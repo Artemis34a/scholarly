@@ -1,0 +1,317 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+//--------------------------------------------------------
+//----------------------ACCOUNTS--------------------------
+//--------------------------------------------------------
+
+enum TypePersonne {
+  DIRECTEUR
+  ENSEIGNANT
+  PARENT
+}
+
+model Personne {
+  id        Int       @id @default(autoincrement())
+  nom           String
+  prenom        String
+  dateNaissance DateTime?
+  lieuNaissance String?
+  mobile        String?
+  phone         String?
+  typePersonne  TypePersonne
+  username      String    @unique
+  password      String
+  alanyaID      String?
+  idAdmin       Int?
+  admin         Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  created_at    DateTime  @default(now())
+
+  residents     Resident[]
+  enseignants   Enseignant?
+  parent        Parent?
+  titulaire     Titulaire?
+
+  updated_at DateTime  @updatedAt
+
+  @@map("Personne")
+}
+
+model Admin {
+  id         Int         @id @default(autoincrement())
+  nom        String
+  username   String      @unique
+  password   String
+  mobile     String?
+  alanyaID   String?
+  actif      Boolean     @default(true)
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+
+  personnes  Personne[]
+  eleves    Eleve[]
+  parents   Parent[]
+  frequentes Frequente[]
+  classes    Classe[]
+  salles     Salle[]
+  titulaires Titulaire[]
+  anneesAcademiques AnneeAcademique[]
+  cycles    Cycle[]
+  trimestres Trimestre[]
+  sessions   Session[]
+  enseignants Enseignant[]
+  cours   Cours[]
+
+
+  @@map("Admin")
+}
+
+model Quartier{
+  id Int       @id @default(autoincrement())
+  libelle        String
+  description    String?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  residents Resident[]  
+
+  @@map("Quartier")
+}
+
+model Resident {
+  id Int       @id @default(autoincrement())
+  idPers     Int       @unique
+  idQuartier Int?
+  description String?
+  personne   Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  quartier   Quartier?  @relation(fields: [idQuartier], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  @@map("Resident")
+}
+
+//--------------------------------------------------------
+//----------------------STUDENTS---------------------------
+//--------------------------------------------------------
+
+model VilleNaissance {
+  id Int       @id @default(autoincrement())
+  libelle          String
+  actif            Boolean     @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  eleves Eleve[]
+
+  @@map("VilleNaissance")
+}
+
+model Eleve {
+  id Int       @id @default(autoincrement())
+  nom          String
+  prenom       String
+  dateNaissance DateTime
+  lieuNaissance String
+  sexe        Int
+  langue       String
+  photoURL     String?
+  actif      Boolean     @default(true)
+  idVilleNaissance Int?
+  villeNaissance   VilleNaissance? @relation(fields: [idVilleNaissance], references: [id], onDelete: SetNull)
+  idAdmin    Int?
+  admin      Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  parents Parent[]
+  frequentes Frequente[]
+
+  @@map("Eleve")
+}
+
+model Parent {
+  id Int       @id @default(autoincrement())
+  idEleve Int
+  idPers Int @unique
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  eleve   Eleve     @relation(fields: [idEleve], references: [id], onDelete: Cascade)
+  personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  @@map("Parent")
+}
+
+//--------------------------------------------------------
+//----------------------ACADEMICS--------------------------
+//--------------------------------------------------------
+
+model Classe {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  idCycle    Int
+  idAdmin    Int?
+  admin      Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  cycle    Cycle      @relation(fields: [idCycle], references: [id], onDelete: Cascade)
+
+  salles   Salle[]
+  cours   Cours[]
+
+  @@map("Classe")
+}
+
+model Frequente {
+  id Int       @id @default(autoincrement())
+  idSalle Int
+  idEleve Int
+  commentaire String?
+  idAdmin Int?
+  admin   Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)  
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  eleve   Eleve     @relation(fields: [idEleve], references: [id], onDelete: Cascade)
+  salle   Salle    @relation(fields: [idSalle], references: [id], onDelete: Cascade)
+  @@map("Frequente")
+  @@unique([idEleve, idSalle])
+}
+
+model Salle {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  position    String?
+  surface    String?
+  idClasse Int?
+  classe   Classe?  @relation(fields: [idClasse], references: [id], onDelete: SetNull)
+  actif     Boolean     @default(true)
+  idAdmin Int?
+  admin   Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  frequentes Frequente[]
+  titulaire Titulaire?
+
+  @@map("Salle")
+}
+
+model Titulaire{
+  id Int       @id @default(autoincrement())
+  idSalle Int @unique
+  idPers Int @unique
+  actif    Boolean     @default(true)
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  salle   Salle     @relation(fields: [idSalle], references: [id], onDelete: Cascade)
+  personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  @@map("Titulaire")
+}
+
+model Cycle{
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  classes Classe[]
+}
+
+//--------------------------------------------------------
+//----------------------SCHOOLING---------------------------
+//--------------------------------------------------------
+
+model AnneeAcademique {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  periode    String
+  idAdmin        Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  trimestres Trimestre[]
+}
+
+model Trimestre {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  periode    String
+  idAca   Int
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  anneeAcademique AnneeAcademique @relation(fields: [idAca], references: [id], onDelete: Cascade)
+
+  sessions Session[]
+}
+
+model Session {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  description    String?
+  idAdmin Int?
+  idTrimestre Int
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  trimestre Trimestre @relation(fields: [idTrimestre], references: [id], onDelete: Cascade)
+}
+
+//--------------------------------------------------------
+//----------------------COURSES---------------------------
+//--------------------------------------------------------
+
+model Enseignant{
+  id Int       @id @default(autoincrement())
+  idPers Int @unique
+  idCours Int
+  actif    Boolean     @default(true)
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  cours  Cours     @relation(fields: [idCours], references: [id], onDelete: Cascade)
+}
+
+model Cours {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  note      Float?
+  coefficient Float
+  idClasse Int
+  actif    Boolean     @default(true)
+  description    String?
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  classe   Classe    @relation(fields: [idClasse], references: [id], onDelete: Cascade)
+
+  enseignants Enseignant[]
+}
