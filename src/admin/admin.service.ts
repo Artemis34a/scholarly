@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
@@ -21,7 +25,7 @@ export class AdminService {
   }
 
   async findOne(id: number) {
-    const a = await this.prisma.admin.findUnique({ where: { ID: id } });
+    const a = await this.prisma.admin.findUnique({ where: { id: id } });
     if (!a) throw new NotFoundException(`Admin #${id} introuvable`);
     return a;
   }
@@ -32,6 +36,6 @@ export class AdminService {
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.admin.delete({ where: { ID: id } });
+    return this.prisma.admin.delete({ where: { id: id } });
   }
 }

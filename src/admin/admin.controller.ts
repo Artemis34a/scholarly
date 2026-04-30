@@ -1,6 +1,12 @@
 import {
-  Controller, Get, Post, Delete,
-  Param, Body, UseGuards, ParseIntPipe
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
