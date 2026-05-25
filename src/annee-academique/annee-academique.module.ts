@@ -4,6 +4,7 @@ import { AnneeAcademiqueService } from './annee-academique.service';
 
 @Module({
   controllers: [AnneeAcademiqueController],
-  providers: [AnneeAcademiqueService]
+  providers: [AnneeAcademiqueService],
+  exports: [AnneeAcademiqueService],
 })
 export class AnneeAcademiqueModule {}

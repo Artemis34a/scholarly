@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { PersonneModule } from './personne/personne.module';
@@ -15,7 +17,6 @@ import { CoursModule } from './cours/cours.module';
 import { CycleModule } from './cycle/cycle.module';
 import { SessionModule } from './session/session.module';
 import { TrimestreModule } from './trimestre/trimestre.module';
-import { AnneeAcademiqueModule } from './annee-academique/annee-academique.module';
 
 @Module({
   imports: [
@@ -36,5 +37,7 @@ import { AnneeAcademiqueModule } from './annee-academique/annee-academique.modul
     TitulaireModule,
     FrequenteModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

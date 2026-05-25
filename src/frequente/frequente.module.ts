@@ -4,6 +4,6 @@ import { FrequenteService } from './frequente.service';
 
 @Module({
   controllers: [FrequenteController],
-  providers: [FrequenteService]
+  providers: [FrequenteService],
 })
 export class FrequenteModule {}

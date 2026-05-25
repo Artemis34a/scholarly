@@ -4,6 +4,7 @@ import { VilleNaissanceService } from './ville-naissance.service';
 
 @Module({
   controllers: [VilleNaissanceController],
-  providers: [VilleNaissanceService]
+  providers: [VilleNaissanceService],
+  exports: [VilleNaissanceService],
 })
 export class VilleNaissanceModule {}

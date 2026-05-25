@@ -3,16 +3,19 @@ import AppLayout from '../layouts/AppLayout'
 import Dashboard from '../pages/Dashboard'
 import Home from '../pages/Home'
 import Login from '../pages/Login'
-import { appPaths } from './paths'
+import PrivateRoute from './PrivateRoute'
 
 function AppRoutes() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path={appPaths.home} element={<Home />} />
-        <Route path={appPaths.login} element={<Login />} />
-        <Route path={appPaths.dashboard} element={<Dashboard />} />
-        <Route path="*" element={<Navigate to={appPaths.home} replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/dashboard" element={
+          <PrivateRoute><Dashboard /></PrivateRoute>
+        } />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Route>
     </Routes>
   )

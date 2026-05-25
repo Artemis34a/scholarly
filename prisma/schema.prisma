@@ -1,3 +1,19 @@
+// prisma/schema.prisma
+//
+// ⚠️  DATABASE_URL est construite dynamiquement par database.config.ts
+//     et injectée via PrismaService({ datasources: { db: { url } } }).
+//
+//     Pour les commandes CLI Prisma (prisma db push, prisma migrate),
+//     positionne DATABASE_URL dans ton .env avant de les lancer :
+//
+//       # BD locale pour migrer
+//       DATABASE_URL="mysql://root:@localhost:3306/scholarly"
+//       npx prisma db push
+//
+//       # BD prof pour inspecter
+//       DATABASE_URL="mysql://ecole:peda2026@163.123.183.89:17705/ecole2026"
+//       npx prisma db pull   (génère le schéma depuis la BD du prof)
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -37,133 +53,139 @@ model Admin {
 
   @@map("Admin")
 }
+
 model Classe {
-  idClasse        Int      @id @default(autoincrement())
-  libelle         String   @db.VarChar(100)
-  idCycle         Int      @db.SmallInt
-  idAdmin         Int      @db.SmallInt
-  created_at      DateTime @default(now())
+  idClasse   Int      @id @default(autoincrement())
+  libelle    String   @db.VarChar(100)
+  idCycle    Int      @db.SmallInt
+  idAdmin    Int      @db.SmallInt
+  created_at DateTime @default(now())
 
-  @@map("Classe") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+  @@map("Classe")
 }
+
 model AnneeAcademique {
-  idAnnee         Int      @id @default(autoincrement())
-  libelle         String   @db.VarChar(200)
-  periode         String   @db.VarChar(255)
-  created_at      DateTime @default(now())
-  idAdmin         Int      @db.SmallInt
+  idAnnee    Int      @id @default(autoincrement())
+  libelle    String   @db.VarChar(200)
+  periode    String   @db.VarChar(255)
+  created_at DateTime @default(now())
+  idAdmin    Int      @db.SmallInt
 
-  @@map("AnneeAcademique") // Permet de s'assurer que la table s'appellera exactement "AnneeAcademique" dans XAMPP
+  @@map("AnneeAcademique")
 }
-model Trimestre {
-  idTrimes        Int      @id @default(autoincrement())
-  libelle         String   @db.VarChar(255)
-  periode         String   @db.VarChar(255)
-  idAca           Int      @db.SmallInt
-  idAdmin         Int      @db.SmallInt
 
-  @@map("Trimestre") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+model Trimestre {
+  idTrimes Int    @id @default(autoincrement())
+  libelle  String @db.VarChar(255)
+  periode  String @db.VarChar(255)
+  idAca    Int    @db.SmallInt
+  idAdmin  Int    @db.SmallInt
+
+  @@map("Trimestre")
 }
 
 model Session {
-  idSession       Int      @id @default(autoincrement())
-  libelle         String   @db.VarChar(255)
-  description     String   @db.TinyText
-  idTrimestre     Int      @db.SmallInt
-  idPers          Int      @db.SmallInt
-  created_at      DateTime @default(now())
+  idSession   Int      @id @default(autoincrement())
+  libelle     String   @db.VarChar(255)
+  description String   @db.TinyText
+  idTrimestre Int      @db.SmallInt
+  idPers      Int      @db.SmallInt
+  created_at  DateTime @default(now())
 
-  @@map("Session") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+  @@map("Session")
 }
 
 model Cycle {
-  idCycle         Int      @id @default(autoincrement())
-  libelle         String   @db.VarChar(100)
-  description     String   @db.TinyText
-  idAdmin         Int      @db.SmallInt
-  created      DateTime    @default(now())
+  idCycle     Int      @id @default(autoincrement())
+  libelle     String   @db.VarChar(100)
+  description String   @db.TinyText
+  idAdmin     Int      @db.SmallInt
+  created     DateTime @default(now())
 
-  @@map("Cycle") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+  @@map("Cycle")
 }
 
 model Cours {
-  idCours         Int      @id @default(autoincrement())
-  libelle         String   @db.VarChar(100)
-  note            Float    
-  coefficient     Float    
-  description     String   @db.TinyText
-  idLivre         Int      @db.SmallInt
-  actif           Int      @db.TinyInt
-  idAdmin         Int      @db.SmallInt
-  created_at      DateTime    @default(now())
+  idCours     Int      @id @default(autoincrement())
+  libelle     String   @db.VarChar(100)
+  note        Float
+  coefficient Float
+  description String   @db.TinyText
+  idLivre     Int      @db.SmallInt
+  actif       Int      @db.TinyInt
+  idAdmin     Int      @db.SmallInt
+  created_at  DateTime @default(now())
 
-  @@map("Cours") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+  @@map("Cours")
 }
 
 model EmploiDuTemps {
-  idTemps         Int      @id @default(autoincrement())
-  jour            String   @db.VarChar(30)
-  heure            String   @db.VarChar(6)
-  idClasse         Int      @db.SmallInt
-  idCours          Int      @db.SmallInt
-  idAdmin          Int      @db.SmallInt
-  created_at      DateTime    @default(now())
-  @@map("EmploiDuTemps") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+  idTemps    Int      @id @default(autoincrement())
+  jour       String   @db.VarChar(30)
+  heure      String   @db.VarChar(6)
+  idClasse   Int      @db.SmallInt
+  idCours    Int      @db.SmallInt
+  idAdmin    Int      @db.SmallInt
+  created_at DateTime @default(now())
+
+  @@map("EmploiDuTemps")
 }
 
 model Eleve {
-  matricule         Int      @id @default(autoincrement())
-  nom               String   @db.VarChar(60)
-  prenom            String   @db.VarChar(60)
-  dateNaissance     DateTime? @db.Date
-  lieuNaissance     String?   @db.VarChar(100)
-  sexe              Int      @db.SmallInt
-  langue            String   @db.VarChar(30)
-  photoURL          String?   @db.VarChar(255)
-  actif             Int      @db.TinyInt
-  idVilleNaissance  Int      @db.SmallInt
-  idAdmin         Int      @db.SmallInt
-  created_at      DateTime    @default(now())
+  matricule        Int       @id @default(autoincrement())
+  nom              String    @db.VarChar(60)
+  prenom           String    @db.VarChar(60)
+  dateNaissance    DateTime? @db.Date
+  lieuNaissance    String?   @db.VarChar(100)
+  sexe             Int       @db.SmallInt
+  langue           String    @db.VarChar(30)
+  photoURL         String?   @db.VarChar(255)
+  actif            Int       @db.TinyInt
+  idVilleNaissance Int       @db.SmallInt
+  idAdmin          Int       @db.SmallInt
+  created_at       DateTime  @default(now())
 
-  @@map("Eleve") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+  @@map("Eleve")
 }
 
 model VilleNaissance {
-  idVille         Int      @id @default(autoincrement())
-  libelle         String   @db.VarChar(100)
-  actif             Int      @db.TinyInt
-  @@map("VilleNaissance") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
-}
-model Enseignant {
-  idEnseignant    Int      @id @default(autoincrement())
-  idPers         Int      @db.SmallInt
-  idCours         Int      @db.SmallInt
-  actif             Int      @db.TinyInt
-  idAdmin         Int      @db.SmallInt
-  created_at      DateTime    @default(now())
+  idVille Int    @id @default(autoincrement())
+  libelle String @db.VarChar(100)
+  actif   Int    @db.TinyInt
 
-  @@map("Enseignant") // Permet de s'assurer que la table s'appellera exactement "Classe" dans XAMPP
+  @@map("VilleNaissance")
+}
+
+model Enseignant {
+  idEnseignant Int      @id @default(autoincrement())
+  idPers       Int      @db.SmallInt
+  idCours      Int      @db.SmallInt
+  actif        Int      @db.TinyInt
+  idAdmin      Int      @db.SmallInt
+  created_at   DateTime @default(now())
+
+  @@map("Enseignant")
 }
 
 model Titulaire {
-  idTitulaire    Int      @id @default(autoincrement())
-  idPers         Int      @db.SmallInt
-  idSalle         Int      @db.SmallInt
-  actif             Int      @db.TinyInt
-  idAdmin         Int      @db.SmallInt
-  created_at      DateTime    @default(now())
+  idTitulaire Int      @id @default(autoincrement())
+  idPers      Int      @db.SmallInt
+  idSalle     Int      @db.SmallInt
+  actif       Int      @db.TinyInt
+  idAdmin     Int      @db.SmallInt
+  created_at  DateTime @default(now())
 
-  @@map("Titulaire") 
+  @@map("Titulaire")
 }
 
 model Frequente {
-  idFrequente    Int      @id @default(autoincrement())
-  idSalle         Int      @db.SmallInt
-  idAcademi       Int      @db.SmallInt
-  matricule       Int      @db.SmallInt
-  commentaire     String   @db.VarChar(255)
-  idAdmin         Int      @db.SmallInt
-  created_at      DateTime    @default(now())
+  idFrequente Int      @id @default(autoincrement())
+  idSalle     Int      @db.SmallInt
+  idAcademi   Int      @db.SmallInt
+  matricule   Int      @db.SmallInt
+  commentaire String   @db.VarChar(255)
+  idAdmin     Int      @db.SmallInt
+  created_at  DateTime @default(now())
 
-  @@map("Frequente") 
+  @@map("Frequente")
 }

@@ -1,11 +1,11 @@
-const PERSONNES_API_URL = 'http://localhost:3000/personnes'
-
+import { api } from './api'
+export const personnesService = {
+  findAll:  ()        => api.get('/personnes'),
+  findOne:  (id)      => api.get(`/personnes/${id}`),
+  create:   (data)    => api.post('/personnes', data),
+  update:   (id, data)=> api.put(`/personnes/${id}`, data),
+  remove:   (id)      => api.delete(`/personnes/${id}`),
+}
 export async function fetchPersonnes() {
-  const response = await fetch(PERSONNES_API_URL)
-
-  if (!response.ok) {
-    throw new Error(`Erreur lors du chargement des personnes: ${response.status}`)
-  }
-
-  return response.json()
+  return personnesService.findAll()
 }

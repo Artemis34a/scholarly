@@ -4,6 +4,7 @@ import { TrimestreService } from './trimestre.service';
 
 @Module({
   controllers: [TrimestreController],
-  providers: [TrimestreService]
+  providers: [TrimestreService],
+  exports: [TrimestreService],
 })
 export class TrimestreModule {}

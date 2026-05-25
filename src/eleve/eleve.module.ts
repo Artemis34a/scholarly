@@ -4,6 +4,7 @@ import { EleveService } from './eleve.service';
 
 @Module({
   controllers: [EleveController],
-  providers: [EleveService]
+  providers: [EleveService],
+  exports: [EleveService],
 })
 export class EleveModule {}

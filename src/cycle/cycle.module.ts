@@ -4,6 +4,7 @@ import { CycleService } from './cycle.service';
 
 @Module({
   controllers: [CycleController],
-  providers: [CycleService]
+  providers: [CycleService],
+  exports: [CycleService],
 })
 export class CycleModule {}

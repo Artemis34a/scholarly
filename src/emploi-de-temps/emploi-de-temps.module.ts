@@ -4,6 +4,6 @@ import { EmploiDeTempsService } from './emploi-de-temps.service';
 
 @Module({
   controllers: [EmploiDeTempsController],
-  providers: [EmploiDeTempsService]
+  providers: [EmploiDeTempsService],
 })
 export class EmploiDeTempsModule {}
