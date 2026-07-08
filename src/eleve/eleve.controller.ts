@@ -17,11 +17,20 @@ export class EleveController {
   create(@Body() dto: CreateEleveDto) { return this.eleveService.create(dto); }
 
   @Get()
-  @ApiOperation({ summary: 'Lister les élèves' })
+  @ApiOperation({ summary: 'Lister les élèves (paginé, recherche optionnelle)' })
   @ApiQuery({ name: 'search', required: false })
-  findAll(@Query('search') search?: string) {
-    if (search) return this.eleveService.search(search);
-    return this.eleveService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  findAll(
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.eleveService.findAll({
+      search,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 
   @Get('actifs')

@@ -15,8 +15,14 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'Connexion personne (élève, enseignant, parent)' })
+  @ApiOperation({ summary: 'Connexion personne (enseignant, directeur, parent)' })
   loginPersonne(@Body() dto: LoginDto) {
     return this.authService.loginPersonne(dto.username, dto.password);
+  }
+
+  @Post('login/eleve')
+  @ApiOperation({ summary: 'Connexion élève' })
+  loginEleve(@Body() dto: LoginDto) {
+    return this.authService.loginEleve(dto.username, dto.password);
   }
 }

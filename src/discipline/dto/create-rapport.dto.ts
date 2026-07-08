@@ -4,9 +4,12 @@ import {
   IsOptional,
   IsInt,
   IsDateString,
+  IsIn,
   Min,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export const RAPPORT_STATUTS = ['OUVERT', 'EN_TRAITEMENT', 'RESOLU', 'FERME'] as const;
 
 export class CreateRapportDto {
   @ApiProperty({ example: 1, description: "ID de l'élève" })
@@ -52,9 +55,9 @@ export class CreateRapportDto {
 
   @ApiPropertyOptional({
     example: 'OUVERT',
-    description: 'OUVERT, EN_TRAITEMENT, RESOLU, FERME',
+    enum: RAPPORT_STATUTS,
   })
-  @IsString()
+  @IsIn(RAPPORT_STATUTS)
   @IsOptional()
   statut?: string;
 }

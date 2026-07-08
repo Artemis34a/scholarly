@@ -1,9 +1,30 @@
 import { api } from './api'
+
+function buildQuery(params = {}) {
+  const searchParams = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && `${value}`.trim() !== '') {
+      searchParams.set(key, value)
+    }
+  })
+
+  const query = searchParams.toString()
+  return query ? `?${query}` : ''
+}
+
 export const elevesService = {
-  findAll:   ()           => api.get('/eleves'),
+  findAll:   (params)     => {
+    if (typeof params === 'string') {
+      return api.get(`/eleves${buildQuery({ search: params })}`)
+    }
+
+    return api.get(`/eleves${buildQuery(params)}`)
+  },
+  search:    (search)     => api.get(`/eleves${buildQuery({ search })}`),
   findActifs:()           => api.get('/eleves/actifs'),
-  findOne:   (matricule)  => api.get(`/eleves/${matricule}`),
+  findOne:   (id)         => api.get(`/eleves/${id}`),
   create:    (data)       => api.post('/eleves', data),
-  update:    (matricule, data) => api.put(`/eleves/${matricule}`, data),
-  remove:    (matricule)  => api.delete(`/eleves/${matricule}`),
+  update:    (id, data)   => api.put(`/eleves/${id}`, data),
+  remove:    (id)         => api.delete(`/eleves/${id}`),
 }

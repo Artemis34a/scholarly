@@ -12,18 +12,18 @@ export class TrimestreService {
   findByAnnee(idAca: number) { return this.prisma.trimestre.findMany({ where: { idAca } }); }
 
   async findOne(id: number) {
-    const t = await this.prisma.trimestre.findUnique({ where: { idTrimes: id } });
+    const t = await this.prisma.trimestre.findUnique({ where: { id } });
     if (!t) throw new NotFoundException(`Trimestre #${id} introuvable`);
     return t;
   }
 
   async update(id: number, dto: UpdateTrimestreDto) {
     await this.findOne(id);
-    return this.prisma.trimestre.update({ where: { idTrimes: id }, data: dto });
+    return this.prisma.trimestre.update({ where: { id }, data: dto });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.trimestre.delete({ where: { idTrimes: id } });
+    return this.prisma.trimestre.delete({ where: { id } });
   }
 }

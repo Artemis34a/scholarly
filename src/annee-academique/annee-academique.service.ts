@@ -11,18 +11,18 @@ export class AnneeAcademiqueService {
   findAll() { return this.prisma.anneeAcademique.findMany({ orderBy: { created_at: 'desc' } }); }
 
   async findOne(id: number) {
-    const a = await this.prisma.anneeAcademique.findUnique({ where: { idAnnee: id } });
+    const a = await this.prisma.anneeAcademique.findUnique({ where: { id } });
     if (!a) throw new NotFoundException(`AnneeAcademique #${id} introuvable`);
     return a;
   }
 
   async update(id: number, dto: UpdateAnneeAcademiqueDto) {
     await this.findOne(id);
-    return this.prisma.anneeAcademique.update({ where: { idAnnee: id }, data: dto });
+    return this.prisma.anneeAcademique.update({ where: { id }, data: dto });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.anneeAcademique.delete({ where: { idAnnee: id } });
+    return this.prisma.anneeAcademique.delete({ where: { id } });
   }
 }

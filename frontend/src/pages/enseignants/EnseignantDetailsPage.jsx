@@ -1,0 +1,166 @@
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import Card from '../../components/Card'
+import ActifBadge from '../../components/ActifBadge'
+import { enseignantsService } from '../../services/enseignantsService'
+import { BUTTON_ON_DARK } from '../../components/buttonStyles'
+import { formatDate } from './enseignants.utils'
+
+function InfoRow({ label, value }) {
+  return (
+    <div className="rounded-[22px] border border-slate-200/80 bg-slate-50/80 px-4 py-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</p>
+      <p className="mt-2 text-sm font-medium text-slate-800">{value}</p>
+    </div>
+  )
+}
+
+function EnseignantDetailsPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [enseignant, setEnseignant] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+
+    enseignantsService.findOne(id)
+      .then((data) => {
+        if (isMounted) setEnseignant(data)
+      })
+      .catch((err) => {
+        if (isMounted) setError(err.message)
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [id])
+
+  async function handleDelete() {
+    if (!enseignant) return
+
+    const confirmed = window.confirm(
+      `Supprimer definitivement l'affectation de ${enseignant.personne?.nom} ${enseignant.personne?.prenom} ?`,
+    )
+
+    if (!confirmed) return
+
+    try {
+      setDeleting(true)
+      await enseignantsService.remove(enseignant.id)
+      navigate('/dashboard/enseignants')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card className="overflow-hidden border-transparent bg-slate-900 p-1 text-white shadow-[0_36px_110px_-46px_rgba(15,23,42,0.78)]">
+        {loading || !enseignant ? (
+          <div className="rounded-[28px] border border-white/10 p-8 text-center text-slate-300">
+            Chargement de l'enseignant...
+          </div>
+        ) : (
+          <div className="rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.34),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,1),_rgba(30,41,59,0.95))] p-6 md:p-8">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-300">
+                  Consultation detaillee
+                </p>
+                <h2 className="mt-4 text-3xl font-semibold md:text-4xl">
+                  {enseignant.personne?.nom} {enseignant.personne?.prenom}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  Enseignant #{enseignant.id} · {enseignant.personne?.username}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to={`/dashboard/enseignants/${enseignant.id}/profil`}
+                  className={BUTTON_ON_DARK.primary}
+                >
+                  Voir le profil
+                </Link>
+                <Link
+                  to={`/dashboard/enseignants/${enseignant.id}/modifier`}
+                  className={BUTTON_ON_DARK.primary}
+                >
+                  Modifier
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className={BUTTON_ON_DARK.danger}
+                >
+                  {deleting ? 'Suppression...' : 'Supprimer'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {error && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {error}
+        </div>
+      )}
+
+      {enseignant && (
+        <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <Card title="Informations generales" subtitle="Resume complet de l'affectation pour consultation administrative.">
+            <div className="grid gap-4 md:grid-cols-2">
+              <InfoRow label="Nom complet" value={`${enseignant.personne?.nom} ${enseignant.personne?.prenom}`} />
+              <InfoRow label="Statut" value={<ActifBadge actif={enseignant.actif} />} />
+              <InfoRow label="Identifiant de connexion" value={enseignant.personne?.username} />
+              <InfoRow label="Cours enseigne" value={enseignant.cours?.libelle ?? 'Non renseigne'} />
+              <InfoRow label="Classe" value={enseignant.cours?.classe?.libelle ?? 'Non renseignee'} />
+              <InfoRow label="Telephone" value={enseignant.personne?.mobile || 'Non renseigne'} />
+              <InfoRow label="Date de naissance" value={formatDate(enseignant.personne?.dateNaissance)} />
+              <InfoRow label="Identifiant" value={`#${enseignant.id}`} />
+            </div>
+          </Card>
+
+          <Card title="Actions rapides" subtitle="Navigation rapide vers les operations les plus frequentes.">
+            <div className="space-y-4">
+              <Link
+                to={`/dashboard/enseignants/${enseignant.id}/profil`}
+                className="block rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4 transition hover:border-sky-200 hover:bg-sky-50/70"
+              >
+                <p className="font-semibold text-slate-900">Ouvrir le profil enseignant</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Vue visuelle pour lecture rapide du dossier.</p>
+              </Link>
+              <Link
+                to={`/dashboard/enseignants/${enseignant.id}/modifier`}
+                className="block rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4 transition hover:border-amber-200 hover:bg-amber-50/70"
+              >
+                <p className="font-semibold text-slate-900">Mettre a jour les informations</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Identite, coordonnees, cours et statut.</p>
+              </Link>
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/enseignants')}
+                className="w-full rounded-[24px] border border-slate-200/80 bg-white px-4 py-4 text-left transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <p className="font-semibold text-slate-900">Retour a la liste</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Revenir a la recherche et aux filtres enseignants.</p>
+              </button>
+            </div>
+          </Card>
+        </section>
+      )}
+    </div>
+  )
+}
+
+export default EnseignantDetailsPage

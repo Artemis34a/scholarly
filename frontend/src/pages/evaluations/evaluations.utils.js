@@ -1,0 +1,169 @@
+export const natureInitialValues = {
+  libelle: '',
+  description: '',
+  coefficient: '1',
+  actif: true,
+}
+
+export function createNatureFormValues(nature) {
+  if (!nature) return natureInitialValues
+
+  return {
+    libelle: nature.libelle ?? '',
+    description: nature.description ?? '',
+    coefficient: nature.coefficient !== undefined && nature.coefficient !== null ? `${nature.coefficient}` : '1',
+    actif: Boolean(nature.actif),
+  }
+}
+
+export function buildNaturePayload(values) {
+  return {
+    libelle: values.libelle.trim(),
+    description: values.description.trim() || undefined,
+    coefficient: Number(values.coefficient),
+    actif: Boolean(values.actif),
+  }
+}
+
+export const epreuveInitialValues = {
+  libelle: '',
+  description: '',
+  idNatureEpreuve: '',
+  idCours: '',
+  dateEpreuve: '',
+  duree: '',
+  coefficient: '1',
+  noteMax: '20',
+  actif: true,
+}
+
+export function formatDate(value) {
+  if (!value) return 'Non renseignee'
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date)
+}
+
+export function formatDateTimeInput(value) {
+  if (!value) return ''
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return date.toISOString().slice(0, 16)
+}
+
+export function createEpreuveFormValues(epreuve) {
+  if (!epreuve) return epreuveInitialValues
+
+  return {
+    libelle: epreuve.libelle ?? '',
+    description: epreuve.description ?? '',
+    idNatureEpreuve: epreuve.idNatureEpreuve ? `${epreuve.idNatureEpreuve}` : '',
+    idCours: epreuve.idCours ? `${epreuve.idCours}` : '',
+    dateEpreuve: formatDateTimeInput(epreuve.dateEpreuve),
+    duree: epreuve.duree !== undefined && epreuve.duree !== null ? `${epreuve.duree}` : '',
+    coefficient: epreuve.coefficient !== undefined && epreuve.coefficient !== null ? `${epreuve.coefficient}` : '1',
+    noteMax: epreuve.noteMax !== undefined && epreuve.noteMax !== null ? `${epreuve.noteMax}` : '20',
+    actif: Boolean(epreuve.actif),
+  }
+}
+
+export function buildEpreuvePayload(values) {
+  return {
+    libelle: values.libelle.trim(),
+    description: values.description.trim() || undefined,
+    idNatureEpreuve: Number(values.idNatureEpreuve),
+    idCours: values.idCours ? Number(values.idCours) : undefined,
+    dateEpreuve: values.dateEpreuve ? new Date(values.dateEpreuve).toISOString() : undefined,
+    duree: values.duree ? Number(values.duree) : undefined,
+    coefficient: Number(values.coefficient),
+    noteMax: Number(values.noteMax),
+    actif: Boolean(values.actif),
+  }
+}
+
+export function getNatureLabel(natures, idNatureEpreuve) {
+  if (!idNatureEpreuve) return 'Non renseignee'
+  const nature = natures.find((item) => item.id === idNatureEpreuve)
+  return nature?.libelle ?? `Nature #${idNatureEpreuve}`
+}
+
+export function getCoursLabel(coursList, idCours) {
+  if (!idCours) return 'Aucun cours'
+  const cours = coursList.find((item) => item.id === idCours)
+  return cours?.libelle ?? `Cours #${idCours}`
+}
+
+export function applyEpreuveFilters(epreuvesList, filters, natures, coursList) {
+  return epreuvesList.filter((epreuve) => {
+    if (filters.idNatureEpreuve !== 'all' && `${epreuve.idNatureEpreuve ?? ''}` !== filters.idNatureEpreuve) {
+      return false
+    }
+
+    if (filters.idCours !== 'all' && `${epreuve.idCours ?? ''}` !== filters.idCours) {
+      return false
+    }
+
+    if (filters.localSearch.trim()) {
+      const needle = filters.localSearch.trim().toLowerCase()
+      const nature = getNatureLabel(natures, epreuve.idNatureEpreuve).toLowerCase()
+      const cours = getCoursLabel(coursList, epreuve.idCours).toLowerCase()
+      const haystack = [epreuve.libelle, epreuve.description, nature, cours]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      if (!haystack.includes(needle)) return false
+    }
+
+    return true
+  })
+}
+
+export const evaluationInitialValues = {
+  idEpreuve: '',
+  idEleve: '',
+  note: '',
+  appreciation: '',
+  commentaire: '',
+}
+
+export function createEvaluationFormValues(evaluation) {
+  if (!evaluation) return evaluationInitialValues
+
+  return {
+    idEpreuve: evaluation.idEpreuve ? `${evaluation.idEpreuve}` : '',
+    idEleve: evaluation.idEleve ? `${evaluation.idEleve}` : '',
+    note: evaluation.note !== undefined && evaluation.note !== null ? `${evaluation.note}` : '',
+    appreciation: evaluation.appreciation ?? '',
+    commentaire: evaluation.commentaire ?? '',
+  }
+}
+
+export function buildEvaluationPayload(values) {
+  return {
+    idEpreuve: Number(values.idEpreuve),
+    idEleve: Number(values.idEleve),
+    note: values.note.trim() ? Number(values.note) : undefined,
+    appreciation: values.appreciation.trim() || undefined,
+    commentaire: values.commentaire.trim() || undefined,
+  }
+}
+
+export function getEleveLabel(eleve) {
+  if (!eleve) return 'Eleve inconnu'
+  return `${eleve.nom} ${eleve.prenom}`
+}
+
+export function getEpreuveLabel(epreuvesList, idEpreuve) {
+  if (!idEpreuve) return 'Epreuve inconnue'
+  const epreuve = epreuvesList.find((item) => item.id === idEpreuve)
+  return epreuve?.libelle ?? `Epreuve #${idEpreuve}`
+}

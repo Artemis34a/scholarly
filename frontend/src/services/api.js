@@ -1,7 +1,6 @@
 const BASE_URL = 'http://localhost:3000'
 
-// Ajouter cet import en haut du fichier :
-import { refreshAccessToken, logout } from './authService'
+import { logout } from './authService'
 
 function getToken() {
   return localStorage.getItem('scholarly_token')
@@ -15,26 +14,14 @@ function authHeaders() {
   }
 }
 
-// Remplacer la fonction request() par :
-async function request(method, path, body, retry = true) {
+async function request(method, path, body) {
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: authHeaders(),
     ...(body ? { body: JSON.stringify(body) } : {}),
   })
 
-  // Token expiré → tenter un refresh automatique une seule fois
-  if (res.status === 401 && retry) {
-    try {
-      await refreshAccessToken()          // nouveau access stocké
-      return request(method, path, body, false)  // rejouer la requête
-    } catch {
-      logout()
-      window.location.href = '/login'
-      return
-    }
-  }
-
+  // Le token est unique (pas de refresh token) : une expiration force une reconnexion.
   if (res.status === 401) {
     logout()
     window.location.href = '/login'

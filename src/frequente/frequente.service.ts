@@ -10,22 +10,26 @@ export class FrequenteService {
   create(dto: CreateFrequenteDto) { return this.prisma.frequente.create({ data: { ...dto, commentaire: dto.commentaire ?? '' } }); }
   findAll() { return this.prisma.frequente.findMany(); }
   findByClasse(idSalle: number) { return this.prisma.frequente.findMany({ where: { idSalle } }); }
-  findByEleve(matricule: number) { return this.prisma.frequente.findMany({ where: { matricule } }); }
-  findByAnnee(idAcademi: number) { return this.prisma.frequente.findMany({ where: { idAcademi } }); }
+  findByEleve(idEleve: number) { return this.prisma.frequente.findMany({ where: { idEleve } }); }
+  findByAnnee(idAnneeAcademique: number) {
+    return this.prisma.frequente.findMany({
+      where: { eleve: { scolarites: { some: { idAnneeAcademique } } } },
+    });
+  }
 
   async findOne(id: number) {
-    const f = await this.prisma.frequente.findUnique({ where: { idFrequente: id } });
+    const f = await this.prisma.frequente.findUnique({ where: { id } });
     if (!f) throw new NotFoundException(`Frequente #${id} introuvable`);
     return f;
   }
 
   async update(id: number, dto: UpdateFrequenteDto) {
     await this.findOne(id);
-    return this.prisma.frequente.update({ where: { idFrequente: id }, data: dto });
+    return this.prisma.frequente.update({ where: { id }, data: dto });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.frequente.delete({ where: { idFrequente: id } });
+    return this.prisma.frequente.delete({ where: { id } });
   }
 }

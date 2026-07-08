@@ -1,7 +1,12 @@
 import 'dotenv/config';
+import * as bcrypt from 'bcrypt';
 import { PrismaClient, TypePersonne } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+function hashPassword(password: string) {
+  return bcrypt.hash(password, 10);
+}
 
 function randomDate(start: Date, end: Date) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
@@ -30,10 +35,10 @@ async function main() {
   console.log('Création de l\'administrateur principal...');
   const admin = await prisma.admin.create({
     data: {
-      nom: 'Super Admin',
+      nom: 'Administrateur Principal',
       username: 'admin',
-      password: 'admin123',
-      mobile: '0601020304',
+      password: await hashPassword('admin'),
+      mobile: '0699010203',
       actif: true,
     },
   });
@@ -41,18 +46,24 @@ async function main() {
   console.log('Création des quartiers et des villes de naissance...');
   const quartiers = await prisma.quartier.createMany({
     data: [
-      { libelle: 'Centre-ville', description: 'Quartier central et animé.' },
-      { libelle: 'Bellevue', description: 'Quartier résidentiel calme.' },
-      { libelle: 'Rivière', description: 'Proche de la rivière et des écoles.' },
+      { libelle: 'Bastos', description: 'Quartier central et animé.' },
+      { libelle: 'Bonamoussadi', description: 'Quartier résidentiel calme.' },
+      { libelle: 'Nkolbisson', description: 'Proche des écoles et des marchés.' },
     ],
   });
 
   const villes = await prisma.villeNaissance.createMany({
     data: [
-      { libelle: 'Paris' },
-      { libelle: 'Lyon' },
-      { libelle: 'Toulouse' },
-      { libelle: 'Marseille' },
+      { libelle: 'Yaoundé' },
+      { libelle: 'Douala' },
+      { libelle: 'Bafoussam' },
+      { libelle: 'Garoua' },
+      { libelle: 'Maroua' },
+      { libelle: 'Bamenda' },
+      { libelle: 'Ngaoundéré' },
+      { libelle: 'Bertoua' },
+      { libelle: 'Kribi' },
+      { libelle: 'Ebolowa' },
     ],
   });
 
@@ -61,12 +72,12 @@ async function main() {
 
   console.log('Création des personnes...');
   const personnesData = [
-    { nom: 'Dubois', prenom: 'Claire', typePersonne: TypePersonne.PARENT, username: 'claire.dubois', password: 'passParent1', mobile: '0650012300', phone: '0142233445' },
-    { nom: 'Moussa', prenom: 'Karim', typePersonne: TypePersonne.DIRECTEUR, username: 'karim.moussa', password: 'passDirecteur', mobile: '0650067890' },
-    { nom: 'Nguyen', prenom: 'Sophie', typePersonne: TypePersonne.ENSEIGNANT, username: 'sophie.nguyen', password: 'passProf1', mobile: '0650098765' },
-    { nom: 'Koffi', prenom: 'Yann', typePersonne: TypePersonne.ENSEIGNANT, username: 'yann.koffi', password: 'passProf2', mobile: '0650076543' },
-    { nom: 'Martin', prenom: 'Lucas', typePersonne: TypePersonne.PARENT, username: 'lucas.martin', password: 'passParent2', mobile: '0650087654' },
-    { nom: 'Ngoma', prenom: 'Amina', typePersonne: TypePersonne.PARENT, username: 'amina.ngoma', password: 'passParent3', mobile: '0650034567' },
+    { nom: 'Ndzié', prenom: 'Marie', typePersonne: TypePersonne.PARENT, username: 'marie.ndzie', password: 'passParent1', mobile: '0699012300', phone: '0233233445' },
+    { nom: 'Mballa', prenom: 'Jean', typePersonne: TypePersonne.DIRECTEUR, username: 'jean.mballa', password: 'passDirecteur', mobile: '0699067890' },
+    { nom: 'Tchoumi', prenom: 'Sophie', typePersonne: TypePersonne.ENSEIGNANT, username: 'sophie.tchoumi', password: 'enseignant123', mobile: '0699098765' },
+    { nom: 'Fonkou', prenom: 'Paul', typePersonne: TypePersonne.ENSEIGNANT, username: 'paul.fonkou', password: 'enseignant123', mobile: '0699076543' },
+    { nom: 'Ndzi', prenom: 'Pierre', typePersonne: TypePersonne.PARENT, username: 'pierre.ndzi', password: 'passParent2', mobile: '0699087654' },
+    { nom: 'Kouam', prenom: 'Aminatou', typePersonne: TypePersonne.PARENT, username: 'aminatou.kouam', password: 'passParent3', mobile: '0699034567' },
   ];
 
   const personnes: any[] = [];
@@ -74,8 +85,9 @@ async function main() {
     const created = await prisma.personne.create({
       data: {
         ...personne,
+        password: await hashPassword(personne.password),
         dateNaissance: randomDate(new Date(1980, 0, 1), new Date(2000, 11, 31)),
-        lieuNaissance: 'Lyon',
+        lieuNaissance: 'Yaoundé',
         idAdmin: admin.id,
       },
     });
@@ -84,16 +96,18 @@ async function main() {
 
   console.log('Création des élèves...');
   const elevesData = [
-    { nom: 'Bernard', prenom: 'Élise', dateNaissance: new Date(2014, 4, 17), lieuNaissance: 'Paris', sexe: 2, langue: 'Français', photoURL: null },
-    { nom: 'Kouame', prenom: 'Noé', dateNaissance: new Date(2013, 9, 2), lieuNaissance: 'Toulouse', sexe: 1, langue: 'Français', photoURL: null },
-    { nom: 'Petit', prenom: 'Lina', dateNaissance: new Date(2015, 1, 28), lieuNaissance: 'Marseille', sexe: 2, langue: 'Français', photoURL: null },
+    { nom: 'Njoya', prenom: 'Aïcha', dateNaissance: new Date(2014, 4, 17), lieuNaissance: 'Yaoundé', sexe: 2, langue: 'Français', photoURL: null, username: 'aicha.njoya', password: 'eleve123' },
+    { nom: 'Ndzié Ngono', prenom: 'Emmanuel', dateNaissance: new Date(2013, 9, 2), lieuNaissance: 'Douala', sexe: 1, langue: 'Français', photoURL: null, username: 'emmanuel.ndzie', password: 'eleve123' },
+    { nom: 'Tchoumi', prenom: 'Grace', dateNaissance: new Date(2015, 1, 28), lieuNaissance: 'Bafoussam', sexe: 2, langue: 'Français', photoURL: null, username: 'grace.tchoumi', password: 'eleve123' },
   ];
 
   const eleves: any[] = [];
   for (const [index, eleve] of elevesData.entries()) {
+    const { password, ...eleveFields } = eleve;
     const created = await prisma.eleve.create({
       data: {
-        ...eleve,
+        ...eleveFields,
+        password: await hashPassword(password),
         idVilleNaissance: villeList[index % villeList.length].id,
         idAdmin: admin.id,
       },

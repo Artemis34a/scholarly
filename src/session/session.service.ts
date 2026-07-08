@@ -10,21 +10,21 @@ export class SessionService {
   create(dto: CreateSessionDto) { return this.prisma.session.create({ data: dto }); }
   findAll() { return this.prisma.session.findMany({ orderBy: { created_at: 'desc' } }); }
   findByTrimestre(idTrimestre: number) { return this.prisma.session.findMany({ where: { idTrimestre } }); }
-  findByPersonne(idPers: number) { return this.prisma.session.findMany({ where: { idPers } }); }
+  findByPersonne(idAdmin: number) { return this.prisma.session.findMany({ where: { idAdmin } }); }
 
   async findOne(id: number) {
-    const s = await this.prisma.session.findUnique({ where: { idSession: id } });
+    const s = await this.prisma.session.findUnique({ where: { id } });
     if (!s) throw new NotFoundException(`Session #${id} introuvable`);
     return s;
   }
 
   async update(id: number, dto: UpdateSessionDto) {
     await this.findOne(id);
-    return this.prisma.session.update({ where: { idSession: id }, data: dto });
+    return this.prisma.session.update({ where: { id }, data: dto });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.session.delete({ where: { idSession: id } });
+    return this.prisma.session.delete({ where: { id } });
   }
 }

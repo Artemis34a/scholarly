@@ -14,19 +14,19 @@ export class VilleNaissanceService {
     return this.prisma.villeNaissance.findMany({ orderBy: { libelle: 'asc' } });
   }
   findActives() {
-    return this.prisma.villeNaissance.findMany({ where: { actif: 1 }, orderBy: { libelle: 'asc' } });
+    return this.prisma.villeNaissance.findMany({ where: { actif: true }, orderBy: { libelle: 'asc' } });
   }
   async findOne(id: number) {
-    const v = await this.prisma.villeNaissance.findUnique({ where: { idVille: id } });
+    const v = await this.prisma.villeNaissance.findUnique({ where: { id } });
     if (!v) throw new NotFoundException(`VilleNaissance #${id} introuvable`);
     return v;
   }
   async update(id: number, dto: UpdateVilleNaissanceDto) {
     await this.findOne(id);
-    return this.prisma.villeNaissance.update({ where: { idVille: id }, data: dto });
+    return this.prisma.villeNaissance.update({ where: { id }, data: dto });
   }
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.villeNaissance.delete({ where: { idVille: id } });
+    return this.prisma.villeNaissance.delete({ where: { id } });
   }
 }

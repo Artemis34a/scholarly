@@ -11,18 +11,18 @@ export class CycleService {
   findAll() { return this.prisma.cycle.findMany({ orderBy: { libelle: 'asc' } }); }
 
   async findOne(id: number) {
-    const c = await this.prisma.cycle.findUnique({ where: { idCycle: id } });
+    const c = await this.prisma.cycle.findUnique({ where: { id } });
     if (!c) throw new NotFoundException(`Cycle #${id} introuvable`);
     return c;
   }
 
   async update(id: number, dto: UpdateCycleDto) {
     await this.findOne(id);
-    return this.prisma.cycle.update({ where: { idCycle: id }, data: dto });
+    return this.prisma.cycle.update({ where: { id }, data: dto });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.cycle.delete({ where: { idCycle: id } });
+    return this.prisma.cycle.delete({ where: { id } });
   }
 }

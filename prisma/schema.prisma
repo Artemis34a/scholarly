@@ -81,6 +81,7 @@ model Admin {
   messages  Message[]
   livres    Livre[]
   specialites Specialite[]
+  emploisDuTemps EmploiDuTemps[]
 
 
   @@map("Admin")
@@ -136,6 +137,8 @@ model Eleve {
   sexe        Int
   langue       String
   photoURL     String?
+  username     String?     @unique
+  password     String?
   actif      Boolean     @default(true)
   idVilleNaissance Int?
   villeNaissance   VilleNaissance? @relation(fields: [idVilleNaissance], references: [id], onDelete: SetNull)
@@ -186,6 +189,7 @@ model Classe {
   cours   Cours[]
   scolarites Scolarite[]
   livres   Livre[]
+  emploisDuTemps EmploiDuTemps[]
 
   @@map("Classe")
 }
@@ -221,6 +225,7 @@ model Salle {
 
   frequentes Frequente[]
   titulaire Titulaire?
+  emploisDuTemps EmploiDuTemps[]
 
   @@map("Salle")
 }
@@ -337,6 +342,33 @@ model Cours {
   enseignants Enseignant[]
   epreuves  Epreuve[]
   livres    Livre[]
+  emploisDuTemps EmploiDuTemps[]
+}
+
+//--------------------------------------------------------
+//----------------------EMPLOI DU TEMPS---------------------------
+//--------------------------------------------------------
+
+model EmploiDuTemps {
+  id Int @id @default(autoincrement())
+  jour String // LUNDI, MARDI, MERCREDI, JEUDI, VENDREDI, SAMEDI
+  heureDebut String // "08:00"
+  heureFin String // "09:00"
+  idClasse Int
+  idCours Int
+  idSalle Int?
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  classe Classe @relation(fields: [idClasse], references: [id], onDelete: Cascade)
+  cours Cours @relation(fields: [idCours], references: [id], onDelete: Cascade)
+  salle Salle? @relation(fields: [idSalle], references: [id], onDelete: SetNull)
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  @@map("EmploiDuTemps")
+  @@unique([idClasse, jour, heureDebut])
 }
 
 //--------------------------------------------------------
