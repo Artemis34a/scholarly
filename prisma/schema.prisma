@@ -1,191 +1,600 @@
-// prisma/schema.prisma
-//
-// ⚠️  DATABASE_URL est construite dynamiquement par database.config.ts
-//     et injectée via PrismaService({ datasources: { db: { url } } }).
-//
-//     Pour les commandes CLI Prisma (prisma db push, prisma migrate),
-//     positionne DATABASE_URL dans ton .env avant de les lancer :
-//
-//       # BD locale pour migrer
-//       DATABASE_URL="mysql://root:@localhost:3306/scholarly"
-//       npx prisma db push
-//
-//       # BD prof pour inspecter
-//       DATABASE_URL="mysql://ecole:peda2026@163.123.183.89:17705/ecole2026"
-//       npx prisma db pull   (génère le schéma depuis la BD du prof)
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
+//--------------------------------------------------------
+//----------------------ACCOUNTS--------------------------
+//--------------------------------------------------------
+
+enum TypePersonne {
+  DIRECTEUR
+  ENSEIGNANT
+  PARENT
+}
+
 model Personne {
-  idPers        Int       @id @default(autoincrement())
-  nom           String    @db.VarChar(255)
-  prenom        String    @db.VarChar(255)
-  dateNaissance DateTime? @db.Date
-  lieuNaissance String?   @db.VarChar(100)
-  mobile        String?   @db.VarChar(15)
-  phone         String?   @db.VarChar(15)
-  typePersonne  Int       @db.SmallInt
-  username      String    @unique @db.VarChar(100)
-  password      String    @db.VarChar(100)
-  alanyaID      String?   @db.VarChar(15)
+  id        Int       @id @default(autoincrement())
+  nom           String
+  prenom        String
+  dateNaissance DateTime?
+  lieuNaissance String?
+  mobile        String?
+  phone         String?
+  typePersonne  TypePersonne
+  username      String    @unique
+  password      String
+  alanyaID      String?
   idAdmin       Int?
+  admin         Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
   created_at    DateTime  @default(now())
+
+  residents     Resident[]
+  enseignants   Enseignant?
+  parent        Parent?
+  titulaire     Titulaire?
+  rapports      Rapport[]
+  messagesEnvoyes Message[]
+
+  updated_at DateTime  @updatedAt
 
   @@map("Personne")
 }
 
 model Admin {
-  ID         Int      @id @default(autoincrement())
-  nom        String   @db.VarChar(100)
-  username   String   @unique @db.VarChar(100)
-  password   String   @db.VarChar(100)
-  mobile     String?  @db.VarChar(15)
-  alanyaID   String?  @db.VarChar(15)
-  actif      Boolean  @default(true)
-  created_at DateTime @default(now())
+  id         Int         @id @default(autoincrement())
+  nom        String
+  username   String      @unique
+  password   String
+  mobile     String?
+  alanyaID   String?
+  actif      Boolean     @default(true)
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+
+  personnes  Personne[]
+  eleves    Eleve[]
+  parents   Parent[]
+  frequentes Frequente[]
+  classes    Classe[]
+  salles     Salle[]
+  titulaires Titulaire[]
+  anneesAcademiques AnneeAcademique[]
+  cycles    Cycle[]
+  trimestres Trimestre[]
+  sessions   Session[]
+  enseignants Enseignant[]
+  cours   Cours[]
+  natureEpreuves NatureEpreuve[]
+  epreuves  Epreuve[]
+  evaluations Evaluation[]
+  disciplines Discipline[]
+  rapports  Rapport[]
+  modePaiements ModePaiement[]
+  tranches  Tranche[]
+  paiements Paiement[]
+  scolarites Scolarite[]
+  messages  Message[]
+  livres    Livre[]
+  specialites Specialite[]
+
 
   @@map("Admin")
 }
 
-model Classe {
-  idClasse   Int      @id @default(autoincrement())
-  libelle    String   @db.VarChar(100)
-  idCycle    Int      @db.SmallInt
-  idAdmin    Int      @db.SmallInt
-  created_at DateTime @default(now())
+model Quartier{
+  id Int       @id @default(autoincrement())
+  libelle        String
+  description    String?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 
-  @@map("Classe")
+  residents Resident[]  
+
+  @@map("Quartier")
 }
 
-model AnneeAcademique {
-  idAnnee    Int      @id @default(autoincrement())
-  libelle    String   @db.VarChar(200)
-  periode    String   @db.VarChar(255)
-  created_at DateTime @default(now())
-  idAdmin    Int      @db.SmallInt
+model Resident {
+  id Int       @id @default(autoincrement())
+  idPers     Int       @unique
+  idQuartier Int?
+  description String?
+  personne   Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  quartier   Quartier?  @relation(fields: [idQuartier], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 
-  @@map("AnneeAcademique")
+  @@map("Resident")
 }
 
-model Trimestre {
-  idTrimes Int    @id @default(autoincrement())
-  libelle  String @db.VarChar(255)
-  periode  String @db.VarChar(255)
-  idAca    Int    @db.SmallInt
-  idAdmin  Int    @db.SmallInt
-
-  @@map("Trimestre")
-}
-
-model Session {
-  idSession   Int      @id @default(autoincrement())
-  libelle     String   @db.VarChar(255)
-  description String   @db.TinyText
-  idTrimestre Int      @db.SmallInt
-  idPers      Int      @db.SmallInt
-  created_at  DateTime @default(now())
-
-  @@map("Session")
-}
-
-model Cycle {
-  idCycle     Int      @id @default(autoincrement())
-  libelle     String   @db.VarChar(100)
-  description String   @db.TinyText
-  idAdmin     Int      @db.SmallInt
-  created     DateTime @default(now())
-
-  @@map("Cycle")
-}
-
-model Cours {
-  idCours     Int      @id @default(autoincrement())
-  libelle     String   @db.VarChar(100)
-  note        Float
-  coefficient Float
-  description String   @db.TinyText
-  idLivre     Int      @db.SmallInt
-  actif       Int      @db.TinyInt
-  idAdmin     Int      @db.SmallInt
-  created_at  DateTime @default(now())
-
-  @@map("Cours")
-}
-
-model EmploiDuTemps {
-  idTemps    Int      @id @default(autoincrement())
-  jour       String   @db.VarChar(30)
-  heure      String   @db.VarChar(6)
-  idClasse   Int      @db.SmallInt
-  idCours    Int      @db.SmallInt
-  idAdmin    Int      @db.SmallInt
-  created_at DateTime @default(now())
-
-  @@map("EmploiDuTemps")
-}
-
-model Eleve {
-  matricule        Int       @id @default(autoincrement())
-  nom              String    @db.VarChar(60)
-  prenom           String    @db.VarChar(60)
-  dateNaissance    DateTime? @db.Date
-  lieuNaissance    String?   @db.VarChar(100)
-  sexe             Int       @db.SmallInt
-  langue           String    @db.VarChar(30)
-  photoURL         String?   @db.VarChar(255)
-  actif            Int       @db.TinyInt
-  idVilleNaissance Int       @db.SmallInt
-  idAdmin          Int       @db.SmallInt
-  created_at       DateTime  @default(now())
-
-  @@map("Eleve")
-}
+//--------------------------------------------------------
+//----------------------STUDENTS---------------------------
+//--------------------------------------------------------
 
 model VilleNaissance {
-  idVille Int    @id @default(autoincrement())
-  libelle String @db.VarChar(100)
-  actif   Int    @db.TinyInt
+  id Int       @id @default(autoincrement())
+  libelle          String
+  actif            Boolean     @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  eleves Eleve[]
 
   @@map("VilleNaissance")
 }
 
-model Enseignant {
-  idEnseignant Int      @id @default(autoincrement())
-  idPers       Int      @db.SmallInt
-  idCours      Int      @db.SmallInt
-  actif        Int      @db.TinyInt
-  idAdmin      Int      @db.SmallInt
-  created_at   DateTime @default(now())
+model Eleve {
+  id Int       @id @default(autoincrement())
+  nom          String
+  prenom       String
+  dateNaissance DateTime
+  lieuNaissance String
+  sexe        Int
+  langue       String
+  photoURL     String?
+  actif      Boolean     @default(true)
+  idVilleNaissance Int?
+  villeNaissance   VilleNaissance? @relation(fields: [idVilleNaissance], references: [id], onDelete: SetNull)
+  idAdmin    Int?
+  admin      Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 
-  @@map("Enseignant")
+  parents Parent[]
+  frequentes Frequente[]
+  evaluations Evaluation[]
+  rapports Rapport[]
+  scolarites Scolarite[]
+
+  @@map("Eleve")
 }
 
-model Titulaire {
-  idTitulaire Int      @id @default(autoincrement())
-  idPers      Int      @db.SmallInt
-  idSalle     Int      @db.SmallInt
-  actif       Int      @db.TinyInt
-  idAdmin     Int      @db.SmallInt
-  created_at  DateTime @default(now())
+model Parent {
+  id Int       @id @default(autoincrement())
+  idEleve Int
+  idPers Int @unique
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  eleve   Eleve     @relation(fields: [idEleve], references: [id], onDelete: Cascade)
+  personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  @@map("Parent")
+}
+
+//--------------------------------------------------------
+//----------------------ACADEMICS--------------------------
+//--------------------------------------------------------
+
+model Classe {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  idCycle    Int
+  idAdmin    Int?
+  admin      Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  cycle    Cycle      @relation(fields: [idCycle], references: [id], onDelete: Cascade)
+
+  salles   Salle[]
+  cours   Cours[]
+  scolarites Scolarite[]
+  livres   Livre[]
+
+  @@map("Classe")
+}
+
+model Frequente {
+  id Int       @id @default(autoincrement())
+  idSalle Int
+  idEleve Int
+  commentaire String?
+  idAdmin Int?
+  admin   Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)  
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  eleve   Eleve     @relation(fields: [idEleve], references: [id], onDelete: Cascade)
+  salle   Salle    @relation(fields: [idSalle], references: [id], onDelete: Cascade)
+  @@map("Frequente")
+  @@unique([idEleve, idSalle])
+}
+
+model Salle {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  position    String?
+  surface    String?
+  idClasse Int?
+  classe   Classe?  @relation(fields: [idClasse], references: [id], onDelete: SetNull)
+  actif     Boolean     @default(true)
+  idAdmin Int?
+  admin   Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  frequentes Frequente[]
+  titulaire Titulaire?
+
+  @@map("Salle")
+}
+
+model Titulaire{
+  id Int       @id @default(autoincrement())
+  idSalle Int @unique
+  idPers Int @unique
+  actif    Boolean     @default(true)
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  salle   Salle     @relation(fields: [idSalle], references: [id], onDelete: Cascade)
+  personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
 
   @@map("Titulaire")
 }
 
-model Frequente {
-  idFrequente Int      @id @default(autoincrement())
-  idSalle     Int      @db.SmallInt
-  idAcademi   Int      @db.SmallInt
-  matricule   Int      @db.SmallInt
-  commentaire String   @db.VarChar(255)
-  idAdmin     Int      @db.SmallInt
-  created_at  DateTime @default(now())
+model Cycle{
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@map("Frequente")
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  classes Classe[]
+  specialites Specialite[]
+}
+
+//--------------------------------------------------------
+//----------------------SCHOOLING---------------------------
+//--------------------------------------------------------
+
+model AnneeAcademique {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  periode    String
+  idAdmin        Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  trimestres Trimestre[]
+  scolarites Scolarite[]
+}
+
+model Trimestre {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  periode    String
+  idAca   Int
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  anneeAcademique AnneeAcademique @relation(fields: [idAca], references: [id], onDelete: Cascade)
+
+  sessions Session[]
+}
+
+model Session {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  description    String?
+  idAdmin Int?
+  idTrimestre Int
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  trimestre Trimestre @relation(fields: [idTrimestre], references: [id], onDelete: Cascade)
+}
+
+//--------------------------------------------------------
+//----------------------COURSES---------------------------
+//--------------------------------------------------------
+
+model Enseignant{
+  id Int       @id @default(autoincrement())
+  idPers Int @unique
+  idCours Int
+  actif    Boolean     @default(true)
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  cours  Cours     @relation(fields: [idCours], references: [id], onDelete: Cascade)
+}
+
+model Cours {
+  id Int       @id @default(autoincrement())
+  libelle        String
+  note      Float?
+  coefficient Float
+  idClasse Int
+  actif    Boolean     @default(true)
+  description    String?
+  idAdmin Int?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  classe   Classe    @relation(fields: [idClasse], references: [id], onDelete: Cascade)
+
+  enseignants Enseignant[]
+  epreuves  Epreuve[]
+  livres    Livre[]
+}
+
+//--------------------------------------------------------
+//----------------------EVALUATIONS---------------------------
+//--------------------------------------------------------
+
+model NatureEpreuve {
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  coefficient Float @default(1.0)
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  epreuves Epreuve[]
+
+  @@map("NatureEpreuve")
+}
+
+model Epreuve {
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  idNatureEpreuve Int
+  idCours Int?
+  dateEpreuve DateTime
+  duree Int? // en minutes
+  coefficient Float @default(1.0)
+  noteMax Float @default(20.0)
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  natureEpreuve NatureEpreuve @relation(fields: [idNatureEpreuve], references: [id], onDelete: Cascade)
+  cours Cours? @relation(fields: [idCours], references: [id], onDelete: SetNull)
+  evaluations Evaluation[]
+
+  @@map("Epreuve")
+}
+
+model Evaluation {
+  id Int @id @default(autoincrement())
+  idEpreuve Int
+  idEleve Int
+  note Float?
+  appreciation String?
+  rang Int?
+  commentaire String?
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  epreuve Epreuve @relation(fields: [idEpreuve], references: [id], onDelete: Cascade)
+  eleve Eleve @relation(fields: [idEleve], references: [id], onDelete: Cascade)
+
+  @@map("Evaluation")
+  @@unique([idEpreuve, idEleve])
+}
+
+//--------------------------------------------------------
+//----------------------DISCIPLINE---------------------------
+//--------------------------------------------------------
+
+model Discipline {
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  estFaute Boolean @default(true) // true = faute, false = comportement positif
+  gravite Int @default(1) // 1=léger, 2=moyen, 3=grave, 4=très grave
+  sanctionType String? // type de sanction associée
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  rapports Rapport[]
+
+  @@map("Discipline")
+}
+
+model Rapport {
+  id Int @id @default(autoincrement())
+  idEleve Int
+  idDiscipline Int
+  idAuteur Int // personne qui fait le rapport (enseignant, admin)
+  dateRapport DateTime @default(now())
+  description String
+  temoins String? // noms des témoins, séparés par virgules
+  sanctionAppliquee String?
+  statut String @default("OUVERT") // OUVERT, EN_TRAITEMENT, RESOLU, FERME
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  eleve Eleve @relation(fields: [idEleve], references: [id], onDelete: Cascade)
+  discipline Discipline @relation(fields: [idDiscipline], references: [id], onDelete: Cascade)
+  auteur Personne @relation(fields: [idAuteur], references: [id], onDelete: Cascade)
+
+  @@map("Rapport")
+}
+
+//--------------------------------------------------------
+//----------------------FINANCE---------------------------
+//--------------------------------------------------------
+
+model ModePaiement {
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  paiements Paiement[]
+
+  @@map("ModePaiement")
+}
+
+model Tranche {
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  montant Float
+  echeance DateTime
+  ordre Int @default(1)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  paiements Paiement[]
+
+  @@map("Tranche")
+}
+
+model Paiement {
+  id Int @id @default(autoincrement())
+  idScolarite Int
+  idTranche Int
+  idModePaiement Int
+  montant Float
+  datePaiement DateTime @default(now())
+  reference String? // numéro de transaction, chèque, etc.
+  commentaire String?
+  recuNumero String? // numéro du reçu
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  scolarite Scolarite @relation(fields: [idScolarite], references: [id], onDelete: Cascade)
+  tranche Tranche @relation(fields: [idTranche], references: [id], onDelete: Cascade)
+  modePaiement ModePaiement @relation(fields: [idModePaiement], references: [id], onDelete: Cascade)
+
+  @@map("Paiement")
+}
+
+model Scolarite {
+  id Int @id @default(autoincrement())
+  idEleve Int
+  idAnneeAcademique Int
+  idClasse Int
+  statut String @default("ACTIF") // ACTIF, TRANSFERE, EXCLU, ABANDON
+  dateInscription DateTime @default(now())
+  fraisInscription Float @default(0)
+  fraisScolarite Float @default(0)
+  reduction Float @default(0)
+  observations String?
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  eleve Eleve @relation(fields: [idEleve], references: [id], onDelete: Cascade)
+  anneeAcademique AnneeAcademique @relation(fields: [idAnneeAcademique], references: [id], onDelete: Cascade)
+  classe Classe @relation(fields: [idClasse], references: [id], onDelete: Cascade)
+  paiements Paiement[]
+
+  @@map("Scolarite")
+  @@unique([idEleve, idAnneeAcademique])
+}
+
+//--------------------------------------------------------
+//----------------------MESSAGES---------------------------
+//--------------------------------------------------------
+
+model Message {
+  id Int @id @default(autoincrement())
+  objet String
+  contenu String
+  typeMessage String @default("GENERAL") // GENERAL, URGENT, INFORMATION, CONVOCATION, etc.
+  idExpediteur Int? // personne qui envoie (admin, enseignant)
+  destinaireType String // TOUS, ELEVES, PARENTS, ENSEIGNANTS, PERSONNALISE
+  idDestinataire Int? // pour destinataire personnalisé (idEleve, idParent, etc.)
+  dateEnvoi DateTime?
+  statut String @default("BROUILLON") // BROUILLON, ENVOYE, LU, NON_LU
+  pieceJointeURL String?
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  expediteur Personne? @relation(fields: [idExpediteur], references: [id], onDelete: SetNull)
+
+  @@map("Message")
+}
+
+//--------------------------------------------------------
+//----------------------RESSOURCES---------------------------
+//--------------------------------------------------------
+
+model Livre {
+  id Int @id @default(autoincrement())
+  titre String
+  auteur String?
+  isbn String?
+  edition String?
+  anneePublication Int?
+  nombreExemplaires Int @default(1)
+  disponible Int @default(1)
+  idClasse Int?
+  idCours Int?
+  description String?
+  couvertureURL String?
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  classe Classe? @relation(fields: [idClasse], references: [id], onDelete: SetNull)
+  cours Cours? @relation(fields: [idCours], references: [id], onDelete: SetNull)
+
+  @@map("Livre")
+}
+
+model Specialite {
+  id Int @id @default(autoincrement())
+  libelle String
+  description String?
+  idCycle Int?
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+  cycle Cycle? @relation(fields: [idCycle], references: [id], onDelete: SetNull)
+
+  @@map("Specialite")
 }

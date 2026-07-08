@@ -31,7 +31,7 @@ async function bootstrap() {
   // --- 4. DÉMARRAGE ---
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  
+
   console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
   console.log(`📖 Swagger disponible sur http://localhost:${port}/api/docs`);
 }

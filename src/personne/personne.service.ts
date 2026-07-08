@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePersonneDto } from './dto/create-personne.dto';
@@ -14,7 +18,13 @@ export class PersonneService {
     });
     if (exist) throw new ConflictException('Username déjà utilisé');
     const hashed = await bcrypt.hash(dto.password, 10);
-    return this.prisma.personne.create({ data: { ...dto, password: hashed } });
+    return this.prisma.personne.create({
+      data: {
+        ...dto,
+        password: hashed,
+        typePersonne: dto.typePersonne as any,
+      },
+    });
   }
 
   async findAll() {
@@ -22,24 +32,26 @@ export class PersonneService {
   }
 
   async findOne(id: number) {
-    const p = await this.prisma.personne.findUnique({ where: { idPers: id } });
+    const p = await this.prisma.personne.findUnique({ where: { id: id } });
     if (!p) throw new NotFoundException(`Personne #${id} introuvable`);
     return p;
   }
 
   async findByType(typePersonne: number) {
-    return this.prisma.personne.findMany({ where: { typePersonne } });
+    return this.prisma.personne.findMany({
+      where: { typePersonne: typePersonne as any },
+    });
   }
 
   async update(id: number, dto: UpdatePersonneDto) {
     await this.findOne(id);
     const data: any = { ...dto };
     if (dto.password) data.password = await bcrypt.hash(dto.password, 10);
-    return this.prisma.personne.update({ where: { idPers: id }, data });
+    return this.prisma.personne.update({ where: { id: id }, data });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.personne.delete({ where: { idPers: id } });
+    return this.prisma.personne.delete({ where: { id: id } });
   }
 }

@@ -1,6 +1,12 @@
 import {
-  IsString, IsNotEmpty, IsOptional,
-  IsDateString, IsNumber, Min, Max, Length
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDateString,
+  IsNumber,
+  Min,
+  Max,
+  Length,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -35,7 +41,10 @@ export class CreatePersonneDto {
   @IsOptional()
   phone?: string;
 
-  @ApiProperty({ example: 1, description: '1=élève 2=enseignant 3=parent 4=admin' })
+  @ApiProperty({
+    example: 1,
+    description: '1=élève 2=enseignant 3=parent 4=admin',
+  })
   @IsNumber()
   @Min(1)
   @Max(4)

@@ -1,0 +1,22 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["/package.json"],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "prisma": {
+            "type": "object",
+            "properties": {
+              "seed": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  ]
+}

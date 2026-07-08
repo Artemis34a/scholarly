@@ -1,9 +1,20 @@
 import {
-  Controller, Get, Post, Put, Delete,
-  Param, Body, UseGuards, ParseIntPipe, Query
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
-  ApiTags, ApiBearerAuth, ApiOperation, ApiQuery
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { PersonneService } from './personne.service';
 import { CreatePersonneDto } from './dto/create-personne.dto';
