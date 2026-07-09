@@ -1,6 +1,11 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { resolve } from 'node:path';
+import { buildDatabaseUrl } from '../config/database.config';
 
 @Injectable()
 export class PrismaService
@@ -10,15 +15,15 @@ export class PrismaService
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
-    if (!process.env.DATABASE_URL) {
-      process.env.DATABASE_URL = `file:${resolve(process.cwd(), 'prisma', 'dev.db')}`;
-    }
+    process.env.DATABASE_URL = buildDatabaseUrl();
 
     super();
   }
 
   async onModuleInit() {
-    this.logger.log(`Connexion Prisma sur ${process.env.DATABASE_URL}`);
+    this.logger.log(
+      `Connexion Prisma sur ${process.env.DB_HOST ?? 'localhost'}:${process.env.DB_PORT ?? '3306'}/${process.env.DB_NAME ?? ''}`,
+    );
     await this.$connect();
   }
   async onModuleDestroy() {

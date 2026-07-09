@@ -23,7 +23,7 @@ import { PaiementModule } from './paiement/paiement.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
     PrismaModule,
     AuthModule,
     PersonneModule,
