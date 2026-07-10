@@ -4,12 +4,12 @@ import Card from '../../components/Card'
 import { useAuth } from '../../context/AuthContext'
 import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
-import { getMesCours } from './teacher.utils'
+import { getMesAffectations } from './teacher.utils'
 
 function TeacherStatsPage() {
   const { user } = useAuth()
   const [coursList, setCoursList] = useState([])
-  const [statsParCours, setStatsParCours] = useState({})
+  const [statsParAffectation, setStatsParAffectation] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -24,13 +24,15 @@ function TeacherStatsPage() {
         if (!isMounted) return
         setCoursList(coursData)
 
-        const mesCours = getMesCours(coursData, user.id)
+        const mesAffectations = getMesAffectations(coursData, user.id)
         const result = {}
 
-        for (const cours of mesCours) {
-          const epreuvesDuCours = epreuvesData.filter((epreuve) => epreuve.idCours === cours.id)
+        for (const affectation of mesAffectations) {
+          const epreuvesDeLAffectation = epreuvesData.filter(
+            (epreuve) => epreuve.idClasseCours === affectation.idClasseCours,
+          )
           const statsListe = await Promise.all(
-            epreuvesDuCours.map((epreuve) => evaluationsService.epreuves.getStats(epreuve.id)),
+            epreuvesDeLAffectation.map((epreuve) => evaluationsService.epreuves.getStats(epreuve.id)),
           )
 
           const totalNotes = statsListe.reduce((sum, s) => sum + s.nombreNotes, 0)
@@ -38,15 +40,15 @@ function TeacherStatsPage() {
           const meilleures = statsListe.map((s) => s.meilleureNote).filter((n) => n !== null)
           const moinsBonnes = statsListe.map((s) => s.moinsBonneNote).filter((n) => n !== null)
 
-          result[cours.id] = {
-            nombreEpreuves: epreuvesDuCours.length,
+          result[affectation.idClasseCours] = {
+            nombreEpreuves: epreuvesDeLAffectation.length,
             moyenneGenerale: totalNotes > 0 ? totalPondere / totalNotes : null,
             meilleureNote: meilleures.length ? Math.max(...meilleures) : null,
             moinsBonneNote: moinsBonnes.length ? Math.min(...moinsBonnes) : null,
           }
         }
 
-        if (isMounted) setStatsParCours(result)
+        if (isMounted) setStatsParAffectation(result)
       })
       .catch((err) => {
         if (isMounted) setError(err.message)
@@ -61,7 +63,7 @@ function TeacherStatsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id])
 
-  const mesCours = useMemo(() => getMesCours(coursList, user.id), [coursList, user.id])
+  const mesAffectations = useMemo(() => getMesAffectations(coursList, user.id), [coursList, user.id])
 
   return (
     <div className="space-y-6 md:space-y-7">
@@ -85,16 +87,20 @@ function TeacherStatsPage() {
         <Card>
           <div className="py-12 text-center text-slate-400">Calcul des statistiques...</div>
         </Card>
-      ) : mesCours.length === 0 ? (
+      ) : mesAffectations.length === 0 ? (
         <Card>
-          <p className="text-sm text-slate-500">Aucun cours affecte pour le moment.</p>
+          <p className="text-sm text-slate-500">Aucune affectation pour le moment.</p>
         </Card>
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
-          {mesCours.map((cours) => {
-            const stat = statsParCours[cours.id]
+          {mesAffectations.map((affectation) => {
+            const stat = statsParAffectation[affectation.idClasseCours]
             return (
-              <Card key={cours.id} title={cours.libelle} subtitle={`${stat?.nombreEpreuves ?? 0} epreuve(s)`}>
+              <Card
+                key={affectation.idClasseCours}
+                title={`${affectation.cours.libelle} - ${affectation.classe?.libelle ?? ''}`}
+                subtitle={`${stat?.nombreEpreuves ?? 0} epreuve(s)`}
+              >
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="rounded-[22px] border border-slate-200/80 bg-slate-50/80 px-4 py-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Moyenne</p>

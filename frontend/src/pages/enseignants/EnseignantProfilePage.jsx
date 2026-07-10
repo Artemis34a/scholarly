@@ -4,7 +4,7 @@ import Card from '../../components/Card'
 import ActifBadge from '../../components/ActifBadge'
 import { enseignantsService } from '../../services/enseignantsService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
-import { formatDate } from './enseignants.utils'
+import { formatDate, getAffectationsLabel } from './enseignants.utils'
 
 function ProfileStat({ label, value }) {
   return (
@@ -58,7 +58,7 @@ function EnseignantProfilePage() {
     )
   }
 
-  const { personne, cours } = enseignant
+  const { personne, affectations } = enseignant
 
   return (
     <div className="space-y-6">
@@ -78,7 +78,7 @@ function EnseignantProfilePage() {
                   {personne?.nom} {personne?.prenom}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-300">
-                  #{enseignant.id} · {cours?.libelle ?? 'Aucun cours'}
+                  #{enseignant.id} · {getAffectationsLabel(enseignant)}
                 </p>
               </div>
             </div>
@@ -102,8 +102,7 @@ function EnseignantProfilePage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <ProfileStat label="Date de naissance" value={formatDate(personne?.dateNaissance)} />
-        <ProfileStat label="Cours" value={cours?.libelle ?? 'Non renseigne'} />
-        <ProfileStat label="Classe" value={cours?.classe?.libelle ?? 'Non renseignee'} />
+        <ProfileStat label="Nombre d'affectations" value={affectations?.length ?? 0} />
         <ProfileStat label="Statut" value={<ActifBadge actif={enseignant.actif} />} />
       </section>
 
@@ -117,20 +116,18 @@ function EnseignantProfilePage() {
           </div>
         </Card>
 
-        <Card title="Suivi pedagogique" subtitle="Bloc pret a accueillir les classes, evaluations et emplois du temps.">
-          <div className="space-y-4">
-            <div className="rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4">
-              <p className="font-semibold text-slate-900">Affectation actuelle</p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                {cours?.libelle ?? 'Aucun cours'} {cours?.classe ? `- ${cours.classe.libelle}` : ''}
-              </p>
-            </div>
-            <div className="rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4">
-              <p className="font-semibold text-slate-900">Perspectives d evolution</p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Ce profil est pret a accueillir les emplois du temps, les evaluations creees et les statistiques de classe.
-              </p>
-            </div>
+        <Card title="Affectations d'enseignement" subtitle="Cours assures par cet enseignant, classe par classe.">
+          <div className="space-y-3">
+            {affectations?.length > 0 ? (
+              affectations.map((affectation) => (
+                <div key={affectation.id} className="rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4">
+                  <p className="font-semibold text-slate-900">{affectation.classeCours?.cours?.libelle ?? 'Cours inconnu'}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">{affectation.classeCours?.classe?.libelle ?? 'Classe inconnue'}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500">Aucune affectation d'enseignement pour le moment.</p>
+            )}
           </div>
         </Card>
       </section>

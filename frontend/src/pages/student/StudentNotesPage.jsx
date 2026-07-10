@@ -76,7 +76,7 @@ function StudentNotesPage() {
                 {evaluationsList.map((evaluation) => (
                   <article key={evaluation.id} className="grid gap-4 px-5 py-5 lg:grid-cols-[1.4fr_1fr_0.6fr_0.6fr_1.2fr] lg:items-center">
                     <span className="text-sm font-semibold text-slate-900">{evaluation.epreuve?.libelle}</span>
-                    <span className="text-sm text-slate-600">{evaluation.epreuve?.cours?.libelle ?? '-'}</span>
+                    <span className="text-sm text-slate-600">{evaluation.epreuve?.classeCours?.cours?.libelle ?? '-'}</span>
                     <span className="text-sm text-slate-600">
                       {evaluation.note !== null && evaluation.note !== undefined ? `${evaluation.note}/${evaluation.epreuve?.noteMax}` : 'Non note'}
                     </span>

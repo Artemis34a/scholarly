@@ -4,6 +4,7 @@ import ActifBadge from '../../components/ActifBadge'
 import { useAuth } from '../../context/AuthContext'
 import { personnesService } from '../../services/personnesService'
 import { enseignantsService } from '../../services/enseignantsService'
+import { getAffectationsLabel } from '../enseignants/enseignants.utils'
 
 function InfoRow({ label, value }) {
   return (
@@ -78,7 +79,7 @@ function TeacherProfilPage() {
             <InfoRow label="Nom complet" value={`${personne.nom} ${personne.prenom}`} />
             <InfoRow label="Identifiant" value={personne.username} />
             <InfoRow label="Telephone" value={personne.mobile || 'Non renseigne'} />
-            <InfoRow label="Cours enseigne" value={enseignant?.cours?.libelle ?? 'Non renseigne'} />
+            <InfoRow label="Affectations" value={enseignant ? getAffectationsLabel(enseignant) : 'Non renseigne'} />
             <InfoRow label="Statut" value={enseignant ? <ActifBadge actif={enseignant.actif} /> : 'Non renseigne'} />
           </div>
         </Card>

@@ -60,6 +60,7 @@ function EpreuveForm({
   title,
   subtitle,
   values,
+  classes,
   cours,
   submitting,
   error,
@@ -68,6 +69,16 @@ function EpreuveForm({
   onSubmit,
   onCancel,
 }) {
+  // Un cours peut être enseigné dans plusieurs classes : on ne propose donc, dans
+  // le second menu, que les cours réellement enseignés dans la classe choisie
+  // (via classesCours), pour ne jamais laisser choisir une paire incohérente.
+  const classeCoursOptions = cours
+    .flatMap((item) =>
+      (item.classesCours ?? [])
+        .filter((classeCours) => `${classeCours.idClasse}` === values.idClasse)
+        .map((classeCours) => ({ value: `${classeCours.id}`, label: item.libelle })),
+    )
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div>
@@ -100,12 +111,21 @@ function EpreuveForm({
           options={typeEpreuveOptions}
         />
         <SelectField
-          label="Cours (optionnel)"
-          name="idCours"
-          value={values.idCours}
+          label="Classe"
+          name="idClasse"
+          value={values.idClasse}
           onChange={onChange}
-          options={cours.map((item) => ({ value: `${item.id}`, label: item.libelle }))}
-          placeholder="Aucun cours specifique"
+          required
+          options={classes.map((classe) => ({ value: `${classe.id}`, label: classe.libelle }))}
+          placeholder="Choisir une classe"
+        />
+        <SelectField
+          label="Cours (optionnel)"
+          name="idClasseCours"
+          value={values.idClasseCours}
+          onChange={onChange}
+          options={classeCoursOptions}
+          placeholder={values.idClasse ? 'Aucun cours specifique' : "Choisissez d'abord une classe"}
         />
         <InputField
           label="Date et heure"

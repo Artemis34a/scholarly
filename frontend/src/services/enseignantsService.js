@@ -20,4 +20,6 @@ export const enseignantsService = {
   create:    (data)       => api.post('/enseignants', data),
   update:    (id, data)   => api.put(`/enseignants/${id}`, data),
   remove:    (id)         => api.delete(`/enseignants/${id}`),
+  addAffectation:   (id, data)             => api.post(`/enseignants/${id}/affectations`, data),
+  removeAffectation:(id, idAffectation)    => api.delete(`/enseignants/${id}/affectations/${idAffectation}`),
 }

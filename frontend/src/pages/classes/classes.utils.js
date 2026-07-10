@@ -43,7 +43,7 @@ export function getEffectif(classe) {
 }
 
 export function getCoursCount(classe) {
-  return classe?.cours?.length ?? 0
+  return classe?.classesCours?.length ?? 0
 }
 
 export function applyClasseFilters(classes, filters, cycles) {

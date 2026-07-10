@@ -12,7 +12,8 @@ export const epreuveInitialValues = {
   libelle: '',
   description: '',
   typeEpreuve: 'CONTROLE',
-  idCours: '',
+  idClasse: '',
+  idClasseCours: '',
   dateEpreuve: '',
   duree: '',
   coefficient: '1',
@@ -49,7 +50,8 @@ export function createEpreuveFormValues(epreuve) {
     libelle: epreuve.libelle ?? '',
     description: epreuve.description ?? '',
     typeEpreuve: epreuve.typeEpreuve ?? 'CONTROLE',
-    idCours: epreuve.idCours ? `${epreuve.idCours}` : '',
+    idClasse: epreuve.idClasse ? `${epreuve.idClasse}` : '',
+    idClasseCours: epreuve.idClasseCours ? `${epreuve.idClasseCours}` : '',
     dateEpreuve: formatDateTimeInput(epreuve.dateEpreuve),
     duree: epreuve.duree !== undefined && epreuve.duree !== null ? `${epreuve.duree}` : '',
     coefficient: epreuve.coefficient !== undefined && epreuve.coefficient !== null ? `${epreuve.coefficient}` : '1',
@@ -63,7 +65,8 @@ export function buildEpreuvePayload(values) {
     libelle: values.libelle.trim(),
     description: values.description.trim() || undefined,
     typeEpreuve: values.typeEpreuve,
-    idCours: values.idCours ? Number(values.idCours) : undefined,
+    idClasse: Number(values.idClasse),
+    idClasseCours: values.idClasseCours ? Number(values.idClasseCours) : undefined,
     dateEpreuve: values.dateEpreuve ? new Date(values.dateEpreuve).toISOString() : undefined,
     duree: values.duree ? Number(values.duree) : undefined,
     coefficient: Number(values.coefficient),
@@ -78,21 +81,34 @@ export function getCoursLabel(coursList, idCours) {
   return cours?.libelle ?? `Cours #${idCours}`
 }
 
-export function applyEpreuveFilters(epreuvesList, filters, coursList) {
+// Le cours et la classe d'une épreuve sont désormais exposés par le backend via
+// epreuve.classe (obligatoire) et epreuve.classeCours.cours (optionnel), plutôt
+// qu'un simple idCours : un même cours pouvant être enseigné dans plusieurs
+// classes, l'épreuve doit préciser explicitement la classe concernée.
+export function getEpreuveClasseLabel(epreuve) {
+  return epreuve?.classe?.libelle ?? 'Non renseignee'
+}
+
+export function getEpreuveCoursLabel(epreuve) {
+  return epreuve?.classeCours?.cours?.libelle ?? 'Aucun cours'
+}
+
+export function applyEpreuveFilters(epreuvesList, filters) {
   return epreuvesList.filter((epreuve) => {
     if (filters.typeEpreuve !== 'all' && epreuve.typeEpreuve !== filters.typeEpreuve) {
       return false
     }
 
-    if (filters.idCours !== 'all' && `${epreuve.idCours ?? ''}` !== filters.idCours) {
+    if (filters.idClasse !== 'all' && `${epreuve.idClasse ?? ''}` !== filters.idClasse) {
       return false
     }
 
     if (filters.localSearch.trim()) {
       const needle = filters.localSearch.trim().toLowerCase()
       const type = getTypeEpreuveLabel(epreuve.typeEpreuve).toLowerCase()
-      const cours = getCoursLabel(coursList, epreuve.idCours).toLowerCase()
-      const haystack = [epreuve.libelle, epreuve.description, type, cours]
+      const classe = getEpreuveClasseLabel(epreuve).toLowerCase()
+      const cours = getEpreuveCoursLabel(epreuve).toLowerCase()
+      const haystack = [epreuve.libelle, epreuve.description, type, classe, cours]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()

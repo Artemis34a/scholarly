@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
 import { BUTTON_LIGHT } from '../../components/buttonStyles'
-import { getMesCours } from './teacher.utils'
+import { getMesAffectations } from './teacher.utils'
 
 function TeacherNotesPage() {
   const { user } = useAuth()
@@ -39,10 +39,13 @@ function TeacherNotesPage() {
     }
   }, [])
 
-  const mesCoursIds = useMemo(() => new Set(getMesCours(coursList, user.id).map((c) => c.id)), [coursList, user.id])
+  const mesClasseCoursIds = useMemo(
+    () => new Set(getMesAffectations(coursList, user.id).map((a) => a.idClasseCours)),
+    [coursList, user.id],
+  )
   const mesNotes = useMemo(
-    () => evaluationsList.filter((evaluation) => evaluation.epreuve?.cours?.id && mesCoursIds.has(evaluation.epreuve.cours.id)),
-    [evaluationsList, mesCoursIds],
+    () => evaluationsList.filter((evaluation) => evaluation.epreuve?.idClasseCours && mesClasseCoursIds.has(evaluation.epreuve.idClasseCours)),
+    [evaluationsList, mesClasseCoursIds],
   )
 
   return (
@@ -85,7 +88,7 @@ function TeacherNotesPage() {
                 <div key={evaluation.id} className="grid gap-3 px-4 py-4 text-sm text-slate-600 lg:grid-cols-[1.2fr_1.1fr_0.9fr_0.6fr_0.6fr_1fr] lg:items-center">
                   <span className="font-semibold text-slate-900">{evaluation.eleve?.nom} {evaluation.eleve?.prenom}</span>
                   <span>{evaluation.epreuve?.libelle}</span>
-                  <span>{evaluation.epreuve?.cours?.libelle}</span>
+                  <span>{evaluation.epreuve?.classeCours?.cours?.libelle}</span>
                   <span>{evaluation.note !== null && evaluation.note !== undefined ? `${evaluation.note}/${evaluation.epreuve?.noteMax}` : 'Non note'}</span>
                   <span className="font-semibold text-slate-800">{evaluation.rang ?? '-'}</span>
                   <Link

@@ -4,6 +4,7 @@ import Card from '../../components/Card'
 import EpreuveForm from '../../components/evaluations/EpreuveForm'
 import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
+import { classesService } from '../../services/classesService'
 import { buildEpreuvePayload, createEpreuveFormValues } from './evaluations.utils'
 
 function EpreuveEditPage() {
@@ -11,6 +12,7 @@ function EpreuveEditPage() {
   const navigate = useNavigate()
   const [values, setValues] = useState(null)
   const [cours, setCours] = useState([])
+  const [classes, setClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -20,15 +22,17 @@ function EpreuveEditPage() {
 
     async function loadData() {
       try {
-        const [epreuve, coursData] = await Promise.all([
+        const [epreuve, coursData, classesResult] = await Promise.all([
           evaluationsService.epreuves.findOne(id),
           coursService.findAll(),
+          classesService.findAll({ limit: 200 }),
         ])
 
         if (!isMounted) return
 
         setValues(createEpreuveFormValues(epreuve))
         setCours(coursData)
+        setClasses(classesResult.data)
       } catch (err) {
         if (isMounted) setError(err.message)
       } finally {
@@ -45,7 +49,11 @@ function EpreuveEditPage() {
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
-    setValues((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
+    setValues((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+      ...(name === 'idClasse' && value !== current.idClasse ? { idClasseCours: '' } : {}),
+    }))
   }
 
   async function handleSubmit(event) {
@@ -73,6 +81,7 @@ function EpreuveEditPage() {
           subtitle="Mettez a jour l'epreuve sans quitter l'espace administrateur."
           values={values}
           cours={cours}
+          classes={classes}
           submitting={submitting}
           error={error}
           submitLabel="Enregistrer les modifications"

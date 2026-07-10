@@ -4,7 +4,7 @@ import Card from '../../components/Card'
 import Pagination from '../../components/Pagination'
 import EnseignantFilters from '../../components/enseignants/EnseignantFilters'
 import EnseignantTable from '../../components/enseignants/EnseignantTable'
-import { coursService } from '../../services/coursService'
+import { classesService } from '../../services/classesService'
 import { enseignantsService } from '../../services/enseignantsService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
 import { applyEnseignantFilters } from './enseignants.utils'
@@ -13,7 +13,7 @@ const PAGE_SIZE = 10
 
 const defaultFilters = {
   actif: 'all',
-  idCours: 'all',
+  idClasse: 'all',
   localSearch: '',
 }
 
@@ -31,7 +31,7 @@ function EnseignantsPage() {
   const [enseignants, setEnseignants] = useState([])
   const [pageInfo, setPageInfo] = useState({ page: 1, totalPages: 1, total: 0 })
   const [page, setPage] = useState(1)
-  const [cours, setCours] = useState([])
+  const [classes, setClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filters, setFilters] = useState(defaultFilters)
@@ -41,8 +41,8 @@ function EnseignantsPage() {
   useEffect(() => {
     let isMounted = true
 
-    coursService.findAll().then((data) => {
-      if (isMounted) setCours(data)
+    classesService.findAll({ limit: 200 }).then((result) => {
+      if (isMounted) setClasses(result.data)
     }).catch(() => {})
 
     return () => {
@@ -85,13 +85,15 @@ function EnseignantsPage() {
   }, [deferredSearch, page])
 
   const filteredEnseignants = useMemo(
-    () => applyEnseignantFilters(enseignants, filters, cours),
-    [enseignants, filters, cours],
+    () => applyEnseignantFilters(enseignants, filters),
+    [enseignants, filters],
   )
 
   const stats = useMemo(() => {
     const actifs = filteredEnseignants.filter((item) => item.actif).length
-    const coursCouverts = new Set(filteredEnseignants.map((item) => item.idCours).filter(Boolean)).size
+    const coursCouverts = new Set(
+      filteredEnseignants.flatMap((item) => (item.affectations ?? []).map((a) => a.classeCours?.idCours)).filter(Boolean),
+    ).size
 
     return {
       total: filteredEnseignants.length,
@@ -178,7 +180,7 @@ function EnseignantsPage() {
       >
         <EnseignantFilters
           filters={filters}
-          cours={cours}
+          classes={classes}
           onChange={handleFilterChange}
           onReset={handleReset}
           onSearchChange={handleSearchChange}
@@ -201,7 +203,6 @@ function EnseignantsPage() {
           <>
             <EnseignantTable
               enseignants={filteredEnseignants}
-              cours={cours}
               deletingId={deletingId}
               onDelete={handleDelete}
             />

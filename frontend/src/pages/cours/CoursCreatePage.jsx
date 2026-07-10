@@ -43,8 +43,26 @@ function CoursCreatePage() {
     }))
   }
 
+  function handleToggleClasse(idClasse) {
+    setValues((current) => {
+      const exists = current.idClasses.includes(idClasse)
+      return {
+        ...current,
+        idClasses: exists
+          ? current.idClasses.filter((id) => id !== idClasse)
+          : [...current.idClasses, idClasse],
+      }
+    })
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
+
+    if (values.idClasses.length === 0) {
+      setError('Selectionnez au moins une classe pour ce cours.')
+      return
+    }
+
     setSubmitting(true)
     setError('')
 
@@ -71,10 +89,12 @@ function CoursCreatePage() {
           subtitle="Rattachez le cours a une classe et definissez son coefficient."
           values={values}
           classes={classes}
+          isCreate
           submitting={submitting}
           error={error}
           submitLabel="Creer le cours"
           onChange={handleChange}
+          onToggleClasse={handleToggleClasse}
           onSubmit={handleSubmit}
           onCancel={() => navigate('/dashboard/cours')}
         />

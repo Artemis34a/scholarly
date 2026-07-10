@@ -27,30 +27,6 @@ function InputField({
   )
 }
 
-function SelectField({ label, name, value, onChange, options, placeholder, required = false }) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-medium text-slate-600">
-        {label}
-      </span>
-      <select
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-sky-400"
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
-}
-
 function TextAreaField({ label, name, value, onChange, placeholder = '' }) {
   return (
     <label className="block md:col-span-2">
@@ -74,10 +50,12 @@ function CoursForm({
   subtitle,
   values,
   classes,
+  isCreate,
   submitting,
   error,
   submitLabel,
   onChange,
+  onToggleClasse,
   onSubmit,
   onCancel,
 }) {
@@ -106,15 +84,6 @@ function CoursForm({
           required
           placeholder="Ex: Mathematiques"
         />
-        <SelectField
-          label="Classe"
-          name="idClasse"
-          value={values.idClasse}
-          onChange={onChange}
-          required
-          options={classes.map((classe) => ({ value: `${classe.id}`, label: classe.libelle }))}
-          placeholder="Choisir une classe"
-        />
         <InputField
           label="Coefficient"
           name="coefficient"
@@ -142,6 +111,34 @@ function CoursForm({
           placeholder="Contenu et objectifs du cours"
         />
       </div>
+
+      {isCreate ? (
+        <div>
+          <span className="mb-2 block text-sm font-medium text-slate-600">
+            Classes concernees (un cours peut etre enseigne dans plusieurs classes)
+          </span>
+          <div className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
+            {classes.map((classe) => (
+              <label
+                key={classe.id}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              >
+                <input
+                  type="checkbox"
+                  checked={values.idClasses.includes(`${classe.id}`)}
+                  onChange={() => onToggleClasse(`${classe.id}`)}
+                  className="h-4 w-4 rounded border-slate-300 text-sky-600"
+                />
+                {classe.libelle}
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+          Les classes associees a ce cours se gerent depuis la page de detail du cours.
+        </p>
+      )}
 
       <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <input

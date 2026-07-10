@@ -124,7 +124,7 @@ function StudentDashboard() {
                     {evaluation.epreuve?.libelle} · {evaluation.note ?? '-'}/{evaluation.epreuve?.noteMax}
                   </p>
                   <p className="mt-1 text-sm leading-6 text-slate-500">
-                    {evaluation.epreuve?.cours?.libelle}
+                    {evaluation.epreuve?.classeCours?.cours?.libelle}
                   </p>
                 </div>
               ))}

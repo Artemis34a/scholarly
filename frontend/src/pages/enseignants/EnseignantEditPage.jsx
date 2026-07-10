@@ -4,7 +4,6 @@ import Card from '../../components/Card'
 import EnseignantForm from '../../components/enseignants/EnseignantForm'
 import { useAuth } from '../../context/AuthContext'
 import { enseignantsService } from '../../services/enseignantsService'
-import { coursService } from '../../services/coursService'
 import { buildEnseignantPayload, createFormValues } from './enseignants.utils'
 
 function EnseignantEditPage() {
@@ -12,7 +11,6 @@ function EnseignantEditPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [values, setValues] = useState(null)
-  const [cours, setCours] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -20,25 +18,16 @@ function EnseignantEditPage() {
   useEffect(() => {
     let isMounted = true
 
-    async function loadData() {
-      try {
-        const [enseignant, coursData] = await Promise.all([
-          enseignantsService.findOne(id),
-          coursService.findAll(),
-        ])
-
-        if (!isMounted) return
-
-        setValues(createFormValues(enseignant))
-        setCours(coursData)
-      } catch (err) {
+    enseignantsService.findOne(id)
+      .then((enseignant) => {
+        if (isMounted) setValues(createFormValues(enseignant))
+      })
+      .catch((err) => {
         if (isMounted) setError(err.message)
-      } finally {
+      })
+      .finally(() => {
         if (isMounted) setLoading(false)
-      }
-    }
-
-    loadData()
+      })
 
     return () => {
       isMounted = false
@@ -61,7 +50,7 @@ function EnseignantEditPage() {
     try {
       await enseignantsService.update(
         id,
-        buildEnseignantPayload(values, user?.id),
+        buildEnseignantPayload(values, user?.id, false),
       )
 
       navigate(`/dashboard/enseignants/${id}`)
@@ -79,9 +68,8 @@ function EnseignantEditPage() {
       ) : (
         <EnseignantForm
           title="Modifier l'enseignant"
-          subtitle="Mettez a jour les informations et l'affectation sans quitter l'espace administrateur."
+          subtitle="Mettez a jour les informations sans quitter l'espace administrateur."
           values={values}
-          cours={cours}
           isCreate={false}
           submitting={submitting}
           error={error}

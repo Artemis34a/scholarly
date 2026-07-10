@@ -1,20 +1,16 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Card from '../../components/Card'
 import EnseignantForm from '../../components/enseignants/EnseignantForm'
 import { useAuth } from '../../context/AuthContext'
 import { enseignantsService } from '../../services/enseignantsService'
 import { coursService } from '../../services/coursService'
-import { buildEnseignantPayload, enseignantInitialValues } from './enseignants.utils'
+import { buildEnseignantPayload, enseignantInitialValues, getClasseCoursOptions } from './enseignants.utils'
 
 function EnseignantCreatePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [searchParams] = useSearchParams()
-  const prefillIdCours = searchParams.get('idCours')
-  const [values, setValues] = useState(
-    prefillIdCours ? { ...enseignantInitialValues, idCours: prefillIdCours } : enseignantInitialValues,
-  )
+  const [values, setValues] = useState(enseignantInitialValues)
   const [cours, setCours] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -41,6 +37,8 @@ function EnseignantCreatePage() {
     }
   }, [])
 
+  const classeCoursOptions = useMemo(() => getClasseCoursOptions(cours), [cours])
+
   function handleChange(event) {
     const { name, value, type, checked } = event.target
     setValues((current) => ({
@@ -56,7 +54,7 @@ function EnseignantCreatePage() {
 
     try {
       const created = await enseignantsService.create(
-        buildEnseignantPayload(values, user?.id),
+        buildEnseignantPayload(values, user?.id, true),
       )
 
       navigate(`/dashboard/enseignants/${created.id}`)
@@ -74,9 +72,9 @@ function EnseignantCreatePage() {
       ) : (
         <EnseignantForm
           title="Creer un nouvel enseignant"
-          subtitle="Un compte de connexion et une affectation a un cours sont crees ensemble."
+          subtitle="Un compte de connexion et une affectation cours/classe initiale sont crees ensemble."
           values={values}
-          cours={cours}
+          classeCoursOptions={classeCoursOptions}
           isCreate
           submitting={submitting}
           error={error}

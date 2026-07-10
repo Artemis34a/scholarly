@@ -2,7 +2,7 @@ export const coursInitialValues = {
   libelle: '',
   coefficient: '1',
   note: '',
-  idClasse: '',
+  idClasses: [],
   description: '',
   actif: true,
 }
@@ -14,7 +14,7 @@ export function createFormValues(cours) {
     libelle: cours.libelle ?? '',
     coefficient: cours.coefficient !== undefined && cours.coefficient !== null ? `${cours.coefficient}` : '1',
     note: cours.note !== undefined && cours.note !== null ? `${cours.note}` : '',
-    idClasse: cours.idClasse ? `${cours.idClasse}` : '',
+    idClasses: (cours.classesCours ?? []).map((classeCours) => `${classeCours.idClasse}`),
     description: cours.description ?? '',
     actif: Boolean(cours.actif),
   }
@@ -25,7 +25,7 @@ export function buildCoursPayload(values, adminId) {
     libelle: values.libelle.trim(),
     coefficient: Number(values.coefficient),
     note: values.note.trim() ? Number(values.note) : undefined,
-    idClasse: Number(values.idClasse),
+    idClasses: values.idClasses.map(Number),
     description: values.description.trim() || undefined,
     actif: Boolean(values.actif),
     idAdmin: adminId ?? undefined,
@@ -39,30 +39,54 @@ export function getClasseLabel(classes, idClasse) {
   return classe?.libelle ?? `Classe #${idClasse}`
 }
 
-export function getEnseignantsNames(cours) {
-  if (!cours?.enseignants || cours.enseignants.length === 0) return 'Aucun enseignant'
+// Un cours peut desormais etre enseigne dans plusieurs classes : on affiche donc
+// la liste complete des classes rattachees (via classesCours) plutot qu'une seule.
+export function getClassesLabels(cours) {
+  const classesCours = cours?.classesCours ?? []
+  if (classesCours.length === 0) return 'Aucune classe'
 
-  return cours.enseignants
-    .map((enseignant) => `${enseignant.personne?.nom} ${enseignant.personne?.prenom}`)
-    .join(', ')
+  return classesCours.map((classeCours) => classeCours.classe?.libelle).filter(Boolean).join(', ')
 }
 
-export function applyCoursFilters(coursList, filters, classes) {
+// Les enseignants sont rattaches a une combinaison cours/classe (Affectation sur
+// ClasseCours) : on agrege ici les affectations de toutes les classes du cours,
+// en dedupliquant par enseignant.
+export function getEnseignantsNames(cours) {
+  const classesCours = cours?.classesCours ?? []
+  const noms = new Map()
+
+  classesCours.forEach((classeCours) => {
+    (classeCours.affectations ?? []).forEach((affectation) => {
+      const enseignant = affectation.enseignant
+      if (enseignant) {
+        noms.set(enseignant.id, `${enseignant.personne?.nom ?? ''} ${enseignant.personne?.prenom ?? ''}`.trim())
+      }
+    })
+  })
+
+  if (noms.size === 0) return 'Aucun enseignant'
+  return Array.from(noms.values()).join(', ')
+}
+
+export function applyCoursFilters(coursList, filters) {
   return coursList.filter((cours) => {
     if (filters.actif !== 'all') {
       const isActive = filters.actif === 'true'
       if (Boolean(cours.actif) !== isActive) return false
     }
 
-    if (filters.idClasse !== 'all' && `${cours.idClasse ?? ''}` !== filters.idClasse) {
-      return false
+    if (filters.idClasse !== 'all') {
+      const appartientALaClasse = (cours.classesCours ?? []).some(
+        (classeCours) => `${classeCours.idClasse}` === filters.idClasse,
+      )
+      if (!appartientALaClasse) return false
     }
 
     if (filters.localSearch.trim()) {
       const needle = filters.localSearch.trim().toLowerCase()
-      const classe = getClasseLabel(classes, cours.idClasse).toLowerCase()
+      const classes = getClassesLabels(cours).toLowerCase()
       const enseignants = getEnseignantsNames(cours).toLowerCase()
-      const haystack = [cours.libelle, cours.description, classe, enseignants]
+      const haystack = [cours.libelle, cours.description, classes, enseignants]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()

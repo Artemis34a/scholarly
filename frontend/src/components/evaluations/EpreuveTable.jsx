@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import ActifBadge from '../ActifBadge'
 import { BUTTON_LIGHT } from '../buttonStyles'
-import { formatDate, getCoursLabel, getTypeEpreuveLabel } from '../../pages/evaluations/evaluations.utils'
+import { formatDate, getEpreuveClasseLabel, getEpreuveCoursLabel, getTypeEpreuveLabel } from '../../pages/evaluations/evaluations.utils'
 
-function EpreuveTable({ epreuvesList, cours, deletingId, onDelete }) {
+function EpreuveTable({ epreuvesList, deletingId, onDelete }) {
   if (epreuvesList.length === 0) {
     return (
       <div className="rounded-[26px] border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
@@ -18,7 +18,7 @@ function EpreuveTable({ epreuvesList, cours, deletingId, onDelete }) {
       <div className="hidden grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr_0.6fr_1fr] gap-3 bg-slate-900 px-5 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 lg:grid">
         <span>Epreuve</span>
         <span>Type</span>
-        <span>Cours</span>
+        <span>Classe / Cours</span>
         <span>Date</span>
         <span>Statut</span>
         <span>Actions</span>
@@ -34,7 +34,10 @@ function EpreuveTable({ epreuvesList, cours, deletingId, onDelete }) {
 
             <div className="text-sm font-medium text-slate-700">{getTypeEpreuveLabel(epreuve.typeEpreuve)}</div>
 
-            <div className="text-sm text-slate-600">{getCoursLabel(cours, epreuve.idCours)}</div>
+            <div className="text-sm text-slate-600">
+              <p>{getEpreuveClasseLabel(epreuve)}</p>
+              <p className="text-xs text-slate-400">{getEpreuveCoursLabel(epreuve)}</p>
+            </div>
 
             <div className="text-sm text-slate-600">{formatDate(epreuve.dateEpreuve)}</div>
 

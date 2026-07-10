@@ -86,13 +86,15 @@ function CoursPage() {
   }, [deferredSearch, filters.idClasse, page])
 
   const filteredCours = useMemo(
-    () => applyCoursFilters(coursList, filters, classes),
-    [coursList, filters, classes],
+    () => applyCoursFilters(coursList, filters),
+    [coursList, filters],
   )
 
   const stats = useMemo(() => {
     const actifs = filteredCours.filter((item) => item.actif).length
-    const avecEnseignant = filteredCours.filter((item) => item.enseignants?.length > 0).length
+    const avecEnseignant = filteredCours.filter((item) =>
+      item.classesCours?.some((classeCours) => classeCours.affectations?.length > 0),
+    ).length
 
     return {
       total: filteredCours.length,
@@ -203,7 +205,6 @@ function CoursPage() {
           <>
             <CoursTable
               coursList={filteredCours}
-              classes={classes}
               deletingId={deletingId}
               onDelete={handleDelete}
             />

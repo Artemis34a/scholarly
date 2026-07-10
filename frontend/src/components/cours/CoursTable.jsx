@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import ActifBadge from '../ActifBadge'
 import { BUTTON_LIGHT } from '../buttonStyles'
-import { getClasseLabel, getEnseignantsNames } from '../../pages/cours/cours.utils'
+import { getClassesLabels, getEnseignantsNames } from '../../pages/cours/cours.utils'
 
-function CoursTable({ coursList, classes, deletingId, onDelete }) {
+function CoursTable({ coursList, deletingId, onDelete }) {
   if (coursList.length === 0) {
     return (
       <div className="rounded-[26px] border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
@@ -19,7 +19,7 @@ function CoursTable({ coursList, classes, deletingId, onDelete }) {
     <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/92">
       <div className="hidden grid-cols-[1.1fr_0.8fr_0.6fr_1.2fr_0.7fr_1fr] gap-3 bg-slate-900 px-5 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 lg:grid">
         <span>Cours</span>
-        <span>Classe</span>
+        <span>Classes</span>
         <span>Coeff.</span>
         <span>Enseignant(s)</span>
         <span>Statut</span>
@@ -38,7 +38,7 @@ function CoursTable({ coursList, classes, deletingId, onDelete }) {
             </div>
 
             <div className="text-sm font-medium text-slate-700">
-              {getClasseLabel(classes, cours.idClasse)}
+              {getClassesLabels(cours)}
             </div>
 
             <div className="text-sm text-slate-600">{cours.coefficient}</div>

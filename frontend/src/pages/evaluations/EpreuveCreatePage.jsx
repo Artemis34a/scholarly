@@ -4,12 +4,14 @@ import Card from '../../components/Card'
 import EpreuveForm from '../../components/evaluations/EpreuveForm'
 import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
+import { classesService } from '../../services/classesService'
 import { buildEpreuvePayload, epreuveInitialValues } from './evaluations.utils'
 
 function EpreuveCreatePage() {
   const navigate = useNavigate()
   const [values, setValues] = useState(epreuveInitialValues)
   const [cours, setCours] = useState([])
+  const [classes, setClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -17,10 +19,11 @@ function EpreuveCreatePage() {
   useEffect(() => {
     let isMounted = true
 
-    coursService.findAll()
-      .then((coursData) => {
+    Promise.all([coursService.findAll(), classesService.findAll({ limit: 200 })])
+      .then(([coursData, classesResult]) => {
         if (isMounted) {
           setCours(coursData)
+          setClasses(classesResult.data)
         }
       })
       .catch((err) => {
@@ -37,7 +40,14 @@ function EpreuveCreatePage() {
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
-    setValues((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
+    setValues((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+      // La classe determine quels cours sont proposables : on reinitialise le
+      // cours choisi si la classe change, pour ne jamais soumettre une paire
+      // cours/classe incoherente.
+      ...(name === 'idClasse' ? { idClasseCours: '' } : {}),
+    }))
   }
 
   async function handleSubmit(event) {
@@ -65,6 +75,7 @@ function EpreuveCreatePage() {
           subtitle="Definissez le type, le cours concerne et le bareme de l'epreuve."
           values={values}
           cours={cours}
+          classes={classes}
           submitting={submitting}
           error={error}
           submitLabel="Creer l'epreuve"

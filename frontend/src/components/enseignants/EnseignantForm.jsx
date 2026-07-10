@@ -55,7 +55,7 @@ function EnseignantForm({
   title,
   subtitle,
   values,
-  cours,
+  classeCoursOptions,
   isCreate,
   submitting,
   error,
@@ -143,16 +143,24 @@ function EnseignantForm({
           onChange={onChange}
           placeholder="Ex: Douala"
         />
-        <SelectField
-          label="Cours enseigne"
-          name="idCours"
-          value={values.idCours}
-          onChange={onChange}
-          required
-          options={cours.map((item) => ({ value: `${item.id}`, label: item.libelle }))}
-          placeholder="Choisir un cours"
-        />
+        {isCreate && (
+          <SelectField
+            label="Affectation initiale (cours - classe)"
+            name="idClasseCours"
+            value={values.idClasseCours}
+            onChange={onChange}
+            required
+            options={classeCoursOptions}
+            placeholder="Choisir un cours dans une classe"
+          />
+        )}
       </div>
+
+      {!isCreate && (
+        <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+          Les affectations d'enseignement (cours/classes) se gerent depuis la fiche detaillee de l'enseignant.
+        </p>
+      )}
 
       <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <input

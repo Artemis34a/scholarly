@@ -6,7 +6,7 @@ import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
 import { BUTTON_LIGHT, BUTTON_ON_DARK } from '../../components/buttonStyles'
 import { formatDate } from '../evaluations/evaluations.utils'
-import { getMesCours } from './teacher.utils'
+import { getMesAffectations } from './teacher.utils'
 
 function TeacherEvaluationsPage() {
   const { user } = useAuth()
@@ -40,11 +40,14 @@ function TeacherEvaluationsPage() {
     }
   }, [])
 
-  const mesCours = useMemo(() => getMesCours(coursList, user.id), [coursList, user.id])
-  const mesCoursIds = useMemo(() => new Set(mesCours.map((cours) => cours.id)), [mesCours])
+  const mesAffectations = useMemo(() => getMesAffectations(coursList, user.id), [coursList, user.id])
+  const mesClasseCoursIds = useMemo(
+    () => new Set(mesAffectations.map((affectation) => affectation.idClasseCours)),
+    [mesAffectations],
+  )
   const mesEpreuves = useMemo(
-    () => epreuvesList.filter((epreuve) => epreuve.idCours && mesCoursIds.has(epreuve.idCours)),
-    [epreuvesList, mesCoursIds],
+    () => epreuvesList.filter((epreuve) => epreuve.idClasseCours && mesClasseCoursIds.has(epreuve.idClasseCours)),
+    [epreuvesList, mesClasseCoursIds],
   )
 
   return (
@@ -85,17 +88,19 @@ function TeacherEvaluationsPage() {
           </div>
         ) : (
           <div className="overflow-hidden rounded-[26px] border border-slate-200/80">
-            <div className="hidden grid-cols-[1.3fr_1fr_0.9fr_0.8fr] gap-3 bg-slate-900/95 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:grid">
+            <div className="hidden grid-cols-[1.3fr_1fr_0.9fr_0.9fr_0.8fr] gap-3 bg-slate-900/95 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:grid">
               <span>Epreuve</span>
+              <span>Classe</span>
               <span>Cours</span>
               <span>Date</span>
               <span>Actions</span>
             </div>
             <div className="divide-y divide-slate-100 bg-white/90">
               {mesEpreuves.map((epreuve) => (
-                <div key={epreuve.id} className="grid gap-3 px-4 py-4 text-sm text-slate-600 lg:grid-cols-[1.3fr_1fr_0.9fr_0.8fr] lg:items-center">
+                <div key={epreuve.id} className="grid gap-3 px-4 py-4 text-sm text-slate-600 lg:grid-cols-[1.3fr_1fr_0.9fr_0.9fr_0.8fr] lg:items-center">
                   <span className="font-semibold text-slate-900">{epreuve.libelle}</span>
-                  <span>{epreuve.cours?.libelle}</span>
+                  <span>{epreuve.classe?.libelle}</span>
+                  <span>{epreuve.classeCours?.cours?.libelle}</span>
                   <span>{formatDate(epreuve.dateEpreuve)}</span>
                   <Link
                     to={`/teacher/evaluations/${epreuve.id}`}

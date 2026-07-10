@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import ActifBadge from '../ActifBadge'
 import { BUTTON_LIGHT } from '../buttonStyles'
-import { getCoursLabel } from '../../pages/enseignants/enseignants.utils'
+import { getAffectationsLabel } from '../../pages/enseignants/enseignants.utils'
 
-function EnseignantTable({ enseignants, cours, deletingId, onDelete }) {
+function EnseignantTable({ enseignants, deletingId, onDelete }) {
   if (enseignants.length === 0) {
     return (
       <div className="rounded-[26px] border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
@@ -19,7 +19,7 @@ function EnseignantTable({ enseignants, cours, deletingId, onDelete }) {
     <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/92">
       <div className="hidden grid-cols-[1.35fr_1fr_0.8fr_1fr] gap-3 bg-slate-900 px-5 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 lg:grid">
         <span>Enseignant</span>
-        <span>Cours</span>
+        <span>Affectations</span>
         <span>Statut</span>
         <span>Actions</span>
       </div>
@@ -41,10 +41,7 @@ function EnseignantTable({ enseignants, cours, deletingId, onDelete }) {
             </div>
 
             <div className="text-sm text-slate-600">
-              <p className="font-medium text-slate-800">{getCoursLabel(cours, enseignant.idCours)}</p>
-              {enseignant.cours?.classe && (
-                <p className="mt-1 text-xs text-slate-400">{enseignant.cours.classe.libelle}</p>
-              )}
+              <p className="font-medium text-slate-800">{getAffectationsLabel(enseignant)}</p>
             </div>
 
             <div>

@@ -7,7 +7,7 @@ export const enseignantInitialValues = {
   phone: '',
   dateNaissance: '',
   lieuNaissance: '',
-  idCours: '',
+  idClasseCours: '',
   actif: true,
 }
 
@@ -43,11 +43,28 @@ export function formatDateInput(value) {
   return date.toISOString().slice(0, 10)
 }
 
-export function getCoursLabel(coursList, idCours) {
-  if (!idCours) return 'Non renseigne'
+// Un enseignant enseigne un cours dans une classe precise : l'unite affectable
+// est donc le couple cours/classe (ClasseCours), pas le cours seul.
+export function getClasseCoursOptions(coursList) {
+  return coursList.flatMap((cours) =>
+    (cours.classesCours ?? []).map((classeCours) => ({
+      value: `${classeCours.id}`,
+      label: `${cours.libelle} - ${classeCours.classe?.libelle ?? 'Classe inconnue'}`,
+    })),
+  )
+}
 
-  const cours = coursList.find((item) => item.id === idCours)
-  return cours?.libelle ?? `Cours #${idCours}`
+export function getAffectationsLabel(enseignant) {
+  const affectations = enseignant?.affectations ?? []
+  if (affectations.length === 0) return 'Aucune affectation'
+
+  return affectations
+    .map((affectation) => {
+      const cours = affectation.classeCours?.cours?.libelle ?? 'Cours inconnu'
+      const classe = affectation.classeCours?.classe?.libelle ?? 'Classe inconnue'
+      return `${cours} (${classe})`
+    })
+    .join(', ')
 }
 
 export function createFormValues(enseignant) {
@@ -62,12 +79,15 @@ export function createFormValues(enseignant) {
     phone: enseignant.personne?.phone ?? '',
     dateNaissance: formatDateInput(enseignant.personne?.dateNaissance),
     lieuNaissance: enseignant.personne?.lieuNaissance ?? '',
-    idCours: enseignant.idCours ? `${enseignant.idCours}` : '',
+    idClasseCours: '',
     actif: Boolean(enseignant.actif),
   }
 }
 
-export function buildEnseignantPayload(values, adminId) {
+// L'affectation initiale (idClasseCours) n'est envoyee qu'a la creation : les
+// affectations se gerent ensuite exclusivement via les endpoints dedies
+// (ajout/retrait), jamais depuis la mise a jour des informations personnelles.
+export function buildEnseignantPayload(values, adminId, isCreate) {
   const payload = {
     nom: values.nom.trim(),
     prenom: values.prenom.trim(),
@@ -76,9 +96,12 @@ export function buildEnseignantPayload(values, adminId) {
     phone: values.phone.trim() || undefined,
     dateNaissance: values.dateNaissance || undefined,
     lieuNaissance: values.lieuNaissance.trim() || undefined,
-    idCours: Number(values.idCours),
     actif: Boolean(values.actif),
     idAdmin: adminId ?? undefined,
+  }
+
+  if (isCreate) {
+    payload.idClasseCours = Number(values.idClasseCours)
   }
 
   if (values.password && values.password.trim()) {
@@ -88,25 +111,28 @@ export function buildEnseignantPayload(values, adminId) {
   return payload
 }
 
-export function applyEnseignantFilters(enseignants, filters, coursList) {
+export function applyEnseignantFilters(enseignants, filters) {
   return enseignants.filter((enseignant) => {
     if (filters.actif !== 'all') {
       const isActive = filters.actif === 'true'
       if (Boolean(enseignant.actif) !== isActive) return false
     }
 
-    if (filters.idCours !== 'all' && `${enseignant.idCours ?? ''}` !== filters.idCours) {
-      return false
+    if (filters.idClasse !== 'all') {
+      const enseigneDansLaClasse = (enseignant.affectations ?? []).some(
+        (affectation) => `${affectation.classeCours?.idClasse}` === filters.idClasse,
+      )
+      if (!enseigneDansLaClasse) return false
     }
 
     if (filters.localSearch.trim()) {
       const needle = filters.localSearch.trim().toLowerCase()
-      const cours = getCoursLabel(coursList, enseignant.idCours).toLowerCase()
+      const affectations = getAffectationsLabel(enseignant).toLowerCase()
       const haystack = [
         enseignant.personne?.nom,
         enseignant.personne?.prenom,
         enseignant.personne?.username,
-        cours,
+        affectations,
       ]
         .filter(Boolean)
         .join(' ')

@@ -22,4 +22,6 @@ export const coursService = {
   create:    (data)    => api.post('/cours', data),
   update:    (id, data)=> api.put(`/cours/${id}`, data),
   remove:    (id)      => api.delete(`/cours/${id}`),
+  addClasse:   (idCours, data)     => api.post(`/cours/${idCours}/classes`, data),
+  removeClasse:(idCours, idClasse) => api.delete(`/cours/${idCours}/classes/${idClasse}`),
 }

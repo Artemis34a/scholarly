@@ -6,7 +6,7 @@ import EvaluationsSubNav from '../../components/evaluations/EvaluationsSubNav'
 import EpreuveFilters from '../../components/evaluations/EpreuveFilters'
 import EpreuveTable from '../../components/evaluations/EpreuveTable'
 import { evaluationsService } from '../../services/evaluationsService'
-import { coursService } from '../../services/coursService'
+import { classesService } from '../../services/classesService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
 import { applyEpreuveFilters } from './evaluations.utils'
 
@@ -14,7 +14,7 @@ const PAGE_SIZE = 10
 
 const defaultFilters = {
   typeEpreuve: 'all',
-  idCours: 'all',
+  idClasse: 'all',
   localSearch: '',
 }
 
@@ -32,7 +32,7 @@ function EpreuvesPage() {
   const [epreuvesList, setEpreuvesList] = useState([])
   const [pageInfo, setPageInfo] = useState({ page: 1, totalPages: 1, total: 0 })
   const [page, setPage] = useState(1)
-  const [cours, setCours] = useState([])
+  const [classes, setClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filters, setFilters] = useState(defaultFilters)
@@ -42,9 +42,9 @@ function EpreuvesPage() {
   useEffect(() => {
     let isMounted = true
 
-    coursService.findAll().then((coursData) => {
+    classesService.findAll({ limit: 200 }).then((result) => {
       if (isMounted) {
-        setCours(coursData)
+        setClasses(result.data)
       }
     }).catch(() => {})
 
@@ -55,7 +55,7 @@ function EpreuvesPage() {
 
   useEffect(() => {
     setPage(1)
-  }, [deferredSearch, filters.typeEpreuve, filters.idCours])
+  }, [deferredSearch, filters.typeEpreuve, filters.idClasse])
 
   async function loadEpreuves() {
     setLoading(true)
@@ -63,7 +63,7 @@ function EpreuvesPage() {
       const result = await evaluationsService.epreuves.findAll({
         search: deferredSearch.trim() || undefined,
         type: filters.typeEpreuve !== 'all' ? filters.typeEpreuve : undefined,
-        cours: filters.idCours !== 'all' ? filters.idCours : undefined,
+        classe: filters.idClasse !== 'all' ? filters.idClasse : undefined,
         page,
         limit: PAGE_SIZE,
       })
@@ -89,17 +89,17 @@ function EpreuvesPage() {
       clearTimeout(timeoutId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deferredSearch, filters.typeEpreuve, filters.idCours, page])
+  }, [deferredSearch, filters.typeEpreuve, filters.idClasse, page])
 
   const filteredEpreuves = useMemo(
-    () => applyEpreuveFilters(epreuvesList, filters, cours),
-    [epreuvesList, filters, cours],
+    () => applyEpreuveFilters(epreuvesList, filters),
+    [epreuvesList, filters],
   )
 
   const stats = useMemo(() => ({
     total: filteredEpreuves.length,
     actives: filteredEpreuves.filter((item) => item.actif).length,
-    avecCours: filteredEpreuves.filter((item) => item.idCours).length,
+    avecCours: filteredEpreuves.filter((item) => item.idClasseCours).length,
   }), [filteredEpreuves])
 
   function handleFilterChange(name, value) {
@@ -168,7 +168,7 @@ function EpreuvesPage() {
       <Card title="Recherche et filtres" subtitle="Combinez la recherche et des filtres pour retrouver une epreuve plus vite.">
         <EpreuveFilters
           filters={filters}
-          cours={cours}
+          classes={classes}
           onChange={handleFilterChange}
           onReset={handleReset}
           onSearchChange={handleSearchChange}
@@ -188,7 +188,6 @@ function EpreuvesPage() {
           <>
             <EpreuveTable
               epreuvesList={filteredEpreuves}
-              cours={cours}
               deletingId={deletingId}
               onDelete={handleDelete}
             />

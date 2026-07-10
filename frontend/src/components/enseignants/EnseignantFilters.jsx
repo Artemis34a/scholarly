@@ -15,7 +15,7 @@ function SelectField({ label, value, onChange, children }) {
   )
 }
 
-function EnseignantFilters({ filters, cours, onChange, onReset, onSearchChange }) {
+function EnseignantFilters({ filters, classes, onChange, onReset, onSearchChange }) {
   return (
     <div className="grid gap-4 xl:grid-cols-[1.4fr_repeat(2,minmax(0,1fr))]">
       <label className="block">
@@ -26,7 +26,7 @@ function EnseignantFilters({ filters, cours, onChange, onReset, onSearchChange }
           type="search"
           value={filters.localSearch}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Nom, prenom, identifiant, cours..."
+          placeholder="Nom, prenom, identifiant, affectation..."
           className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-sky-400"
         />
       </label>
@@ -42,14 +42,14 @@ function EnseignantFilters({ filters, cours, onChange, onReset, onSearchChange }
       </SelectField>
 
       <SelectField
-        label="Cours"
-        value={filters.idCours}
-        onChange={(event) => onChange('idCours', event.target.value)}
+        label="Classe"
+        value={filters.idClasse}
+        onChange={(event) => onChange('idClasse', event.target.value)}
       >
-        <option value="all">Tous</option>
-        {cours.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.libelle}
+        <option value="all">Toutes</option>
+        {classes.map((classe) => (
+          <option key={classe.id} value={classe.id}>
+            {classe.libelle}
           </option>
         ))}
       </SelectField>

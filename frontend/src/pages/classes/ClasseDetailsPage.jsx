@@ -9,6 +9,7 @@ import { elevesService } from '../../services/elevesService'
 import { frequenteService } from '../../services/frequenteService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
 import { getCycleLabel, getPrimarySalle } from './classes.utils'
+import { getAffectationsLabel } from '../enseignants/enseignants.utils'
 
 function InfoRow({ label, value }) {
   return (
@@ -226,7 +227,7 @@ function ClasseDetailsPage() {
                 <InfoRow label="Libelle" value={classe.libelle} />
                 <InfoRow label="Cycle" value={getCycleLabel(cycles, classe.idCycle)} />
                 <InfoRow label="Effectif" value={`${eleves.length} eleve${eleves.length > 1 ? 's' : ''}`} />
-                <InfoRow label="Cours rattaches" value={`${classe.cours?.length ?? 0}`} />
+                <InfoRow label="Cours rattaches" value={`${classe.classesCours?.length ?? 0}`} />
                 <InfoRow label="Salle principale" value={salle?.libelle ?? 'Non renseignee'} />
                 <InfoRow label="Identifiant" value={`#${classe.id}`} />
               </div>
@@ -255,7 +256,7 @@ function ClasseDetailsPage() {
                     <option value="">Choisir un enseignant</option>
                     {enseignants.map((enseignant) => (
                       <option key={enseignant.id} value={enseignant.idPers}>
-                        {enseignant.personne?.nom} {enseignant.personne?.prenom} ({enseignant.cours?.libelle})
+                        {enseignant.personne?.nom} {enseignant.personne?.prenom} ({getAffectationsLabel(enseignant)})
                       </option>
                     ))}
                   </select>

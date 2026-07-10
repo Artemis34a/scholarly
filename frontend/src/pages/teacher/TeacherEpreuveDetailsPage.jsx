@@ -42,7 +42,7 @@ function TeacherEpreuveDetailsPage() {
   async function loadAll() {
     const epreuveData = await evaluationsService.epreuves.findOne(id)
     const statsData = await evaluationsService.epreuves.getStats(id)
-    const idClasse = epreuveData.cours?.classe?.id
+    const idClasse = epreuveData.classe?.id
 
     const elevesFrequentes = idClasse ? await classesService.findEleves(idClasse) : []
     const nextRoster = buildRoster(epreuveData, elevesFrequentes)
@@ -147,7 +147,7 @@ function TeacherEpreuveDetailsPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-300">Espace enseignant</p>
                 <h2 className="mt-4 text-3xl font-semibold md:text-4xl">{epreuve.libelle}</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-300">
-                  {epreuve.cours?.libelle} · {epreuve.cours?.classe?.libelle} · {formatDate(epreuve.dateEpreuve)}
+                  {epreuve.classeCours?.cours?.libelle ?? 'Aucun cours specifique'} · {epreuve.classe?.libelle} · {formatDate(epreuve.dateEpreuve)}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

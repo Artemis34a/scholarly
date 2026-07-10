@@ -15,7 +15,7 @@ function SelectField({ label, value, onChange, children }) {
   )
 }
 
-function EpreuveFilters({ filters, cours, onChange, onReset, onSearchChange }) {
+function EpreuveFilters({ filters, classes, onChange, onReset, onSearchChange }) {
   return (
     <div className="grid gap-4 xl:grid-cols-[1.3fr_1fr_1fr_auto]">
       <label className="block">
@@ -36,10 +36,10 @@ function EpreuveFilters({ filters, cours, onChange, onReset, onSearchChange }) {
         ))}
       </SelectField>
 
-      <SelectField label="Cours" value={filters.idCours} onChange={(event) => onChange('idCours', event.target.value)}>
-        <option value="all">Tous</option>
-        {cours.map((item) => (
-          <option key={item.id} value={item.id}>{item.libelle}</option>
+      <SelectField label="Classe" value={filters.idClasse} onChange={(event) => onChange('idClasse', event.target.value)}>
+        <option value="all">Toutes</option>
+        {classes.map((classe) => (
+          <option key={classe.id} value={classe.id}>{classe.libelle}</option>
         ))}
       </SelectField>
 

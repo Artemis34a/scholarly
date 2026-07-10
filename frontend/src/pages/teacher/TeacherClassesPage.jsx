@@ -4,7 +4,7 @@ import Card from '../../components/Card'
 import { useAuth } from '../../context/AuthContext'
 import { classesService } from '../../services/classesService'
 import { coursService } from '../../services/coursService'
-import { estTitulaireDeClasse, getMesClasses, getMesCours } from './teacher.utils'
+import { estTitulaireDeClasse, getMesAffectations, getMesClasses, getMesCours } from './teacher.utils'
 
 function TeacherClassesPage() {
   const { user } = useAuth()
@@ -39,6 +39,7 @@ function TeacherClassesPage() {
   }, [])
 
   const mesCours = useMemo(() => getMesCours(coursList, user.id), [coursList, user.id])
+  const mesAffectations = useMemo(() => getMesAffectations(coursList, user.id), [coursList, user.id])
   const mesClasses = useMemo(() => getMesClasses(classes, mesCours, user.id), [classes, mesCours, user.id])
 
   return (
@@ -72,7 +73,9 @@ function TeacherClassesPage() {
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
           {mesClasses.map((classe) => {
-            const mesCoursIci = mesCours.filter((cours) => cours.idClasse === classe.id)
+            const mesCoursIci = mesAffectations
+              .filter((affectation) => affectation.idClasse === classe.id)
+              .map((affectation) => affectation.cours)
             const effectif = classe.salles?.[0]?._count?.frequentes ?? 0
             return (
               <Card key={classe.id} title={classe.libelle} subtitle={classe.cycle?.libelle}>

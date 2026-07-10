@@ -5,7 +5,7 @@ import ActifBadge from '../../components/ActifBadge'
 import { evaluationsService } from '../../services/evaluationsService'
 import { elevesService } from '../../services/elevesService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
-import { formatDate, getTypeEpreuveLabel } from './evaluations.utils'
+import { formatDate, getEpreuveClasseLabel, getEpreuveCoursLabel, getTypeEpreuveLabel } from './evaluations.utils'
 
 function StatCard({ label, value }) {
   return (
@@ -142,7 +142,7 @@ function EpreuveDetailsPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-300">Consultation detaillee</p>
                 <h2 className="mt-4 text-3xl font-semibold md:text-4xl">{epreuve.libelle}</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-300">
-                  {getTypeEpreuveLabel(epreuve.typeEpreuve)} · {formatDate(epreuve.dateEpreuve)} · {epreuve.cours?.libelle ?? 'Aucun cours'}
+                  {getTypeEpreuveLabel(epreuve.typeEpreuve)} · {formatDate(epreuve.dateEpreuve)} · {getEpreuveClasseLabel(epreuve)} · {getEpreuveCoursLabel(epreuve)}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

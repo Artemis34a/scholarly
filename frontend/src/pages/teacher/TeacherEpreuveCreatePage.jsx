@@ -5,14 +5,16 @@ import EpreuveForm from '../../components/evaluations/EpreuveForm'
 import { useAuth } from '../../context/AuthContext'
 import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
+import { classesService } from '../../services/classesService'
 import { buildEpreuvePayload, epreuveInitialValues } from '../evaluations/evaluations.utils'
-import { getMesCours } from './teacher.utils'
+import { getMesClasses, getMesCours } from './teacher.utils'
 
 function TeacherEpreuveCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [values, setValues] = useState(epreuveInitialValues)
   const [coursList, setCoursList] = useState([])
+  const [classesList, setClassesList] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -20,10 +22,11 @@ function TeacherEpreuveCreatePage() {
   useEffect(() => {
     let isMounted = true
 
-    coursService.findAll()
-      .then((coursData) => {
+    Promise.all([coursService.findAll(), classesService.findAll({ limit: 200 })])
+      .then(([coursData, classesResult]) => {
         if (isMounted) {
           setCoursList(coursData)
+          setClassesList(classesResult.data)
         }
       })
       .catch((err) => {
@@ -39,10 +42,15 @@ function TeacherEpreuveCreatePage() {
   }, [])
 
   const mesCours = useMemo(() => getMesCours(coursList, user.id), [coursList, user.id])
+  const mesClasses = useMemo(() => getMesClasses(classesList, mesCours, user.id), [classesList, mesCours, user.id])
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
-    setValues((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
+    setValues((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+      ...(name === 'idClasse' ? { idClasseCours: '' } : {}),
+    }))
   }
 
   async function handleSubmit(event) {
@@ -70,6 +78,7 @@ function TeacherEpreuveCreatePage() {
           subtitle="Uniquement pour les cours que vous enseignez."
           values={values}
           cours={mesCours}
+          classes={mesClasses}
           submitting={submitting}
           error={error}
           submitLabel="Creer l'epreuve"

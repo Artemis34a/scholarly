@@ -8,7 +8,7 @@ import { coursService } from '../services/coursService'
 import { classesService } from '../services/classesService'
 import { evaluationsService } from '../services/evaluationsService'
 import { emploiDuTempsService } from '../services/emploiDuTempsService'
-import { getMesCours, getMesClasses } from './teacher/teacher.utils'
+import { getMesAffectations, getMesCours, getMesClasses } from './teacher/teacher.utils'
 
 const JOURS = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI']
 
@@ -34,9 +34,9 @@ function TeacherDashboard() {
         if (!isMounted) return
 
         const mesCours = getMesCours(coursData, user.id)
-        const mesCoursIds = new Set(mesCours.map((c) => c.id))
         const mesClasses = getMesClasses(classesResult.data, mesCours, user.id)
-        const mesEpreuves = epreuves.filter((epreuve) => mesCoursIds.has(epreuve.idCours))
+        const mesClasseCoursIds = new Set(getMesAffectations(coursData, user.id).map((a) => a.idClasseCours))
+        const mesEpreuves = epreuves.filter((epreuve) => epreuve.idClasseCours && mesClasseCoursIds.has(epreuve.idClasseCours))
 
         const effectif = mesClasses.reduce((sum, classe) => {
           const salle = classe.salles?.[0]
