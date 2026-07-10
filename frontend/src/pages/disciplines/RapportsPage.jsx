@@ -137,7 +137,7 @@ function RapportsPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion de la discipline</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Suivez les incidents, sanctions et comportements positifs, relie a l API NestJS.
+                Suivez les incidents, les sanctions et les comportements positifs de chaque eleve.
               </p>
             </div>
             <Link

@@ -150,7 +150,7 @@ function PaiementsPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion des paiements</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Encaissements, tranches, modes de paiement et suivi des soldes, relie a l API NestJS.
+                Encaissements, tranches, modes de paiement et suivi des soldes des eleves.
               </p>
             </div>
             <Link

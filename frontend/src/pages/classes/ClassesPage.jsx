@@ -154,7 +154,7 @@ function ClassesPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion des classes</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Organisez les classes, leur cycle, leur titulaire et leurs effectifs depuis une interface reliee a l API NestJS.
+                Organisez les classes, leur cycle, leur titulaire et leurs effectifs en toute simplicite.
               </p>
             </div>
             <Link
@@ -175,7 +175,7 @@ function ClassesPage() {
 
       <Card
         title="Recherche et filtres"
-        subtitle="Combinez la recherche backend avec des filtres visuels locaux pour naviguer plus vite."
+        subtitle="Combinez la recherche et des filtres pour retrouver une classe plus vite."
       >
         <ClasseFilters
           filters={filters}

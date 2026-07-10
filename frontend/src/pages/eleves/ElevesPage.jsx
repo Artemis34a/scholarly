@@ -157,7 +157,7 @@ function ElevesPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion des eleves</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Recherchez, filtrez et pilotez les dossiers eleves depuis une interface prete pour l API NestJS.
+                Consultez, recherchez et gerez facilement les dossiers des eleves de l'etablissement.
               </p>
             </div>
             <Link
@@ -179,7 +179,7 @@ function ElevesPage() {
 
       <Card
         title="Recherche et filtres"
-        subtitle="Combinez la recherche backend avec des filtres visuels locaux pour naviguer plus vite."
+        subtitle="Combinez la recherche et des filtres pour retrouver un eleve plus vite."
       >
         <EleveFilters
           filters={filters}

@@ -146,7 +146,7 @@ function AdminsPage() {
 
       <Card
         title="Recherche et filtres"
-        subtitle="Combinez la recherche backend avec des filtres visuels locaux pour naviguer plus vite."
+        subtitle="Combinez la recherche et des filtres pour retrouver un compte plus vite."
       >
         <AdminFilters
           filters={filters}

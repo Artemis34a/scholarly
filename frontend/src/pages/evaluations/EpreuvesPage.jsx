@@ -144,7 +144,7 @@ function EpreuvesPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion des evaluations</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Centralisez les epreuves, notes et statistiques de performance, relie a l API NestJS.
+                Centralisez les epreuves, les notes et les statistiques de performance des eleves.
               </p>
             </div>
             <Link
@@ -165,7 +165,7 @@ function EpreuvesPage() {
         <StatCard label="Rattachees a un cours" value={stats.avecCours} detail="Sur cette page" />
       </section>
 
-      <Card title="Recherche et filtres" subtitle="Combinez la recherche backend avec des filtres visuels locaux.">
+      <Card title="Recherche et filtres" subtitle="Combinez la recherche et des filtres pour retrouver une epreuve plus vite.">
         <EpreuveFilters
           filters={filters}
           cours={cours}

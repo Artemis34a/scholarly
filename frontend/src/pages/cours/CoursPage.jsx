@@ -155,7 +155,7 @@ function CoursPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion des cours</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Catalogue des cours, coefficients et rattachement aux classes, relie a l API NestJS.
+                Catalogue des cours, de leurs coefficients et de leur rattachement aux classes.
               </p>
             </div>
             <Link
@@ -176,7 +176,7 @@ function CoursPage() {
 
       <Card
         title="Recherche et filtres"
-        subtitle="Combinez la recherche backend avec des filtres visuels locaux pour naviguer plus vite."
+        subtitle="Combinez la recherche et des filtres pour retrouver un cours plus vite."
       >
         <CoursFilters
           filters={filters}

@@ -111,7 +111,7 @@ function EmploiDuTempsPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion des emplois du temps</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Consultez le planning par classe, par enseignant ou par eleve, relie a l API NestJS.
+                Consultez le planning par classe, par enseignant ou par eleve.
               </p>
             </div>
             <Link

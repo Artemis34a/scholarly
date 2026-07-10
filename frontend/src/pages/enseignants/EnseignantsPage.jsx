@@ -153,7 +153,7 @@ function EnseignantsPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-semibold md:text-4xl">Gestion des enseignants</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                Recherchez, filtrez et pilotez les affectations enseignants depuis une interface reliee a l API NestJS.
+                Gerez les informations des enseignants et leurs affectations aux differents cours.
               </p>
             </div>
             <Link
@@ -174,7 +174,7 @@ function EnseignantsPage() {
 
       <Card
         title="Recherche et filtres"
-        subtitle="Combinez la recherche backend avec des filtres visuels locaux pour naviguer plus vite."
+        subtitle="Combinez la recherche et des filtres pour retrouver un enseignant plus vite."
       >
         <EnseignantFilters
           filters={filters}

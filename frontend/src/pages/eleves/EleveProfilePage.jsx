@@ -126,7 +126,7 @@ function EleveProfilePage() {
           </div>
         </Card>
 
-        <Card title="Medias et suivi" subtitle="Bloc pret pour accueillir d autres donnees quand l API s enrichira.">
+        <Card title="Medias et suivi" subtitle="Photo de profil et informations complementaires de l'eleve.">
           <div className="space-y-4">
             <div className="rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4">
               <p className="font-semibold text-slate-900">Photo de profil</p>

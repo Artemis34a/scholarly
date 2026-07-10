@@ -12,7 +12,8 @@
       "Bash(pkill -f \"nest start\\\\|dist/src/main\")",
       "Bash(curl -s -o /dev/null -w \"backend:%{http_code}\\\\n\" http://localhost:3000/cycles --max-time 3)",
       "Bash(curl -s -o /dev/null -w \"frontend:%{http_code}\\\\n\" http://localhost:5173 --max-time 3)",
-      "Bash(kill 38543)"
+      "Bash(kill 38543)",
+      "Bash(grep -v \"^--$\")"
     ]
   }
 }

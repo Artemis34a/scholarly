@@ -84,7 +84,7 @@ function AdminDashboard() {
       <section className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
         <Card
           title="Acces rapide aux modules"
-          subtitle="Chaque carte ouvre un espace de gestion relie a l'API."
+          subtitle="Chaque carte ouvre un espace de gestion dedie a l'un de ces sujets."
         >
           <div className="grid gap-4 md:grid-cols-2">
             {featureModules.map((module) => (
