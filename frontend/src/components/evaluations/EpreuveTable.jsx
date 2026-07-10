@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import ActifBadge from '../ActifBadge'
 import { BUTTON_LIGHT } from '../buttonStyles'
-import { formatDate, getCoursLabel, getNatureLabel } from '../../pages/evaluations/evaluations.utils'
+import { formatDate, getCoursLabel, getTypeEpreuveLabel } from '../../pages/evaluations/evaluations.utils'
 
-function EpreuveTable({ epreuvesList, natures, cours, deletingId, onDelete }) {
+function EpreuveTable({ epreuvesList, cours, deletingId, onDelete }) {
   if (epreuvesList.length === 0) {
     return (
       <div className="rounded-[26px] border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
@@ -32,7 +32,7 @@ function EpreuveTable({ epreuvesList, natures, cours, deletingId, onDelete }) {
               <p className="mt-1 text-xs text-slate-400">ID {epreuve.id} · Coeff. {epreuve.coefficient}</p>
             </div>
 
-            <div className="text-sm font-medium text-slate-700">{getNatureLabel(natures, epreuve.idNatureEpreuve)}</div>
+            <div className="text-sm font-medium text-slate-700">{getTypeEpreuveLabel(epreuve.typeEpreuve)}</div>
 
             <div className="text-sm text-slate-600">{getCoursLabel(cours, epreuve.idCours)}</div>
 

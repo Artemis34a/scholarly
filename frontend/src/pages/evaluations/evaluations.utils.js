@@ -1,34 +1,17 @@
-export const natureInitialValues = {
-  libelle: '',
-  description: '',
-  coefficient: '1',
-  actif: true,
-}
+export const typeEpreuveOptions = [
+  { value: 'CONTROLE', label: 'Controle' },
+  { value: 'EXAMEN', label: 'Examen' },
+]
 
-export function createNatureFormValues(nature) {
-  if (!nature) return natureInitialValues
-
-  return {
-    libelle: nature.libelle ?? '',
-    description: nature.description ?? '',
-    coefficient: nature.coefficient !== undefined && nature.coefficient !== null ? `${nature.coefficient}` : '1',
-    actif: Boolean(nature.actif),
-  }
-}
-
-export function buildNaturePayload(values) {
-  return {
-    libelle: values.libelle.trim(),
-    description: values.description.trim() || undefined,
-    coefficient: Number(values.coefficient),
-    actif: Boolean(values.actif),
-  }
+export function getTypeEpreuveLabel(typeEpreuve) {
+  const option = typeEpreuveOptions.find((item) => item.value === typeEpreuve)
+  return option?.label ?? 'Non renseigne'
 }
 
 export const epreuveInitialValues = {
   libelle: '',
   description: '',
-  idNatureEpreuve: '',
+  typeEpreuve: 'CONTROLE',
   idCours: '',
   dateEpreuve: '',
   duree: '',
@@ -65,7 +48,7 @@ export function createEpreuveFormValues(epreuve) {
   return {
     libelle: epreuve.libelle ?? '',
     description: epreuve.description ?? '',
-    idNatureEpreuve: epreuve.idNatureEpreuve ? `${epreuve.idNatureEpreuve}` : '',
+    typeEpreuve: epreuve.typeEpreuve ?? 'CONTROLE',
     idCours: epreuve.idCours ? `${epreuve.idCours}` : '',
     dateEpreuve: formatDateTimeInput(epreuve.dateEpreuve),
     duree: epreuve.duree !== undefined && epreuve.duree !== null ? `${epreuve.duree}` : '',
@@ -79,7 +62,7 @@ export function buildEpreuvePayload(values) {
   return {
     libelle: values.libelle.trim(),
     description: values.description.trim() || undefined,
-    idNatureEpreuve: Number(values.idNatureEpreuve),
+    typeEpreuve: values.typeEpreuve,
     idCours: values.idCours ? Number(values.idCours) : undefined,
     dateEpreuve: values.dateEpreuve ? new Date(values.dateEpreuve).toISOString() : undefined,
     duree: values.duree ? Number(values.duree) : undefined,
@@ -89,21 +72,15 @@ export function buildEpreuvePayload(values) {
   }
 }
 
-export function getNatureLabel(natures, idNatureEpreuve) {
-  if (!idNatureEpreuve) return 'Non renseignee'
-  const nature = natures.find((item) => item.id === idNatureEpreuve)
-  return nature?.libelle ?? `Nature #${idNatureEpreuve}`
-}
-
 export function getCoursLabel(coursList, idCours) {
   if (!idCours) return 'Aucun cours'
   const cours = coursList.find((item) => item.id === idCours)
   return cours?.libelle ?? `Cours #${idCours}`
 }
 
-export function applyEpreuveFilters(epreuvesList, filters, natures, coursList) {
+export function applyEpreuveFilters(epreuvesList, filters, coursList) {
   return epreuvesList.filter((epreuve) => {
-    if (filters.idNatureEpreuve !== 'all' && `${epreuve.idNatureEpreuve ?? ''}` !== filters.idNatureEpreuve) {
+    if (filters.typeEpreuve !== 'all' && epreuve.typeEpreuve !== filters.typeEpreuve) {
       return false
     }
 
@@ -113,9 +90,9 @@ export function applyEpreuveFilters(epreuvesList, filters, natures, coursList) {
 
     if (filters.localSearch.trim()) {
       const needle = filters.localSearch.trim().toLowerCase()
-      const nature = getNatureLabel(natures, epreuve.idNatureEpreuve).toLowerCase()
+      const type = getTypeEpreuveLabel(epreuve.typeEpreuve).toLowerCase()
       const cours = getCoursLabel(coursList, epreuve.idCours).toLowerCase()
-      const haystack = [epreuve.libelle, epreuve.description, nature, cours]
+      const haystack = [epreuve.libelle, epreuve.description, type, cours]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()

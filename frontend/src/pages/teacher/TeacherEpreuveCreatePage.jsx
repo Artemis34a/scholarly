@@ -12,7 +12,6 @@ function TeacherEpreuveCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [values, setValues] = useState(epreuveInitialValues)
-  const [natures, setNatures] = useState([])
   const [coursList, setCoursList] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -21,13 +20,9 @@ function TeacherEpreuveCreatePage() {
   useEffect(() => {
     let isMounted = true
 
-    Promise.all([
-      evaluationsService.natures.findAll(),
-      coursService.findAll(),
-    ])
-      .then(([naturesData, coursData]) => {
+    coursService.findAll()
+      .then((coursData) => {
         if (isMounted) {
-          setNatures(naturesData)
           setCoursList(coursData)
         }
       })
@@ -74,7 +69,6 @@ function TeacherEpreuveCreatePage() {
           title="Creer une nouvelle epreuve"
           subtitle="Uniquement pour les cours que vous enseignez."
           values={values}
-          natures={natures}
           cours={mesCours}
           submitting={submitting}
           error={error}

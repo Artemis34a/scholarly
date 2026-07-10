@@ -1,3 +1,5 @@
+import { typeEpreuveOptions } from '../../pages/evaluations/evaluations.utils'
+
 function SelectField({ label, value, onChange, children }) {
   return (
     <label className="block">
@@ -13,7 +15,7 @@ function SelectField({ label, value, onChange, children }) {
   )
 }
 
-function EpreuveFilters({ filters, natures, cours, onChange, onReset, onSearchChange }) {
+function EpreuveFilters({ filters, cours, onChange, onReset, onSearchChange }) {
   return (
     <div className="grid gap-4 xl:grid-cols-[1.3fr_1fr_1fr_auto]">
       <label className="block">
@@ -27,10 +29,10 @@ function EpreuveFilters({ filters, natures, cours, onChange, onReset, onSearchCh
         />
       </label>
 
-      <SelectField label="Type" value={filters.idNatureEpreuve} onChange={(event) => onChange('idNatureEpreuve', event.target.value)}>
+      <SelectField label="Type" value={filters.typeEpreuve} onChange={(event) => onChange('typeEpreuve', event.target.value)}>
         <option value="all">Tous</option>
-        {natures.map((nature) => (
-          <option key={nature.id} value={nature.id}>{nature.libelle}</option>
+        {typeEpreuveOptions.map((option) => (
+          <option key={option.value} value={option.value}>{option.label}</option>
         ))}
       </SelectField>
 

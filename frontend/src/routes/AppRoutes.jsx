@@ -35,7 +35,6 @@ import EpreuveCreatePage from '../pages/evaluations/EpreuveCreatePage'
 import EpreuveDetailsPage from '../pages/evaluations/EpreuveDetailsPage'
 import EpreuveEditPage from '../pages/evaluations/EpreuveEditPage'
 import EpreuvesPage from '../pages/evaluations/EpreuvesPage'
-import NaturesPage from '../pages/evaluations/NaturesPage'
 import NotesPage from '../pages/evaluations/NotesPage'
 import NoteCreatePage from '../pages/evaluations/NoteCreatePage'
 import NoteEditPage from '../pages/evaluations/NoteEditPage'
@@ -119,7 +118,6 @@ function AppRoutes() {
           <Route path="/dashboard/sessions" element={<SessionsPage />} />
           <Route path="/dashboard/evaluations" element={<EpreuvesPage />} />
           <Route path="/dashboard/evaluations/nouvelle" element={<EpreuveCreatePage />} />
-          <Route path="/dashboard/evaluations/natures" element={<NaturesPage />} />
           <Route path="/dashboard/evaluations/notes" element={<NotesPage />} />
           <Route path="/dashboard/evaluations/notes/nouvelle" element={<NoteCreatePage />} />
           <Route path="/dashboard/evaluations/notes/:id/modifier" element={<NoteEditPage />} />

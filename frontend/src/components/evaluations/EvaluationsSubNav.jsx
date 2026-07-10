@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom'
 const tabs = [
   { to: '/dashboard/evaluations', label: 'Epreuves', end: true },
   { to: '/dashboard/evaluations/notes', label: 'Notes' },
-  { to: '/dashboard/evaluations/natures', label: "Types d'epreuves" },
   { to: '/dashboard/evaluations/bulletins', label: 'Bulletins' },
 ]
 

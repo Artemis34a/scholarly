@@ -4,8 +4,8 @@ import Card from '../../components/Card'
 import Pagination from '../../components/Pagination'
 import EleveFilters from '../../components/eleves/EleveFilters'
 import EleveTable from '../../components/eleves/EleveTable'
-import { villesService } from '../../services/villesService'
 import { elevesService } from '../../services/elevesService'
+import { cyclesService } from '../../services/cyclesService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
 import { applyEleveFilters } from './eleves.utils'
 
@@ -15,7 +15,7 @@ const defaultFilters = {
   actif: 'all',
   sexe: 'all',
   langue: 'all',
-  ville: 'all',
+  idCycle: 'all',
   localSearch: '',
 }
 
@@ -33,7 +33,7 @@ function ElevesPage() {
   const [eleves, setEleves] = useState([])
   const [pageInfo, setPageInfo] = useState({ page: 1, totalPages: 1, total: 0 })
   const [page, setPage] = useState(1)
-  const [villes, setVilles] = useState([])
+  const [cycles, setCycles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filters, setFilters] = useState(defaultFilters)
@@ -43,8 +43,8 @@ function ElevesPage() {
   useEffect(() => {
     let isMounted = true
 
-    villesService.findAll().then((villesData) => {
-      if (isMounted) setVilles(villesData)
+    cyclesService.findAll().then((data) => {
+      if (isMounted) setCycles(data)
     }).catch(() => {})
 
     return () => {
@@ -87,8 +87,8 @@ function ElevesPage() {
   }, [deferredSearch, page])
 
   const filteredEleves = useMemo(
-    () => applyEleveFilters(eleves, filters, villes),
-    [eleves, filters, villes],
+    () => applyEleveFilters(eleves, filters),
+    [eleves, filters],
   )
 
   const stats = useMemo(() => {
@@ -183,7 +183,7 @@ function ElevesPage() {
       >
         <EleveFilters
           filters={filters}
-          villes={villes}
+          cycles={cycles}
           onChange={handleFilterChange}
           onReset={handleReset}
           onSearchChange={handleSearchChange}
@@ -206,7 +206,6 @@ function ElevesPage() {
           <>
             <EleveTable
               eleves={filteredEleves}
-              villes={villes}
               deletingId={deletingId}
               onDelete={handleDelete}
             />

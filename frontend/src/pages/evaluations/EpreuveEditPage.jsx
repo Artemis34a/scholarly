@@ -10,7 +10,6 @@ function EpreuveEditPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [values, setValues] = useState(null)
-  const [natures, setNatures] = useState([])
   const [cours, setCours] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -21,16 +20,14 @@ function EpreuveEditPage() {
 
     async function loadData() {
       try {
-        const [epreuve, naturesData, coursData] = await Promise.all([
+        const [epreuve, coursData] = await Promise.all([
           evaluationsService.epreuves.findOne(id),
-          evaluationsService.natures.findAll(),
           coursService.findAll(),
         ])
 
         if (!isMounted) return
 
         setValues(createEpreuveFormValues(epreuve))
-        setNatures(naturesData)
         setCours(coursData)
       } catch (err) {
         if (isMounted) setError(err.message)
@@ -75,7 +72,6 @@ function EpreuveEditPage() {
           title="Modifier l'epreuve"
           subtitle="Mettez a jour l'epreuve sans quitter l'espace administrateur."
           values={values}
-          natures={natures}
           cours={cours}
           submitting={submitting}
           error={error}

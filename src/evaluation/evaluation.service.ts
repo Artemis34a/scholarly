@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { TypeEpreuve } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateNatureEpreuveDto } from './dto/create-nature-epreuve.dto';
-import { UpdateNatureEpreuveDto } from './dto/update-nature-epreuve.dto';
 import { CreateEpreuveDto } from './dto/create-epreuve.dto';
 import { UpdateEpreuveDto } from './dto/update-epreuve.dto';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
@@ -11,7 +10,7 @@ export interface FindAllEpreuvesParams {
   search?: string;
   idCours?: number;
   idClasse?: number;
-  idNatureEpreuve?: number;
+  typeEpreuve?: TypeEpreuve;
   page?: number;
   limit?: number;
 }
@@ -27,11 +26,9 @@ export interface FindAllEvaluationsParams {
 
 // Relations déjà présentes dans schema.prisma, exposées ici via include (aucune
 // nouvelle relation créée) :
-//   Evaluation -> Epreuve -> NatureEpreuve
 //   Evaluation -> Epreuve -> Cours -> Classe, Cours <- Enseignant[]
 //   Evaluation -> Eleve
 const EPREUVE_INCLUDE = {
-  natureEpreuve: true,
   cours: { include: { classe: true, enseignants: { include: { personne: true } } } },
 };
 
@@ -44,44 +41,8 @@ const EVALUATION_INCLUDE = {
 export class EvaluationService {
   constructor(private prisma: PrismaService) {}
 
-  // ── Nature Epreuve ──────────────────────────────────────────────
-  async createNatureEpreuve(dto: CreateNatureEpreuveDto, idAdmin?: number) {
-    return this.prisma.natureEpreuve.create({
-      data: { ...dto, idAdmin },
-    });
-  }
-
-  async findAllNatureEpreuves(search?: string) {
-    return this.prisma.natureEpreuve.findMany({
-      where: search ? { libelle: { contains: search } } : undefined,
-      orderBy: { libelle: 'asc' },
-    });
-  }
-
-  async findOneNatureEpreuve(id: number) {
-    const nature = await this.prisma.natureEpreuve.findUnique({
-      where: { id },
-    });
-    if (!nature)
-      throw new NotFoundException(`NatureEpreuve #${id} introuvable`);
-    return nature;
-  }
-
-  async updateNatureEpreuve(id: number, dto: UpdateNatureEpreuveDto) {
-    await this.findOneNatureEpreuve(id);
-    return this.prisma.natureEpreuve.update({ where: { id }, data: dto });
-  }
-
-  async deleteNatureEpreuve(id: number) {
-    await this.findOneNatureEpreuve(id);
-    return this.prisma.natureEpreuve.delete({ where: { id } });
-  }
-
   // ── Epreuve ──────────────────────────────────────────────────────
   async createEpreuve(dto: CreateEpreuveDto, idAdmin?: number) {
-    await this.prisma.natureEpreuve.findUniqueOrThrow({
-      where: { id: dto.idNatureEpreuve },
-    });
     if (dto.idCours) {
       await this.prisma.cours.findUniqueOrThrow({
         where: { id: dto.idCours },
@@ -100,7 +61,7 @@ export class EvaluationService {
   async findAllEpreuves(params: FindAllEpreuvesParams = {}) {
     const where = {
       ...(params.search ? { libelle: { contains: params.search } } : {}),
-      ...(params.idNatureEpreuve ? { idNatureEpreuve: params.idNatureEpreuve } : {}),
+      ...(params.typeEpreuve ? { typeEpreuve: params.typeEpreuve } : {}),
       ...(params.idCours ? { idCours: params.idCours } : {}),
       ...(params.idClasse ? { cours: { idClasse: params.idClasse } } : {}),
     };
@@ -155,9 +116,6 @@ export class EvaluationService {
 
   async updateEpreuve(id: number, dto: UpdateEpreuveDto) {
     await this.findOneEpreuve(id);
-    if (dto.idNatureEpreuve) {
-      await this.prisma.natureEpreuve.findUniqueOrThrow({ where: { id: dto.idNatureEpreuve } });
-    }
     if (dto.idCours) {
       await this.prisma.cours.findUniqueOrThrow({ where: { id: dto.idCours } });
     }

@@ -26,7 +26,6 @@ async function main() {
   await prisma.cycle.deleteMany();
   await prisma.parent.deleteMany();
   await prisma.eleve.deleteMany();
-  await prisma.villeNaissance.deleteMany();
   await prisma.resident.deleteMany();
   await prisma.quartier.deleteMany();
   await prisma.personne.deleteMany();
@@ -43,7 +42,7 @@ async function main() {
     },
   });
 
-  console.log('Création des quartiers et des villes de naissance...');
+  console.log('Création des quartiers...');
   const quartiers = await prisma.quartier.createMany({
     data: [
       { libelle: 'Bastos', description: 'Quartier central et animé.' },
@@ -52,23 +51,7 @@ async function main() {
     ],
   });
 
-  const villes = await prisma.villeNaissance.createMany({
-    data: [
-      { libelle: 'Yaoundé' },
-      { libelle: 'Douala' },
-      { libelle: 'Bafoussam' },
-      { libelle: 'Garoua' },
-      { libelle: 'Maroua' },
-      { libelle: 'Bamenda' },
-      { libelle: 'Ngaoundéré' },
-      { libelle: 'Bertoua' },
-      { libelle: 'Kribi' },
-      { libelle: 'Ebolowa' },
-    ],
-  });
-
   const quartierList = await prisma.quartier.findMany();
-  const villeList = await prisma.villeNaissance.findMany();
 
   console.log('Création des personnes...');
   const personnesData = [
@@ -102,13 +85,12 @@ async function main() {
   ];
 
   const eleves: any[] = [];
-  for (const [index, eleve] of elevesData.entries()) {
+  for (const eleve of elevesData) {
     const { password, ...eleveFields } = eleve;
     const created = await prisma.eleve.create({
       data: {
         ...eleveFields,
         password: await hashPassword(password),
-        idVilleNaissance: villeList[index % villeList.length].id,
         idAdmin: admin.id,
       },
     });
@@ -132,35 +114,62 @@ async function main() {
     ],
   });
 
-  console.log('Création des cycles, classes, salles et cours...');
-  const cycle = await prisma.cycle.create({
+  console.log('Création des cycles...');
+  // L'établissement ne comporte que ces deux cycles fixes (voir CycleService,
+  // qui interdit désormais toute création/suppression en dehors de ceux-ci).
+  const cycleMaternel = await prisma.cycle.create({
     data: {
-      libelle: 'Cycle 1',
-      description: 'Cycle fondamental pour les classes primaires.',
+      libelle: 'Cycle maternel',
+      description: 'Petite, moyenne et grande section.',
       idAdmin: admin.id,
     },
   });
 
-  const classes = await prisma.classe.createMany({
-    data: [
-      { libelle: 'CP', idCycle: cycle.id, idAdmin: admin.id },
-      { libelle: 'CE1', idCycle: cycle.id, idAdmin: admin.id },
-    ],
+  const cyclePrimaire = await prisma.cycle.create({
+    data: {
+      libelle: 'Cycle primaire',
+      description: 'De la SIL au CM2.',
+      idAdmin: admin.id,
+    },
   });
 
-  const classesList = await prisma.classe.findMany();
-
-  const sallesData = [
-    { libelle: 'Salle A', position: 'Rez-de-chaussée', surface: '45m2', idClasse: classesList[0].id, actif: true, idAdmin: admin.id },
-    { libelle: 'Salle B', position: '1er étage', surface: '50m2', idClasse: classesList[1].id, actif: true, idAdmin: admin.id },
+  console.log('Création des classes, salles et cours...');
+  const classesData = [
+    { libelle: 'Petite Section', idCycle: cycleMaternel.id },
+    { libelle: 'Moyenne Section', idCycle: cycleMaternel.id },
+    { libelle: 'Grande Section', idCycle: cycleMaternel.id },
+    { libelle: 'SIL', idCycle: cyclePrimaire.id },
+    { libelle: 'CP', idCycle: cyclePrimaire.id },
+    { libelle: 'CE1', idCycle: cyclePrimaire.id },
+    { libelle: 'CE2', idCycle: cyclePrimaire.id },
+    { libelle: 'CM1', idCycle: cyclePrimaire.id },
+    { libelle: 'CM2', idCycle: cyclePrimaire.id },
   ];
-  const salles = await prisma.salle.createMany({ data: sallesData });
-  const sallesList = await prisma.salle.findMany();
+
+  const classesList: any[] = [];
+  for (const classe of classesData) {
+    const created = await prisma.classe.create({ data: { ...classe, idAdmin: admin.id } });
+    classesList.push(created);
+  }
+  const grandeSection = classesList[2];
+  const cp = classesList[4];
+  const ce1 = classesList[5];
+
+  const sallesList: any[] = [];
+  for (const classe of classesList) {
+    const created = await prisma.salle.create({
+      data: { libelle: `Salle ${classe.libelle}`, idClasse: classe.id, actif: true, idAdmin: admin.id },
+    });
+    sallesList.push(created);
+  }
+  const salleGrandeSection = sallesList[2];
+  const salleCp = sallesList[4];
+  const salleCe1 = sallesList[5];
 
   const coursData = [
-    { libelle: 'Mathématiques', coefficient: 3, idClasse: classesList[0].id, actif: true, description: 'Cours de base sur les nombres et les formes.', idAdmin: admin.id },
-    { libelle: 'Français', coefficient: 2, idClasse: classesList[0].id, actif: true, description: 'Lecture, écriture et expression orale.', idAdmin: admin.id },
-    { libelle: 'Sciences', coefficient: 1.5, idClasse: classesList[1].id, actif: true, description: 'Découverte de la nature et de la physique simple.', idAdmin: admin.id },
+    { libelle: 'Mathématiques', coefficient: 3, idClasse: cp.id, actif: true, description: 'Cours de base sur les nombres et les formes.', idAdmin: admin.id },
+    { libelle: 'Français', coefficient: 2, idClasse: cp.id, actif: true, description: 'Lecture, écriture et expression orale.', idAdmin: admin.id },
+    { libelle: 'Sciences', coefficient: 1.5, idClasse: ce1.id, actif: true, description: 'Découverte de la nature et de la physique simple.', idAdmin: admin.id },
   ];
 
   const coursList: any[] = [];
@@ -190,7 +199,7 @@ async function main() {
 
   await prisma.titulaire.create({
     data: {
-      idSalle: sallesList[0].id,
+      idSalle: salleCp.id,
       idPers: personnes[2].id,
       actif: true,
       idAdmin: admin.id,
@@ -223,11 +232,12 @@ async function main() {
   });
 
   console.log('Création des fréquentations élèves-salles...');
+  // Un élève de chaque cycle, pour exercer la dérivation du cycle depuis la classe.
   await prisma.frequente.createMany({
     data: [
-      { idSalle: sallesList[0].id, idEleve: eleves[0].id, commentaire: 'Présent tous les jours.', idAdmin: admin.id },
-      { idSalle: sallesList[1].id, idEleve: eleves[1].id, commentaire: 'Participe bien aux activités.', idAdmin: admin.id },
-      { idSalle: sallesList[0].id, idEleve: eleves[2].id, commentaire: 'Élève calme et attentif.', idAdmin: admin.id },
+      { idSalle: salleCp.id, idEleve: eleves[0].id, commentaire: 'Présent tous les jours.', idAdmin: admin.id },
+      { idSalle: salleCe1.id, idEleve: eleves[1].id, commentaire: 'Participe bien aux activités.', idAdmin: admin.id },
+      { idSalle: salleGrandeSection.id, idEleve: eleves[2].id, commentaire: 'Élève calme et attentif.', idAdmin: admin.id },
     ],
   });
 

@@ -26,6 +26,25 @@ export function getSexeLabel(value) {
   return value === 2 || value === '2' ? 'Feminin' : 'Masculin'
 }
 
+// Un eleve n'a pas de cycle stocke directement : il est deduit de la classe dans
+// laquelle il est inscrit (voir EleveService.ELEVE_INCLUDE cote backend), pour
+// eviter toute incoherence entre le cycle affiche et la classe reelle de l'eleve.
+export function getEleveClasse(eleve) {
+  return eleve?.frequentes?.[0]?.salle?.classe ?? null
+}
+
+export function getEleveCycle(eleve) {
+  return getEleveClasse(eleve)?.cycle ?? null
+}
+
+export function getEleveClasseLabel(eleve) {
+  return getEleveClasse(eleve)?.libelle ?? 'Non affecte'
+}
+
+export function getEleveCycleLabel(eleve) {
+  return getEleveCycle(eleve)?.libelle ?? 'Non affecte'
+}
+
 export function getActifLabel(actif) {
   return actif ? 'Actif' : 'Inactif'
 }
@@ -56,13 +75,6 @@ export function formatDateInput(value) {
   }
 
   return date.toISOString().slice(0, 10)
-}
-
-export function getVilleLabel(villes, idVilleNaissance) {
-  if (!idVilleNaissance) return 'Non renseignee'
-
-  const ville = villes.find((item) => item.id === idVilleNaissance)
-  return ville?.libelle ?? `Ville #${idVilleNaissance}`
 }
 
 export function createFormValues(eleve) {
@@ -102,7 +114,7 @@ export function buildElevePayload(values, adminId) {
   return payload
 }
 
-export function applyEleveFilters(eleves, filters, villes) {
+export function applyEleveFilters(eleves, filters) {
   return eleves.filter((eleve) => {
     if (filters.actif !== 'all') {
       const isActive = filters.actif === 'true'
@@ -117,19 +129,21 @@ export function applyEleveFilters(eleves, filters, villes) {
       return false
     }
 
-    if (filters.ville !== 'all' && `${eleve.idVilleNaissance ?? ''}` !== filters.ville) {
+    if (filters.idCycle !== 'all' && `${getEleveCycle(eleve)?.id ?? ''}` !== filters.idCycle) {
       return false
     }
 
     if (filters.localSearch.trim()) {
       const needle = filters.localSearch.trim().toLowerCase()
-      const ville = getVilleLabel(villes, eleve.idVilleNaissance).toLowerCase()
+      const cycle = getEleveCycleLabel(eleve).toLowerCase()
+      const classe = getEleveClasseLabel(eleve).toLowerCase()
       const haystack = [
         eleve.nom,
         eleve.prenom,
         eleve.lieuNaissance,
         eleve.langue,
-        ville,
+        cycle,
+        classe,
       ]
         .filter(Boolean)
         .join(' ')

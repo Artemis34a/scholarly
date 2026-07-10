@@ -19,7 +19,7 @@ function SelectField({ label, value, onChange, children }) {
 
 function EleveFilters({
   filters,
-  villes,
+  cycles,
   onChange,
   onReset,
   onSearchChange,
@@ -76,14 +76,14 @@ function EleveFilters({
       </SelectField>
 
       <SelectField
-        label="Ville"
-        value={filters.ville}
-        onChange={(event) => onChange('ville', event.target.value)}
+        label="Cycle"
+        value={filters.idCycle}
+        onChange={(event) => onChange('idCycle', event.target.value)}
       >
-        <option value="all">Toutes</option>
-        {villes.map((ville) => (
-          <option key={ville.id} value={ville.id}>
-            {ville.libelle}
+        <option value="all">Tous</option>
+        {cycles.map((cycle) => (
+          <option key={cycle.id} value={cycle.id}>
+            {cycle.libelle}
           </option>
         ))}
       </SelectField>

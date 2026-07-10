@@ -70,7 +70,6 @@ model Admin {
   sessions   Session[]
   enseignants Enseignant[]
   cours   Cours[]
-  natureEpreuves NatureEpreuve[]
   epreuves  Epreuve[]
   evaluations Evaluation[]
   disciplines Discipline[]
@@ -117,18 +116,6 @@ model Resident {
 //----------------------STUDENTS---------------------------
 //--------------------------------------------------------
 
-model VilleNaissance {
-  id Int       @id @default(autoincrement())
-  libelle          String
-  actif            Boolean     @default(true)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-
-  eleves Eleve[]
-
-  @@map("VilleNaissance")
-}
-
 model Eleve {
   id Int       @id @default(autoincrement())
   nom          String
@@ -141,8 +128,6 @@ model Eleve {
   username     String?     @unique
   password     String?
   actif      Boolean     @default(true)
-  idVilleNaissance Int?
-  villeNaissance   VilleNaissance? @relation(fields: [idVilleNaissance], references: [id], onDelete: SetNull)
   idAdmin    Int?
   admin      Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
   created_at DateTime  @default(now())
@@ -376,27 +361,16 @@ model EmploiDuTemps {
 //----------------------EVALUATIONS---------------------------
 //--------------------------------------------------------
 
-model NatureEpreuve {
-  id Int @id @default(autoincrement())
-  libelle String
-  description String?
-  coefficient Float @default(1.0)
-  actif Boolean @default(true)
-  idAdmin Int?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
-  epreuves Epreuve[]
-
-  @@map("NatureEpreuve")
+enum TypeEpreuve {
+  CONTROLE
+  EXAMEN
 }
 
 model Epreuve {
   id Int @id @default(autoincrement())
   libelle String
   description String?
-  idNatureEpreuve Int
+  typeEpreuve TypeEpreuve
   idCours Int?
   dateEpreuve DateTime
   duree Int? // en minutes
@@ -408,7 +382,6 @@ model Epreuve {
   updated_at DateTime @updatedAt
 
   admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
-  natureEpreuve NatureEpreuve @relation(fields: [idNatureEpreuve], references: [id], onDelete: Cascade)
   cours Cours? @relation(fields: [idCours], references: [id], onDelete: SetNull)
   evaluations Evaluation[]
 

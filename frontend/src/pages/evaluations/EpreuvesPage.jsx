@@ -13,7 +13,7 @@ import { applyEpreuveFilters } from './evaluations.utils'
 const PAGE_SIZE = 10
 
 const defaultFilters = {
-  idNatureEpreuve: 'all',
+  typeEpreuve: 'all',
   idCours: 'all',
   localSearch: '',
 }
@@ -32,7 +32,6 @@ function EpreuvesPage() {
   const [epreuvesList, setEpreuvesList] = useState([])
   const [pageInfo, setPageInfo] = useState({ page: 1, totalPages: 1, total: 0 })
   const [page, setPage] = useState(1)
-  const [natures, setNatures] = useState([])
   const [cours, setCours] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -43,12 +42,8 @@ function EpreuvesPage() {
   useEffect(() => {
     let isMounted = true
 
-    Promise.all([
-      evaluationsService.natures.findAll(),
-      coursService.findAll(),
-    ]).then(([naturesData, coursData]) => {
+    coursService.findAll().then((coursData) => {
       if (isMounted) {
-        setNatures(naturesData)
         setCours(coursData)
       }
     }).catch(() => {})
@@ -60,14 +55,14 @@ function EpreuvesPage() {
 
   useEffect(() => {
     setPage(1)
-  }, [deferredSearch, filters.idNatureEpreuve, filters.idCours])
+  }, [deferredSearch, filters.typeEpreuve, filters.idCours])
 
   async function loadEpreuves() {
     setLoading(true)
     try {
       const result = await evaluationsService.epreuves.findAll({
         search: deferredSearch.trim() || undefined,
-        nature: filters.idNatureEpreuve !== 'all' ? filters.idNatureEpreuve : undefined,
+        type: filters.typeEpreuve !== 'all' ? filters.typeEpreuve : undefined,
         cours: filters.idCours !== 'all' ? filters.idCours : undefined,
         page,
         limit: PAGE_SIZE,
@@ -94,11 +89,11 @@ function EpreuvesPage() {
       clearTimeout(timeoutId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deferredSearch, filters.idNatureEpreuve, filters.idCours, page])
+  }, [deferredSearch, filters.typeEpreuve, filters.idCours, page])
 
   const filteredEpreuves = useMemo(
-    () => applyEpreuveFilters(epreuvesList, filters, natures, cours),
-    [epreuvesList, filters, natures, cours],
+    () => applyEpreuveFilters(epreuvesList, filters, cours),
+    [epreuvesList, filters, cours],
   )
 
   const stats = useMemo(() => ({
@@ -173,7 +168,6 @@ function EpreuvesPage() {
       <Card title="Recherche et filtres" subtitle="Combinez la recherche backend avec des filtres visuels locaux.">
         <EpreuveFilters
           filters={filters}
-          natures={natures}
           cours={cours}
           onChange={handleFilterChange}
           onReset={handleReset}
@@ -194,7 +188,6 @@ function EpreuvesPage() {
           <>
             <EpreuveTable
               epreuvesList={filteredEpreuves}
-              natures={natures}
               cours={cours}
               deletingId={deletingId}
               onDelete={handleDelete}

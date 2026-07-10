@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s -w '\\\\nHTTP:%{http_code}\\\\n' -X POST http://localhost:3000/cycles -H 'Content-Type: application/json' -H 'Authorization: Bearer __TRACKED_VAR__' -d '{\"libelle\":\"Cycle secondaire\",\"description\":\"test\"}')",
+      "Bash(curl -s -w '\\\\nHTTP:%{http_code}\\\\n' -X POST http://localhost:3000/cycles -H 'Content-Type: application/json' -H 'Authorization: Bearer __TRACKED_VAR__' -d '{\"libelle\":\"Cycle maternel\",\"description\":\"doublon\"}')",
+      "Bash(curl -s -w '\\\\nHTTP:%{http_code}\\\\n' -X DELETE http://localhost:3000/cycles/6 -H 'Authorization: Bearer __TRACKED_VAR__')",
+      "Bash(curl -s -X PUT http://localhost:3000/cycles/6 -H 'Content-Type: application/json' -H 'Authorization: Bearer __TRACKED_VAR__' -d '{\"libelle\":\"Hacked name\",\"description\":\"Nouvelle description test\"}')",
+      "Bash(curl -s -X PUT http://localhost:3000/cycles/6 -H 'Content-Type: application/json' -H 'Authorization: Bearer __TRACKED_VAR__' -d '{\"description\":\"Nouvelle description test\"}')",
+      "Bash(curl -s http://localhost:3000/cycles/6 -H 'Authorization: Bearer __TRACKED_VAR__')",
+      "Bash(node drive_cycle.js)",
+      "Bash(pkill -f \"nest start\\\\|dist/src/main\")",
+      "Bash(curl -s -o /dev/null -w \"backend:%{http_code}\\\\n\" http://localhost:3000/cycles --max-time 3)",
+      "Bash(curl -s -o /dev/null -w \"frontend:%{http_code}\\\\n\" http://localhost:5173 --max-time 3)",
+      "Bash(kill 38543)"
+    ]
+  }
+}

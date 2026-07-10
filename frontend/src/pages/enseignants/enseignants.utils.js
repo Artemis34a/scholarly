@@ -8,7 +8,6 @@ export const enseignantInitialValues = {
   dateNaissance: '',
   lieuNaissance: '',
   idCours: '',
-  idClasseTitulaire: '',
   actif: true,
 }
 
@@ -64,7 +63,6 @@ export function createFormValues(enseignant) {
     dateNaissance: formatDateInput(enseignant.personne?.dateNaissance),
     lieuNaissance: enseignant.personne?.lieuNaissance ?? '',
     idCours: enseignant.idCours ? `${enseignant.idCours}` : '',
-    idClasseTitulaire: '',
     actif: Boolean(enseignant.actif),
   }
 }

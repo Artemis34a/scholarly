@@ -4,9 +4,8 @@ import Card from '../../components/Card'
 import EleveStatusBadge from '../../components/eleves/EleveStatusBadge'
 import DefaultAvatar from '../../components/DefaultAvatar'
 import { elevesService } from '../../services/elevesService'
-import { villesService } from '../../services/villesService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
-import { formatDate, getSexeLabel, getVilleLabel } from './eleves.utils'
+import { formatDate, getEleveClasseLabel, getEleveCycleLabel, getSexeLabel } from './eleves.utils'
 
 function ProfileStat({ label, value }) {
   return (
@@ -20,7 +19,6 @@ function ProfileStat({ label, value }) {
 function EleveProfilePage() {
   const { id } = useParams()
   const [eleve, setEleve] = useState(null)
-  const [villes, setVilles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -29,15 +27,11 @@ function EleveProfilePage() {
 
     async function loadData() {
       try {
-        const [eleveData, villesData] = await Promise.all([
-          elevesService.findOne(id),
-          villesService.findAll(),
-        ])
+        const eleveData = await elevesService.findOne(id)
 
         if (!isMounted) return
 
         setEleve(eleveData)
-        setVilles(villesData)
       } catch (err) {
         if (isMounted) {
           setError(err.message)
@@ -92,7 +86,7 @@ function EleveProfilePage() {
                   {eleve.nom} {eleve.prenom}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-300">
-                  Dossier #{eleve.id} · {getVilleLabel(villes, eleve.idVilleNaissance)}
+                  Dossier #{eleve.id} · {getEleveClasseLabel(eleve)} · {getEleveCycleLabel(eleve)}
                 </p>
               </div>
             </div>
@@ -127,7 +121,8 @@ function EleveProfilePage() {
             <ProfileStat label="Nom" value={eleve.nom} />
             <ProfileStat label="Prenom" value={eleve.prenom} />
             <ProfileStat label="Lieu de naissance" value={eleve.lieuNaissance} />
-            <ProfileStat label="Ville de naissance" value={getVilleLabel(villes, eleve.idVilleNaissance)} />
+            <ProfileStat label="Classe" value={getEleveClasseLabel(eleve)} />
+            <ProfileStat label="Cycle" value={getEleveCycleLabel(eleve)} />
           </div>
         </Card>
 

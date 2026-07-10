@@ -16,9 +16,8 @@ import {
   ApiOperation,
   ApiQuery,
 } from '@nestjs/swagger';
+import { TypeEpreuve } from '@prisma/client';
 import { EvaluationService } from './evaluation.service';
-import { CreateNatureEpreuveDto } from './dto/create-nature-epreuve.dto';
-import { UpdateNatureEpreuveDto } from './dto/update-nature-epreuve.dto';
 import { CreateEpreuveDto } from './dto/create-epreuve.dto';
 import { UpdateEpreuveDto } from './dto/update-epreuve.dto';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
@@ -31,47 +30,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @Controller('evaluations')
 export class EvaluationController {
   constructor(private evaluationService: EvaluationService) {}
-
-  // ── Nature Epreuve ──────────────────────────────────────────────
-  @Post('nature-epreuves')
-  @ApiOperation({ summary: "Créer une nature d'épreuve" })
-  createNatureEpreuve(
-    @Body() dto: CreateNatureEpreuveDto,
-    @Query('adminId') adminId?: number,
-  ) {
-    return this.evaluationService.createNatureEpreuve(
-      dto,
-      adminId ? +adminId : undefined,
-    );
-  }
-
-  @Get('nature-epreuves')
-  @ApiOperation({ summary: "Lister toutes les natures d'épreuves" })
-  @ApiQuery({ name: 'search', required: false })
-  findAllNatureEpreuves(@Query('search') search?: string) {
-    return this.evaluationService.findAllNatureEpreuves(search);
-  }
-
-  @Get('nature-epreuves/:id')
-  @ApiOperation({ summary: "Obtenir une nature d'épreuve par ID" })
-  findOneNatureEpreuve(@Param('id', ParseIntPipe) id: number) {
-    return this.evaluationService.findOneNatureEpreuve(id);
-  }
-
-  @Put('nature-epreuves/:id')
-  @ApiOperation({ summary: "Modifier une nature d'épreuve" })
-  updateNatureEpreuve(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateNatureEpreuveDto,
-  ) {
-    return this.evaluationService.updateNatureEpreuve(id, dto);
-  }
-
-  @Delete('nature-epreuves/:id')
-  @ApiOperation({ summary: "Supprimer une nature d'épreuve" })
-  deleteNatureEpreuve(@Param('id', ParseIntPipe) id: number) {
-    return this.evaluationService.deleteNatureEpreuve(id);
-  }
 
   // ── Epreuve ──────────────────────────────────────────────────────
   @Post('epreuves')
@@ -93,14 +51,14 @@ export class EvaluationController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'cours', required: false, type: Number })
   @ApiQuery({ name: 'classe', required: false, type: Number })
-  @ApiQuery({ name: 'nature', required: false, type: Number })
+  @ApiQuery({ name: 'type', required: false, enum: TypeEpreuve })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   findAllEpreuves(
     @Query('search') search?: string,
     @Query('cours') cours?: string,
     @Query('classe') classe?: string,
-    @Query('nature') nature?: string,
+    @Query('type') type?: TypeEpreuve,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
@@ -108,7 +66,7 @@ export class EvaluationController {
       search,
       idCours: cours ? parseInt(cours, 10) : undefined,
       idClasse: classe ? parseInt(classe, 10) : undefined,
-      idNatureEpreuve: nature ? parseInt(nature, 10) : undefined,
+      typeEpreuve: type || undefined,
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
     });

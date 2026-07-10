@@ -3,9 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import Card from '../../components/Card'
 import EleveStatusBadge from '../../components/eleves/EleveStatusBadge'
 import { elevesService } from '../../services/elevesService'
-import { villesService } from '../../services/villesService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
-import { formatDate, getSexeLabel, getVilleLabel } from './eleves.utils'
+import { formatDate, getEleveClasseLabel, getEleveCycleLabel, getSexeLabel } from './eleves.utils'
 
 function InfoRow({ label, value }) {
   return (
@@ -20,7 +19,6 @@ function EleveDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [eleve, setEleve] = useState(null)
-  const [villes, setVilles] = useState([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
@@ -30,15 +28,11 @@ function EleveDetailsPage() {
 
     async function loadData() {
       try {
-        const [eleveData, villesData] = await Promise.all([
-          elevesService.findOne(id),
-          villesService.findAll(),
-        ])
+        const eleveData = await elevesService.findOne(id)
 
         if (!isMounted) return
 
         setEleve(eleveData)
-        setVilles(villesData)
       } catch (err) {
         if (isMounted) {
           setError(err.message)
@@ -140,7 +134,8 @@ function EleveDetailsPage() {
               <InfoRow label="Sexe" value={getSexeLabel(eleve.sexe)} />
               <InfoRow label="Langue" value={eleve.langue} />
               <InfoRow label="Lieu de naissance" value={eleve.lieuNaissance} />
-              <InfoRow label="Ville de naissance" value={getVilleLabel(villes, eleve.idVilleNaissance)} />
+              <InfoRow label="Classe" value={getEleveClasseLabel(eleve)} />
+              <InfoRow label="Cycle" value={getEleveCycleLabel(eleve)} />
               <InfoRow label="Date de naissance" value={formatDate(eleve.dateNaissance)} />
               <InfoRow label="Identifiant" value={`#${eleve.id}`} />
             </div>
@@ -160,7 +155,7 @@ function EleveDetailsPage() {
                 className="block rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4 transition hover:border-amber-200 hover:bg-amber-50/70"
               >
                 <p className="font-semibold text-slate-900">Mettre a jour les informations</p>
-                <p className="mt-1 text-sm leading-6 text-slate-500">Nom, date de naissance, ville, langue et statut.</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Nom, date de naissance, cycle, langue et statut.</p>
               </Link>
               <button
                 type="button"

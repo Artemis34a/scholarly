@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import EleveStatusBadge from './EleveStatusBadge'
 import { BUTTON_LIGHT } from '../buttonStyles'
-import { formatDate, getSexeLabel, getVilleLabel } from '../../pages/eleves/eleves.utils'
+import { formatDate, getEleveClasseLabel, getEleveCycleLabel, getSexeLabel } from '../../pages/eleves/eleves.utils'
 
-function EleveTable({ eleves, villes, deletingId, onDelete }) {
+function EleveTable({ eleves, deletingId, onDelete }) {
   if (eleves.length === 0) {
     return (
       <div className="rounded-[26px] border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
@@ -19,7 +19,7 @@ function EleveTable({ eleves, villes, deletingId, onDelete }) {
     <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/92">
       <div className="hidden grid-cols-[1.35fr_0.9fr_0.8fr_0.8fr_1fr] gap-3 bg-slate-900 px-5 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 lg:grid">
         <span>Eleve</span>
-        <span>Ville</span>
+        <span>Cycle</span>
         <span>Sexe</span>
         <span>Statut</span>
         <span>Actions</span>
@@ -44,8 +44,8 @@ function EleveTable({ eleves, villes, deletingId, onDelete }) {
             </div>
 
             <div className="text-sm text-slate-600">
-              <p className="font-medium text-slate-800">{getVilleLabel(villes, eleve.idVilleNaissance)}</p>
-              <p className="mt-1 text-xs text-slate-400">Lieu saisi: {eleve.lieuNaissance}</p>
+              <p className="font-medium text-slate-800">{getEleveCycleLabel(eleve)}</p>
+              <p className="mt-1 text-xs text-slate-400">{getEleveClasseLabel(eleve)}</p>
             </div>
 
             <div className="text-sm font-medium text-slate-700">

@@ -116,6 +116,13 @@ function ClasseDetailsPage() {
     event.preventDefault()
     if (!selectedTitulaire) return
 
+    if (titulairePersonne) {
+      const confirmed = window.confirm(
+        `Cette classe a deja un titulaire : ${titulairePersonne.nom} ${titulairePersonne.prenom}. Voulez-vous le remplacer ?`,
+      )
+      if (!confirmed) return
+    }
+
     setAssigning(true)
     setError('')
     try {
@@ -226,26 +233,19 @@ function ClasseDetailsPage() {
             </Card>
 
             <Card title="Titulaire de la classe" subtitle="Enseignant responsable de la classe.">
-              {titulairePersonne ? (
-                <div className="space-y-4">
+              <div className="space-y-4">
+                {titulairePersonne ? (
                   <div className="rounded-[22px] border border-slate-200/80 bg-slate-50/80 px-4 py-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Titulaire actuel</p>
                     <p className="mt-2 text-sm font-medium text-slate-800">
                       {titulairePersonne.nom} {titulairePersonne.prenom}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveTitulaire}
-                    disabled={assigning}
-                    className="w-full rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:opacity-60"
-                  >
-                    {assigning ? 'Traitement...' : 'Retirer le titulaire'}
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleAssignTitulaire} className="space-y-4">
+                ) : (
                   <p className="text-sm text-slate-500">Aucun titulaire affecte pour cette classe.</p>
+                )}
+
+                <form onSubmit={handleAssignTitulaire} className="space-y-4">
                   <select
                     value={selectedTitulaire}
                     onChange={(event) => setSelectedTitulaire(event.target.value)}
@@ -264,10 +264,25 @@ function ClasseDetailsPage() {
                     disabled={assigning || !selectedTitulaire}
                     className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:opacity-60"
                   >
-                    {assigning ? 'Affectation...' : 'Affecter comme titulaire'}
+                    {assigning
+                      ? 'Traitement...'
+                      : titulairePersonne
+                        ? 'Remplacer le titulaire'
+                        : 'Affecter comme titulaire'}
                   </button>
                 </form>
-              )}
+
+                {titulairePersonne && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveTitulaire}
+                    disabled={assigning}
+                    className="w-full rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:opacity-60"
+                  >
+                    {assigning ? 'Traitement...' : 'Retirer le titulaire'}
+                  </button>
+                )}
+              </div>
             </Card>
           </section>
 

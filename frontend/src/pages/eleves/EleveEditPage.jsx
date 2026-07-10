@@ -4,12 +4,13 @@ import Card from '../../components/Card'
 import EleveForm from '../../components/eleves/EleveForm'
 import { useAuth } from '../../context/AuthContext'
 import { elevesService } from '../../services/elevesService'
-import { buildElevePayload, createFormValues } from './eleves.utils'
+import { buildElevePayload, createFormValues, getEleveClasseLabel, getEleveCycleLabel } from './eleves.utils'
 
 function EleveEditPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const [eleve, setEleve] = useState(null)
   const [values, setValues] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -20,11 +21,12 @@ function EleveEditPage() {
 
     async function loadData() {
       try {
-        const eleve = await elevesService.findOne(id)
+        const eleveData = await elevesService.findOne(id)
 
         if (!isMounted) return
 
-        setValues(createFormValues(eleve))
+        setEleve(eleveData)
+        setValues(createFormValues(eleveData))
       } catch (err) {
         if (isMounted) {
           setError(err.message)
@@ -71,24 +73,33 @@ function EleveEditPage() {
   }
 
   return (
-    <Card>
-      {loading || !values ? (
-        <div className="py-12 text-center text-slate-400">Chargement du dossier...</div>
-      ) : (
-        <EleveForm
-          title="Modifier le dossier eleve"
-          subtitle="Mettez a jour les informations de l eleve sans quitter l espace administrateur."
-          values={values}
-          isCreate={false}
-          submitting={submitting}
-          error={error}
-          submitLabel="Enregistrer les modifications"
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          onCancel={() => navigate(`/dashboard/eleves/${id}`)}
-        />
+    <div className="space-y-6">
+      {!loading && eleve && (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          Classe actuelle : <span className="font-semibold text-slate-800">{getEleveClasseLabel(eleve)}</span>
+          {' · '}Cycle : <span className="font-semibold text-slate-800">{getEleveCycleLabel(eleve)}</span>
+          {' — '}la classe se change depuis la fiche de la classe, dans « Gestion des classes ».
+        </div>
       )}
-    </Card>
+      <Card>
+        {loading || !values ? (
+          <div className="py-12 text-center text-slate-400">Chargement du dossier...</div>
+        ) : (
+          <EleveForm
+            title="Modifier le dossier eleve"
+            subtitle="Mettez a jour les informations de l eleve sans quitter l espace administrateur."
+            values={values}
+            isCreate={false}
+            submitting={submitting}
+            error={error}
+            submitLabel="Enregistrer les modifications"
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            onCancel={() => navigate(`/dashboard/eleves/${id}`)}
+          />
+        )}
+      </Card>
+    </div>
   )
 }
 

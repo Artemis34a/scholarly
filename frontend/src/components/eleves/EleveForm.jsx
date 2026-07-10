@@ -74,6 +74,8 @@ function EleveForm({
   onSubmit,
   onCancel,
 }) {
+  const selectedClasse = classes?.find((classe) => `${classe.id}` === values.idClasse)
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div>
@@ -116,7 +118,7 @@ function EleveForm({
           required
         />
         <InputField
-          label="Ville de naissance"
+          label="Lieu de naissance"
           name="lieuNaissance"
           value={values.lieuNaissance}
           onChange={onChange}
@@ -165,6 +167,16 @@ function EleveForm({
             options={classes.map((classe) => ({ value: `${classe.id}`, label: classe.libelle }))}
             placeholder="Choisir une classe"
           />
+        )}
+        {classes && (
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-600">Cycle</span>
+            <div className="flex h-[50px] items-center rounded-2xl border border-slate-200 bg-slate-100 px-4 text-slate-700">
+              {selectedClasse
+                ? selectedClasse.cycle?.libelle
+                : 'Determine automatiquement par la classe choisie'}
+            </div>
+          </label>
         )}
       </div>
 

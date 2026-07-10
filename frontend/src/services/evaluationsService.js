@@ -14,13 +14,6 @@ function buildQuery(params = {}) {
 }
 
 export const evaluationsService = {
-  natures: {
-    findAll: (search) => api.get(`/evaluations/nature-epreuves${buildQuery({ search })}`),
-    findOne: (id) => api.get(`/evaluations/nature-epreuves/${id}`),
-    create: (data) => api.post('/evaluations/nature-epreuves', data),
-    update: (id, data) => api.put(`/evaluations/nature-epreuves/${id}`, data),
-    remove: (id) => api.delete(`/evaluations/nature-epreuves/${id}`),
-  },
   epreuves: {
     // Sans parametre : tableau complet (menus deroulants). Avec { page, limit } : reponse paginee.
     findAll: (params) => api.get(`/evaluations/epreuves${buildQuery(params)}`),

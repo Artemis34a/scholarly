@@ -32,8 +32,5 @@ export class CreateEleveDto {
   @IsBoolean() @IsOptional() actif?: boolean;
 
   @ApiPropertyOptional({ example: 1 })
-  @IsInt() @IsOptional() idVilleNaissance?: number;
-
-  @ApiPropertyOptional({ example: 1 })
   @IsInt() @IsOptional() idAdmin?: number;
 }

@@ -8,7 +8,6 @@ import { EvaluationModule } from './evaluation/evaluation.module';
 import { DisciplineModule } from './discipline/discipline.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { EleveModule } from './eleve/eleve.module';
-import { VilleNaissanceModule } from './ville-naissance/ville-naissance.module';
 import { AnneeAcademiqueModule } from './annee-academique/annee-academique.module';
 import { ClasseModule } from './classe/classe.module';
 import { CoursModule } from './cours/cours.module';
@@ -32,7 +31,6 @@ import { PaiementModule } from './paiement/paiement.module';
     DisciplineModule,
     DashboardModule,
     EleveModule,
-    VilleNaissanceModule,
     AnneeAcademiqueModule,
     ClasseModule,
     CoursModule,

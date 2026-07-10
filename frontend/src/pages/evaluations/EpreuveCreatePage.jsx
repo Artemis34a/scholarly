@@ -9,7 +9,6 @@ import { buildEpreuvePayload, epreuveInitialValues } from './evaluations.utils'
 function EpreuveCreatePage() {
   const navigate = useNavigate()
   const [values, setValues] = useState(epreuveInitialValues)
-  const [natures, setNatures] = useState([])
   const [cours, setCours] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -18,13 +17,9 @@ function EpreuveCreatePage() {
   useEffect(() => {
     let isMounted = true
 
-    Promise.all([
-      evaluationsService.natures.findAll(),
-      coursService.findAll(),
-    ])
-      .then(([naturesData, coursData]) => {
+    coursService.findAll()
+      .then((coursData) => {
         if (isMounted) {
-          setNatures(naturesData)
           setCours(coursData)
         }
       })
@@ -69,7 +64,6 @@ function EpreuveCreatePage() {
           title="Creer une nouvelle epreuve"
           subtitle="Definissez le type, le cours concerne et le bareme de l'epreuve."
           values={values}
-          natures={natures}
           cours={cours}
           submitting={submitting}
           error={error}

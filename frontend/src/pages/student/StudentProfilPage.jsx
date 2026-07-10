@@ -3,8 +3,7 @@ import Card from '../../components/Card'
 import ActifBadge from '../../components/ActifBadge'
 import { useAuth } from '../../context/AuthContext'
 import { elevesService } from '../../services/elevesService'
-import { villesService } from '../../services/villesService'
-import { formatDate, getSexeLabel, getVilleLabel } from '../eleves/eleves.utils'
+import { formatDate, getEleveClasseLabel, getEleveCycleLabel, getSexeLabel } from '../eleves/eleves.utils'
 
 function ProfileStat({ label, value }) {
   return (
@@ -18,21 +17,16 @@ function ProfileStat({ label, value }) {
 function StudentProfilPage() {
   const { user } = useAuth()
   const [eleve, setEleve] = useState(null)
-  const [villes, setVilles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
 
-    Promise.all([
-      elevesService.findOne(user.id),
-      villesService.findAll(),
-    ])
-      .then(([eleveData, villesData]) => {
+    elevesService.findOne(user.id)
+      .then((eleveData) => {
         if (isMounted) {
           setEleve(eleveData)
-          setVilles(villesData)
         }
       })
       .catch((err) => {
@@ -80,7 +74,7 @@ function StudentProfilPage() {
                 {eleve.nom} {eleve.prenom}
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-300">
-                Dossier #{eleve.id} · {getVilleLabel(villes, eleve.idVilleNaissance)}
+                Dossier #{eleve.id} · {getEleveClasseLabel(eleve)} · {getEleveCycleLabel(eleve)}
               </p>
             </div>
           </div>
@@ -99,7 +93,8 @@ function StudentProfilPage() {
           <ProfileStat label="Nom" value={eleve.nom} />
           <ProfileStat label="Prenom" value={eleve.prenom} />
           <ProfileStat label="Lieu de naissance" value={eleve.lieuNaissance} />
-          <ProfileStat label="Ville de naissance" value={getVilleLabel(villes, eleve.idVilleNaissance)} />
+          <ProfileStat label="Classe" value={getEleveClasseLabel(eleve)} />
+          <ProfileStat label="Cycle" value={getEleveCycleLabel(eleve)} />
         </div>
       </Card>
     </div>

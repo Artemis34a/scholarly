@@ -56,7 +56,6 @@ function EnseignantForm({
   subtitle,
   values,
   cours,
-  classes,
   isCreate,
   submitting,
   error,
@@ -138,7 +137,7 @@ function EnseignantForm({
           onChange={onChange}
         />
         <InputField
-          label="Ville de naissance"
+          label="Lieu de naissance"
           name="lieuNaissance"
           value={values.lieuNaissance}
           onChange={onChange}
@@ -153,16 +152,6 @@ function EnseignantForm({
           options={cours.map((item) => ({ value: `${item.id}`, label: item.libelle }))}
           placeholder="Choisir un cours"
         />
-        {classes && (
-          <SelectField
-            label="Classe principale (classe geree)"
-            name="idClasseTitulaire"
-            value={values.idClasseTitulaire}
-            onChange={onChange}
-            options={classes.map((classe) => ({ value: `${classe.id}`, label: classe.libelle }))}
-            placeholder="Aucune (facultatif)"
-          />
-        )}
       </div>
 
       <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">

@@ -1,3 +1,5 @@
+import { typeEpreuveOptions } from '../../pages/evaluations/evaluations.utils'
+
 function InputField({ label, name, value, onChange, required = false, type = 'text', placeholder = '', step }) {
   return (
     <label className="block">
@@ -58,7 +60,6 @@ function EpreuveForm({
   title,
   subtitle,
   values,
-  natures,
   cours,
   submitting,
   error,
@@ -92,12 +93,11 @@ function EpreuveForm({
         />
         <SelectField
           label="Type d'epreuve"
-          name="idNatureEpreuve"
-          value={values.idNatureEpreuve}
+          name="typeEpreuve"
+          value={values.typeEpreuve}
           onChange={onChange}
           required
-          options={natures.map((nature) => ({ value: `${nature.id}`, label: nature.libelle }))}
-          placeholder="Choisir un type"
+          options={typeEpreuveOptions}
         />
         <SelectField
           label="Cours (optionnel)"

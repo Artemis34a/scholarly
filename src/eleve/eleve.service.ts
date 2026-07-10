@@ -15,6 +15,19 @@ export interface FindAllElevesParams {
   limit?: number;
 }
 
+// Un élève n'a pas de cycle stocké en base : il est dérivé de la classe dans
+// laquelle il est inscrit (Eleve -> Frequente -> Salle -> Classe -> Cycle), pour
+// éviter toute incohérence entre le cycle affiché et la classe réelle de l'élève.
+// On ne prend que la première inscription trouvée : un élève n'est en pratique
+// inscrit que dans une seule salle à la fois (voir ClasseDetailsPage).
+const ELEVE_INCLUDE = {
+  frequentes: {
+    take: 1,
+    orderBy: { created_at: 'desc' as const },
+    include: { salle: { include: { classe: { include: { cycle: true } } } } },
+  },
+};
+
 @Injectable()
 export class EleveService {
   constructor(private prisma: PrismaService) {}
@@ -25,7 +38,6 @@ export class EleveService {
   }
 
   async create(dto: CreateEleveDto) {
-    await this.assertVilleNaissanceExiste(dto.idVilleNaissance);
     await this.assertAdminExiste(dto.idAdmin);
     await this.assertUsernameAvailable(dto.username);
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -36,6 +48,7 @@ export class EleveService {
         dateNaissance: new Date(dto.dateNaissance),
         password: hashedPassword,
       },
+      include: ELEVE_INCLUDE,
     });
   }
 
@@ -54,6 +67,7 @@ export class EleveService {
     const [data, total] = await Promise.all([
       this.prisma.eleve.findMany({
         where,
+        include: ELEVE_INCLUDE,
         orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
         skip: (page - 1) * limit,
         take: limit,
@@ -70,17 +84,22 @@ export class EleveService {
     };
   }
 
-  findActifs() { return this.prisma.eleve.findMany({ where: { actif: true }, orderBy: [{ nom: 'asc' }] }); }
+  findActifs() {
+    return this.prisma.eleve.findMany({
+      where: { actif: true },
+      include: ELEVE_INCLUDE,
+      orderBy: [{ nom: 'asc' }],
+    });
+  }
 
   async findOne(id: number) {
-    const e = await this.prisma.eleve.findUnique({ where: { id } });
+    const e = await this.prisma.eleve.findUnique({ where: { id }, include: ELEVE_INCLUDE });
     if (!e) throw new NotFoundException(`Eleve #${id} introuvable`);
     return e;
   }
 
   async update(id: number, dto: UpdateEleveDto) {
     const eleve = await this.findOne(id);
-    await this.assertVilleNaissanceExiste(dto.idVilleNaissance);
     await this.assertAdminExiste(dto.idAdmin);
 
     if (dto.username && dto.username !== eleve.username) {
@@ -94,25 +113,13 @@ export class EleveService {
         dateNaissance: dto.dateNaissance ? new Date(dto.dateNaissance) : undefined,
         password: dto.password ? await bcrypt.hash(dto.password, 10) : undefined,
       },
+      include: ELEVE_INCLUDE,
     });
   }
 
   async remove(id: number) {
     await this.findOne(id);
     return this.prisma.eleve.delete({ where: { id } });
-  }
-
-  private async assertVilleNaissanceExiste(idVilleNaissance?: number) {
-    if (!idVilleNaissance) return;
-
-    const ville = await this.prisma.villeNaissance.findUnique({
-      where: { id: idVilleNaissance },
-    });
-    if (!ville) {
-      throw new NotFoundException(
-        `Ville de naissance #${idVilleNaissance} introuvable`,
-      );
-    }
   }
 
   // Le compte admin est transmis par le client (session courante). Si la base a
