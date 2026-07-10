@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Manuel utilisateur — BrightPath Academy</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 20mm 18mm;
+  }
+
+  :root {
+    --ink: #1c2333;
+    --ink-soft: #47506a;
+    --accent: #0f6fb0;
+    --accent-soft: #eaf4fb;
+    --line: #d7dde6;
+    --line-strong: #aab4c4;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Georgia', 'Iowan Old Style', 'Palatino Linotype', serif;
+    color: var(--ink);
+    font-size: 11.5pt;
+    line-height: 1.55;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: var(--ink);
+    font-weight: 700;
+    line-height: 1.25;
+    break-after: avoid;
+  }
+
+  /* Title page h1 */
+  body > h1:first-of-type {
+    font-size: 26pt;
+    margin: 8mm 0 1mm;
+    color: var(--accent);
+  }
+
+  h2 {
+    font-size: 16pt;
+    margin: 0 0 4mm;
+    padding-bottom: 2mm;
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+  }
+
+  h3 {
+    font-size: 12.5pt;
+    margin: 6mm 0 2mm;
+    color: var(--ink);
+  }
+
+  p {
+    margin: 0 0 3mm;
+    text-align: left;
+  }
+
+  strong { color: var(--ink); }
+
+  ul, ol {
+    margin: 0 0 3mm;
+    padding-left: 6mm;
+  }
+
+  li { margin-bottom: 1.5mm; }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 5mm 0;
+  }
+
+  figure {
+    margin: 4mm 0 1mm;
+    text-align: center;
+    break-inside: avoid;
+  }
+
+  figure img {
+    max-width: 100%;
+    max-height: 172mm;
+    border: 1px solid var(--line);
+    border-radius: 2mm;
+    box-shadow: 0 2mm 6mm -3mm rgba(15,23,42,0.35);
+  }
+
+  /* figure captions are the italic paragraph immediately after an image */
+  figure + p em, figure + p {
+    display: block;
+    text-align: center;
+    font-size: 9.5pt;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 1.5mm;
+    margin-bottom: 5mm;
+  }
+
+  em { font-style: italic; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 3mm 0 5mm;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10pt;
+  }
+
+  th {
+    background: var(--accent-soft);
+    color: var(--accent);
+    text-align: left;
+    padding: 2.5mm 3mm;
+    border: 1px solid var(--line-strong);
+  }
+
+  td {
+    padding: 2.5mm 3mm;
+    border: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  /* Title page styling */
+  body > p:nth-of-type(-n+3) {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10.5pt;
+    color: var(--ink-soft);
+  }
+
+  div[style*="page-break-after"] {
+    page-break-after: always;
+  }
+
+  p.toc-sub {
+    padding-left: 10mm;
+    color: var(--ink-soft);
+    font-size: 10.5pt;
+    margin-bottom: 2mm;
+  }
+
+  h2, h3 { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+<h1 id="scholarly-brightpath-academy">Scholarly — BrightPath Academy</h1>
+<h2 id="manuel-utilisateur">Manuel utilisateur</h2>
+<p><strong>Plateforme de gestion d'école primaire</strong></p>
+<hr />
+<p>Établissement : _[À compléter]_</p>
+<p>Version du document : 1.0</p>
+<p>Date : _[À compléter]_</p>
+<hr />
+<p><em>Ce manuel a pour objectif d'accompagner les administrateurs, enseignants et élèves dans la prise en main quotidienne de l'application. Il ne requiert aucune connaissance informatique particulière.</em></p>
+<div style="page-break-after: always;"></div>
+<h2 id="table-des-matières">Table des matières</h2>
+<ol>
+<li value="1">Introduction</li>
+<li value="2">Présentation générale de l'application</li>
+<li value="3">Public concerné</li>
+<li value="4">Prérequis</li>
+<li value="5">Connexion à l'application</li>
+<li value="6">Présentation des espaces utilisateurs</li>
+</ol>
+<p class="toc-sub">6.1 Espace Administrateur</p>
+<p class="toc-sub">6.2 Espace Enseignant</p>
+<p class="toc-sub">6.3 Espace Élève</p>
+<ol>
+<li value="7">Description des principaux modules</li>
+</ol>
+<p class="toc-sub">7.1 Le tableau de bord</p>
+<p class="toc-sub">7.2 Gestion des administrateurs</p>
+<p class="toc-sub">7.3 Gestion des enseignants</p>
+<p class="toc-sub">7.4 Gestion des élèves</p>
+<p class="toc-sub">7.5 Gestion des classes</p>
+<p class="toc-sub">7.6 Gestion des cycles et du calendrier scolaire</p>
+<p class="toc-sub">7.7 Gestion des cours</p>
+<p class="toc-sub">7.8 Gestion des évaluations</p>
+<p class="toc-sub">7.9 Gestion des notes</p>
+<p class="toc-sub">7.10 Gestion des bulletins</p>
+<p class="toc-sub">7.11 Gestion des emplois du temps</p>
+<p class="toc-sub">7.12 Gestion des paiements</p>
+<p class="toc-sub">7.13 Gestion de la discipline</p>
+<ol>
+<li value="8">Scénarios d'utilisation</li>
+</ol>
+<p class="toc-sub">8.1 Créer un élève</p>
+<p class="toc-sub">8.2 Créer une classe</p>
+<p class="toc-sub">8.3 Désigner un professeur titulaire</p>
+<p class="toc-sub">8.4 Créer une évaluation</p>
+<p class="toc-sub">8.5 Saisir les notes</p>
+<p class="toc-sub">8.6 Enregistrer un paiement</p>
+<p class="toc-sub">8.7 Consulter un bulletin</p>
+<ol>
+<li value="9">Questions fréquentes (FAQ)</li>
+<li value="10">Bonnes pratiques</li>
+<li value="11">Conclusion</li>
+</ol>
+<div style="page-break-after: always;"></div>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>Scholarly, commercialisé sous le nom <strong>BrightPath Academy</strong>, est une application de gestion administrative et pédagogique conçue pour les écoles primaires. Elle réunit dans un seul outil les tâches qui, autrement, seraient réparties entre des registres papier, des tableurs et des échanges informels : inscription des élèves, organisation des classes, suivi des enseignants, saisie des notes, édition des bulletins, gestion des emplois du temps, suivi des paiements de scolarité et suivi de la discipline.</p>
+<p>Ce manuel décrit, étape par étape, comment utiliser chacune des fonctionnalités de l'application. Il s'adresse à toute personne amenée à s'en servir au quotidien, qu'elle soit à l'aise avec l'informatique ou qu'elle découvre ce type d'outil pour la première fois. Aucune connaissance technique n'est nécessaire : ce document explique uniquement <em>comment utiliser le logiciel</em>, pas comment il a été construit.</p>
+<p>Chaque grande fonctionnalité est illustrée par une capture d'écran réelle de l'application, afin que vous puissiez reconnaître immédiatement ce que vous voyez à l'écran.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="2-présentation-générale-de-lapplication">2. Présentation générale de l'application</h2>
+<p>BrightPath Academy organise le fonctionnement de l'école autour de quelques notions simples, qui reviennent dans tous les modules :</p>
+<ul>
+<li><strong>Les cycles</strong> : l'établissement est structuré en deux grands cycles, le <em>cycle maternel</em> et le <em>cycle primaire</em>. Chaque classe appartient à l'un des deux.</li>
+<li><strong>Les classes</strong> : chaque classe regroupe un ensemble d'élèves, dispose d'une salle et peut se voir attribuer un professeur titulaire.</li>
+<li><strong>Les cours</strong> : une matière enseignée (Mathématiques, Français, Sciences...). Un même cours peut être enseigné dans plusieurs classes différentes — par exemple, les Mathématiques peuvent être dispensées en CP, en CE1 et en CE2 à la fois.</li>
+<li><strong>Les enseignants</strong> : chaque enseignant peut être affecté à plusieurs cours, dans plusieurs classes différentes. Il peut en plus être désigné <em>titulaire</em> d'une seule classe, c'est-à-dire son responsable pédagogique principal.</li>
+<li><strong>Les évaluations et les notes</strong> : l'application permet de créer des épreuves (contrôles ou examens), d'y saisir les notes des élèves et de calculer automatiquement les classements et les moyennes.</li>
+<li><strong>Les bulletins</strong> : la moyenne générale d'un élève, calculée automatiquement à partir de ses notes et pondérée par le coefficient de chaque cours.</li>
+<li><strong>Les emplois du temps</strong> : la répartition hebdomadaire des cours par classe.</li>
+<li><strong>Les paiements</strong> : le suivi des frais de scolarité, versés en une ou plusieurs tranches.</li>
+<li><strong>La discipline</strong> : le suivi des incidents et des comportements notables des élèves.</li>
+</ul>
+<p>L'ensemble de ces informations est centralisé et accessible selon le profil de la personne connectée : un administrateur voit l'intégralité de l'école, un enseignant voit ses propres classes et élèves, un élève ne voit que son propre dossier.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="3-public-concerné">3. Public concerné</h2>
+<p>Ce manuel s'adresse à trois catégories d'utilisateurs, chacune disposant d'un espace de travail dédié dans l'application :</p>
+<table>
+<thead><tr><th>Profil</th><th>Rôle dans l'application</th></tr></thead>
+<tbody>
+<tr><td><strong>Administrateur</strong> (direction, secrétariat)</td><td>Pilotage complet de l'école : inscriptions, classes, enseignants, cours, évaluations, paiements, discipline.</td></tr>
+<tr><td><strong>Enseignant</strong></td><td>Suivi de ses propres classes, saisie des notes, consultation de son emploi du temps et de ses statistiques.</td></tr>
+<tr><td><strong>Élève</strong></td><td>Consultation de ses notes, de son bulletin, de son emploi du temps et du suivi de ses paiements.</td></tr>
+</tbody></table>
+<p>Chaque profil ne voit que les fonctionnalités qui le concernent : un enseignant, par exemple, ne peut ni créer de nouvelles classes ni consulter les dossiers d'élèves qu'il n'encadre pas.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="4-prérequis">4. Prérequis</h2>
+<p>L'utilisation de BrightPath Academy ne nécessite aucune installation. L'application fonctionne directement dans un navigateur web.</p>
+<p><strong>Ce qu'il vous faut :</strong></p>
+<ul>
+<li>Un ordinateur, de préférence — l'interface reste utilisable sur une tablette, mais elle est conçue avant tout pour un usage sur écran d'ordinateur.</li>
+<li>Un navigateur récent : Google Chrome, Mozilla Firefox, Microsoft Edge ou Safari.</li>
+<li>Une connexion internet stable.</li>
+<li>Un identifiant et un mot de passe, qui vous sont fournis par l'administration de l'établissement. Les élèves et les enseignants ne créent pas eux-mêmes leur compte : celui-ci est créé par un administrateur.</li>
+</ul>
+<p>Aucune compétence informatique particulière n'est requise pour utiliser l'application au quotidien.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="5-connexion-à-lapplication">5. Connexion à l'application</h2>
+<p>L'écran de connexion est le point d'entrée unique de l'application, quel que soit votre profil.</p>
+<p>Pour vous connecter :</p>
+<ol>
+<li value="1">Ouvrez l'application dans votre navigateur.</li>
+<li value="2">Dans la section <strong>« Je suis... »</strong>, sélectionnez votre profil : <strong>Administrateur</strong>, <strong>Enseignant</strong> ou <strong>Élève</strong>.</li>
+<li value="3">Renseignez votre <strong>Identifiant</strong> et votre <strong>Mot de passe</strong>.</li>
+<li value="4">Cliquez sur <strong>Se connecter</strong>.</li>
+</ol>
+<p>Une icône en forme d'œil, à droite du champ mot de passe, permet d'afficher ou de masquer temporairement votre saisie pour vérifier qu'elle est correcte.</p>
+<p>Si vos identifiants sont incorrects, un message d'erreur clair s'affiche et vous invite à réessayer. Si le problème persiste, contactez l'administration : seul un administrateur peut réinitialiser un mot de passe oublié (voir la section Questions fréquentes).</p>
+<p>Une fois connecté, vous êtes automatiquement redirigé vers l'espace correspondant à votre profil : tableau de bord administrateur, espace enseignant ou espace élève.</p>
+<figure><img src="captures/01-connexion.png" alt="Figure 1 — Écran de connexion" /></figure>
+<p><em>Figure 1 — Écran de connexion : sélection du profil et saisie des identifiants.</em></p>
+<div style="page-break-after: always;"></div>
+<h2 id="6-présentation-des-espaces-utilisateurs">6. Présentation des espaces utilisateurs</h2>
+<p>Chaque profil dispose d'un espace organisé autour d'un menu latéral, à gauche de l'écran, qui donne accès à l'ensemble des modules disponibles pour ce profil. Le contenu de ce menu change selon que vous êtes connecté en tant qu'administrateur, enseignant ou élève.</p>
+<h3 id="61-espace-administrateur">6.1 Espace Administrateur</h3>
+<p>L'espace administrateur est le plus complet des trois : il donne accès à l'ensemble des modules de gestion de l'école — élèves, enseignants, classes, cours, cycles, évaluations, emplois du temps, paiements et discipline.</p>
+<p>Le tableau de bord qui s'affiche à la connexion présente une vue d'ensemble synthétique de l'établissement : effectifs, nombre de classes, nombre d'enseignants, et raccourcis vers les actions les plus courantes.</p>
+<figure><img src="captures/02-tableau-de-bord-admin.png" alt="Figure 2 — Tableau de bord administrateur" /></figure>
+<p><em>Figure 2 — Tableau de bord de l'espace Administrateur.</em></p>
+<h3 id="62-espace-enseignant">6.2 Espace Enseignant</h3>
+<p>L'espace enseignant se concentre sur les classes et les élèves dont l'enseignant a la charge. Il permet de consulter ses classes, la liste de ses élèves, son emploi du temps personnel, de créer des évaluations, de saisir des notes et de consulter des statistiques de performance sur ses propres cours.</p>
+<p>Un enseignant ne voit que les données qui le concernent directement : il ne peut ni consulter les classes d'un collègue, ni modifier des informations administratives comme la création de nouvelles classes ou de nouveaux comptes.</p>
+<figure><img src="captures/20-tableau-de-bord-enseignant.png" alt="Figure 3 — Tableau de bord enseignant" /></figure>
+<p><em>Figure 3 — Tableau de bord de l'espace Enseignant.</em></p>
+<h3 id="63-espace-élève">6.3 Espace Élève</h3>
+<p>L'espace élève est le plus simple des trois : un élève y consulte ses propres informations — ses notes, son bulletin, son emploi du temps, l'état de ses paiements de scolarité et son historique disciplinaire éventuel. Il ne dispose d'aucune fonction de modification : cet espace est entièrement dédié à la consultation.</p>
+<figure><img src="captures/22-tableau-de-bord-eleve.png" alt="Figure 4 — Tableau de bord élève" /></figure>
+<p><em>Figure 4 — Tableau de bord de l'espace Élève.</em></p>
+<div style="page-break-after: always;"></div>
+<h2 id="7-description-des-principaux-modules">7. Description des principaux modules</h2>
+<p>Cette section détaille chacun des modules de l'application. Certains modules fonctionnent selon des principes très proches les uns des autres ; ces principes communs sont expliqués une seule fois, la première fois qu'ils apparaissent, pour éviter les répétitions inutiles.</p>
+<h3 id="71-le-tableau-de-bord">7.1 Le tableau de bord</h3>
+<p>Le tableau de bord est le premier écran affiché après la connexion, pour les trois profils. Il joue le rôle d'un point de départ : il résume les informations essentielles sous forme de chiffres clés (nombre d'élèves, de classes, de notes saisies, etc.) et propose des raccourcis vers les modules les plus utilisés, sous forme de cartes cliquables.</p>
+<p>Le contenu du tableau de bord s'adapte automatiquement au profil connecté : un administrateur y voit une vue globale de l'établissement, un enseignant une vue centrée sur ses classes, et un élève un résumé de sa situation personnelle (dernières notes, paiements, emploi du temps du jour).</p>
+<h3 id="72-gestion-des-administrateurs">7.2 Gestion des administrateurs</h3>
+<p>Réservée au profil administrateur, cette section permet de créer, modifier ou retirer des comptes administrateurs — les personnes habilitées à piloter l'école dans l'application. Le principe est identique à celui décrit plus loin pour la gestion des enseignants et des élèves : une liste avec recherche, un formulaire de création (nom, prénom, identifiant de connexion, mot de passe, téléphone) et une fiche de modification. Aucune capture dédiée n'est nécessaire : la logique est la même que pour les autres comptes utilisateurs, en plus simple, puisqu'un administrateur n'est rattaché à aucune classe ni à aucun cours.</p>
+<h3 id="73-gestion-des-enseignants">7.3 Gestion des enseignants</h3>
+<p>Ce module permet de créer et de suivre les comptes des enseignants de l'établissement.</p>
+<p><strong>Un enseignant peut enseigner plusieurs cours, dans plusieurs classes différentes.</strong> Par exemple, un même enseignant peut assurer les Mathématiques en CP, en CE1 et en CE2. Chacune de ces combinaisons « cours + classe » est appelée une <strong>affectation</strong>.</p>
+<p>À la création d'un compte enseignant, vous renseignez son identité (nom, prénom, date et lieu de naissance), ses coordonnées, son identifiant de connexion, son mot de passe, ainsi qu'une <strong>première affectation obligatoire</strong> : le cours qu'il enseignera, dans quelle classe.</p>
+<figure><img src="captures/09-creation-enseignant.png" alt="Figure 5 — Création d'un enseignant" /></figure>
+<p><em>Figure 5 — Formulaire de création d'un enseignant, avec son affectation initiale.</em></p>
+<p>Une fois le compte créé, sa fiche détaillée permet d'ajouter ou de retirer des affectations supplémentaires à tout moment, sans limite de nombre. Chaque affectation apparaît sous la forme d'une ligne « cours — classe », avec un bouton pour la retirer si l'enseignant cesse d'assurer ce cours dans cette classe.</p>
+<figure><img src="captures/10-detail-enseignant-affectations.png" alt="Figure 6 — Fiche détaillée d'un enseignant" /></figure>
+<p><em>Figure 6 — Fiche détaillée d'un enseignant : gestion de ses affectations d'enseignement.</em></p>
+<p>Cette fiche illustre bien la distinction essentielle du module : les <em>affectations d'enseignement</em> (ce que l'enseignant enseigne, et où) sont totalement indépendantes du <em>titulariat</em> d'une classe (la responsabilité pédagogique globale d'une classe), qui se gère depuis le module Classes (voir section 7.5). Un enseignant peut ainsi enseigner dans plusieurs classes tout en n'étant titulaire que d'une seule d'entre elles — ou d'aucune.</p>
+<p>La suppression d'un enseignant retire automatiquement son compte, l'ensemble de ses affectations et, le cas échéant, son titulariat, sans laisser de trace incohérente dans l'application.</p>
+<h3 id="74-gestion-des-élèves">7.4 Gestion des élèves</h3>
+<p>Ce module regroupe l'ensemble des informations relatives aux élèves inscrits dans l'établissement : identité, classe, statut (actif ou inactif) et identifiants de connexion.</p>
+<p>La liste des élèves peut être filtrée et recherchée par nom, ce qui facilite le repérage d'un dossier particulier dans un établissement comptant de nombreux effectifs.</p>
+<figure><img src="captures/03-liste-eleves.png" alt="Figure 7 — Liste des élèves" /></figure>
+<p><em>Figure 7 — Liste des élèves, avec recherche et filtres.</em></p>
+<p>La création d'un élève reprend le principe commun à tous les formulaires de compte de l'application : identité complète (nom, prénom, date et lieu de naissance, sexe, langue), identifiant de connexion, mot de passe, puis affectation à une classe. Le cycle (maternel ou primaire) de l'élève est déterminé automatiquement en fonction de la classe choisie ; il n'a pas à être renseigné séparément.</p>
+<figure><img src="captures/04-creation-eleve.png" alt="Figure 8 — Création d'un élève" /></figure>
+<p><em>Figure 8 — Formulaire de création d'un élève.</em></p>
+<p>L'application vérifie automatiquement la cohérence de la date de naissance saisie : une date future ou manifestement irréaliste est rejetée avec un message d'explication, ce qui évite les erreurs de saisie.</p>
+<p>Depuis la fiche détaillée d'un élève, vous accédez également à son profil pédagogique complet — notes, bulletin, historique disciplinaire, paiements — sans avoir à naviguer entre plusieurs modules séparés.</p>
+<h3 id="75-gestion-des-classes">7.5 Gestion des classes</h3>
+<p>Une classe regroupe un ensemble d'élèves, appartient à un cycle et dispose d'une salle. La liste des classes de l'établissement donne un aperçu rapide de chaque niveau, avec son effectif et son cycle d'appartenance.</p>
+<figure><img src="captures/05-liste-classes.png" alt="Figure 9 — Liste des classes" /></figure>
+<p><em>Figure 9 — Liste des classes de l'établissement.</em></p>
+<p>La fiche détaillée d'une classe est l'écran central du module. Elle réunit :</p>
+<ul>
+<li>les informations générales de la classe (libellé, cycle, effectif, salle) ;</li>
+<li>la désignation du <strong>professeur titulaire</strong>, c'est-à-dire l'enseignant responsable de cette classe. Un menu déroulant liste les enseignants disponibles ; un seul enseignant peut être titulaire d'une classe donnée, et un même enseignant ne peut être titulaire que d'une seule classe à la fois — si vous tentez d'affecter un enseignant déjà titulaire ailleurs, l'application vous avertit et vous invite à retirer d'abord son ancien titulariat ;</li>
+<li>la liste des élèves inscrits, avec un formulaire permettant d'en inscrire un nouveau directement depuis cette page.</li>
+</ul>
+<figure><img src="captures/06-detail-classe.png" alt="Figure 10 — Fiche détaillée d'une classe" /></figure>
+<p><em>Figure 10 — Fiche détaillée d'une classe : titulaire et élèves inscrits.</em></p>
+<p>Un élève ne peut jamais être inscrit dans deux classes en même temps : l'inscrire dans une nouvelle classe le retire automatiquement de la précédente. Ce mécanisme garantit qu'à tout moment, la situation scolaire de chaque élève reste cohérente.</p>
+<p>La suppression d'une classe entraîne le retrait propre de toutes les données qui lui sont rattachées — élèves inscrits, titulariat, évaluations — sans laisser d'information orpheline dans l'application.</p>
+<h3 id="76-gestion-des-cycles-et-du-calendrier-scolaire">7.6 Gestion des cycles et du calendrier scolaire</h3>
+<p>L'établissement est structuré autour de <strong>deux cycles fixes : le cycle maternel et le cycle primaire</strong>. Ces deux cycles existent par défaut et ne peuvent ni être supprimés ni renommés ; seule leur description peut être ajustée depuis le module Cycles.</p>
+<figure><img src="captures/11-gestion-cycles.png" alt="Figure 11 — Gestion des cycles" /></figure>
+<p><em>Figure 11 — Les deux cycles fixes de l'établissement.</em></p>
+<p>Ce module de calendrier comprend également, sous des onglets voisins, la gestion des <strong>années académiques</strong> (par exemple « 2025-2026 »), des <strong>trimestres</strong> qui la composent, et des <strong>sessions</strong> pédagogiques rattachées à chaque trimestre. Ces trois éléments suivent le même principe simple : un libellé, une période, et pour les trimestres et les sessions, un rattachement à l'élément parent (l'année académique pour un trimestre, le trimestre pour une session). Ils permettent de structurer le calendrier scolaire de l'établissement sur toute une année.</p>
+<h3 id="77-gestion-des-cours">7.7 Gestion des cours</h3>
+<p>Le module Cours est l'un des plus structurants de l'application. Un <strong>cours</strong> représente une matière — Mathématiques, Français, Sciences... — et présente une particularité importante : <strong>un même cours peut être enseigné dans plusieurs classes à la fois.</strong> Ainsi, les Mathématiques peuvent être enseignées en CP, en CE1 et en CE2 sous la forme d'un seul et même cours, plutôt que d'être dupliquées en trois fiches distinctes.</p>
+<p>La fiche détaillée d'un cours illustre bien ce principe : elle affiche l'ensemble des classes dans lesquelles le cours est actuellement enseigné, et pour chacune, les enseignants qui en ont la charge.</p>
+<figure><img src="captures/07-detail-cours.png" alt="Figure 12 — Fiche détaillée d'un cours" /></figure>
+<p><em>Figure 12 — Fiche détaillée d'un cours : classes associées et enseignants.</em></p>
+<p>Vous pouvez, à tout moment, associer le cours à une classe supplémentaire ou l'en retirer, directement depuis cette fiche, sans avoir à passer par le module Enseignants.</p>
+<p>À la création d'un nouveau cours, un ensemble de cases à cocher vous permet de sélectionner directement toutes les classes concernées :</p>
+<figure><img src="captures/08-creation-cours-multi-classe.png" alt="Figure 13 — Création d'un cours multi-classe" /></figure>
+<p><em>Figure 13 — Formulaire de création d'un cours : sélection de plusieurs classes.</em></p>
+<p>Retirer un cours d'une classe supprime automatiquement les affectations d'enseignants qui y étaient liées pour cette classe précise ; les affectations de ce même cours dans les autres classes restent, elles, inchangées.</p>
+<h3 id="78-gestion-des-évaluations">7.8 Gestion des évaluations</h3>
+<p>Une <strong>évaluation</strong> — appelée <em>épreuve</em> dans l'application — représente un contrôle ou un examen organisé pour une classe. Deux types d'épreuves sont proposés : <strong>Contrôle</strong> et <strong>Examen</strong>.</p>
+<p>La création d'une épreuve se fait en deux temps : vous choisissez d'abord la <strong>classe</strong> concernée, puis, si vous le souhaitez, le <strong>cours</strong> précis auquel l'épreuve se rattache parmi ceux enseignés dans cette classe. Ce second choix affine simplement le rattachement de l'épreuve ; il reste facultatif.</p>
+<figure><img src="captures/12-creation-evaluation.png" alt="Figure 14 — Création d'une évaluation" /></figure>
+<p><em>Figure 14 — Formulaire de création d'une évaluation.</em></p>
+<p>Vous renseignez également le libellé de l'épreuve, sa date, sa durée, son coefficient et sa <strong>note maximale</strong> (le barème sur lequel elle est notée, généralement 20). Cette note maximale est ensuite utilisée automatiquement par l'application pour empêcher la saisie d'une note supérieure au barème.</p>
+<p>Une fois l'épreuve créée, sa fiche détaillée affiche en temps réel les statistiques calculées à partir des notes saisies — moyenne de classe, meilleure note, note la plus faible — ainsi qu'un classement complet des élèves évalués, du premier au dernier.</p>
+<figure><img src="captures/13-detail-evaluation-classement.png" alt="Figure 15 — Fiche détaillée d'une évaluation" /></figure>
+<p><em>Figure 15 — Fiche détaillée d'une évaluation : statistiques et classement des élèves.</em></p>
+<h3 id="79-gestion-des-notes">7.9 Gestion des notes</h3>
+<p>La saisie des notes s'effectue soit depuis la fiche d'une épreuve (module Évaluations, décrit ci-dessus), soit depuis l'espace enseignant, où chaque enseignant retrouve la liste de ses propres épreuves et peut y saisir directement les notes de ses élèves, épreuve par épreuve.</p>
+<figure><img src="captures/21-saisie-notes-enseignant.png" alt="Figure 16 — Saisie des notes" /></figure>
+<p><em>Figure 16 — Saisie des notes depuis l'espace enseignant.</em></p>
+<p>Pour chaque élève de la classe concernée, vous renseignez la note obtenue et, si vous le souhaitez, une appréciation libre. Le rang de l'élève au sein de la classe se recalcule automatiquement à chaque nouvelle saisie, sans action supplémentaire de votre part.</p>
+<p>L'application refuse toute note supérieure à la note maximale définie pour l'épreuve, avec un message d'erreur explicite, ce qui élimine les erreurs de saisie fréquentes lors de la correction de nombreuses copies.</p>
+<h3 id="710-gestion-des-bulletins">7.10 Gestion des bulletins</h3>
+<p>Le bulletin d'un élève rassemble, sur un seul écran, sa <strong>moyenne générale</strong> ainsi que le détail de sa moyenne pour chacun des cours qu'il suit, avec le coefficient et le nombre d'évaluations pris en compte pour chacun.</p>
+<p>Ces moyennes sont calculées automatiquement par l'application à partir de l'ensemble des notes déjà saisies, pondérées par le coefficient de chaque épreuve puis par celui de chaque cours. Aucun calcul manuel n'est nécessaire.</p>
+<figure><img src="captures/14-bulletin-eleve.png" alt="Figure 17 — Bulletin d'un élève" /></figure>
+<p><em>Figure 17 — Bulletin d'un élève : moyenne générale et détail par cours.</em></p>
+<p>Côté administrateur, ce bulletin est consultable pour n'importe quel élève de l'établissement, en le sélectionnant dans une liste déroulante. Côté élève, chacun retrouve directement son propre bulletin, sans étape de sélection, dans son espace personnel.</p>
+<h3 id="711-gestion-des-emplois-du-temps">7.11 Gestion des emplois du temps</h3>
+<p>Ce module permet de définir, classe par classe, les créneaux horaires hebdomadaires : jour, heure de début, heure de fin, cours dispensé et, si besoin, salle occupée. Chaque créneau est associé à une classe et à un cours ; l'application vérifie automatiquement l'absence de chevauchement horaire pour une même classe ou une même salle, afin d'éviter les conflits de planning.</p>
+<figure><img src="captures/15-emploi-du-temps.png" alt="Figure 18 — Grille d'emploi du temps" /></figure>
+<p><em>Figure 18 — Grille hebdomadaire d'emploi du temps.</em></p>
+<p>Chaque enseignant retrouve, dans son propre espace, uniquement les créneaux correspondant aux cours qu'il assure dans les classes où il est affecté — sa grille personnelle se construit donc automatiquement à partir de ses affectations, sans configuration supplémentaire. Les élèves disposent du même principe : ils consultent la grille de leur classe depuis leur espace personnel.</p>
+<h3 id="712-gestion-des-paiements">7.12 Gestion des paiements</h3>
+<p>Ce module suit le règlement des frais de scolarité. Il repose sur quatre éléments complémentaires, accessibles par onglets :</p>
+<ul>
+<li><strong>Scolarités</strong> : l'inscription financière d'un élève pour une année académique donnée, dans une classe précise, avec les frais attendus (inscription et scolarité) et une éventuelle réduction.</li>
+<li><strong>Tranches</strong> : les échéances de paiement définies par l'établissement (par exemple Tranche 1, Tranche 2, Tranche 3), chacune avec son montant et sa date d'échéance.</li>
+<li><strong>Modes de paiement</strong> : le mode utilisé pour un règlement (espèces, virement bancaire, mobile money...).</li>
+<li><strong>Paiements</strong> : chaque versement effectivement enregistré, rattaché à une scolarité, une tranche et un mode de paiement.</li>
+</ul>
+<p>La liste des paiements permet de rechercher, filtrer par classe, mode ou statut, et de consulter en un coup d'œil le total encaissé.</p>
+<figure><img src="captures/16-liste-paiements.png" alt="Figure 19 — Liste des paiements" /></figure>
+<p><em>Figure 19 — Liste des paiements, avec recherche et filtres.</em></p>
+<p>Pour enregistrer un nouveau paiement, vous sélectionnez la scolarité de l'élève concerné, la tranche réglée, le mode de paiement utilisé, le montant versé, ainsi que, si vous le souhaitez, une référence et un numéro de reçu.</p>
+<figure><img src="captures/17-enregistrement-paiement.png" alt="Figure 20 — Enregistrement d'un paiement" /></figure>
+<p><em>Figure 20 — Formulaire d'enregistrement d'un paiement.</em></p>
+<p>Le statut de chaque scolarité — <strong>Impayé</strong>, <strong>Partiellement payé</strong> ou <strong>Payé</strong> — se met à jour automatiquement en fonction des versements enregistrés, sans calcul manuel. Un onglet Historique permet de consulter, pour un élève donné, l'ensemble de ses versements sur toute l'année.</p>
+<h3 id="713-gestion-de-la-discipline">7.13 Gestion de la discipline</h3>
+<p>Ce module permet de suivre le comportement des élèves, qu'il s'agisse de fautes ou de comportements positifs à valoriser.</p>
+<p>Il repose sur deux niveaux : un <strong>catalogue de types de discipline</strong> (par exemple « Retard répété », « Bagarre » ou « Participation exemplaire »), chacun défini par sa nature (faute ou comportement positif), son degré de gravité et le type de sanction habituellement associé ; et des <strong>rapports individuels</strong>, qui consignent un incident précis pour un élève donné.</p>
+<p>La liste des rapports donne une vue d'ensemble des incidents enregistrés, avec leur statut de traitement.</p>
+<figure><img src="captures/18-liste-rapports-discipline.png" alt="Figure 21 — Liste des rapports de discipline" /></figure>
+<p><em>Figure 21 — Liste des rapports de discipline.</em></p>
+<p>La création d'un rapport se fait en renseignant l'élève concerné, le type de discipline dans le catalogue, l'auteur du rapport, une description détaillée des faits, d'éventuels témoins et la sanction appliquée.</p>
+<figure><img src="captures/19-nouveau-rapport-discipline.png" alt="Figure 22 — Création d'un rapport de discipline" /></figure>
+<p><em>Figure 22 — Formulaire de création d'un rapport de discipline.</em></p>
+<p>Chaque rapport suit un statut de traitement — <strong>Ouvert</strong>, <strong>En traitement</strong>, <strong>Résolu</strong> ou <strong>Fermé</strong> — que vous pouvez faire évoluer au fil du suivi du dossier. Un module Historique permet de consulter, pour un élève donné, l'ensemble de son parcours disciplinaire.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="8-scénarios-dutilisation">8. Scénarios d'utilisation</h2>
+<p>Cette section propose des parcours pas à pas pour les opérations les plus courantes. Elle s'appuie sur les modules déjà présentés en détail dans la section précédente ; reportez-vous aux figures correspondantes en cas de besoin.</p>
+<h3 id="81-créer-un-élève">8.1 Créer un élève</h3>
+<ol>
+<li value="1">Depuis le menu latéral, ouvrez <strong>Gestion des élèves</strong>.</li>
+<li value="2">Cliquez sur <strong>Nouvel élève</strong>.</li>
+<li value="3">Renseignez l'identité de l'élève (nom, prénom, date et lieu de naissance, sexe, langue).</li>
+<li value="4">Renseignez un identifiant de connexion et un mot de passe : ce sont les identifiants que l'élève utilisera pour se connecter à son propre espace.</li>
+<li value="5">Choisissez sa classe : le cycle est déterminé automatiquement.</li>
+<li value="6">Cliquez sur <strong>Créer l'élève</strong>.</li>
+</ol>
+<p>L'élève apparaît immédiatement dans la liste et dans les effectifs de sa classe.</p>
+<h3 id="82-créer-une-classe">8.2 Créer une classe</h3>
+<ol>
+<li value="1">Depuis le menu latéral, ouvrez <strong>Gestion des classes</strong>.</li>
+<li value="2">Cliquez sur <strong>Nouvelle classe</strong>.</li>
+<li value="3">Renseignez le libellé de la classe (par exemple « CE2 ») et choisissez son cycle.</li>
+<li value="4">Validez la création.</li>
+</ol>
+<p>Une salle principale est automatiquement créée pour la nouvelle classe. Vous pouvez ensuite y inscrire des élèves et lui affecter un titulaire depuis sa fiche détaillée.</p>
+<h3 id="83-désigner-un-professeur-titulaire">8.3 Désigner un professeur titulaire</h3>
+<ol>
+<li value="1">Ouvrez la fiche détaillée de la classe concernée depuis <strong>Gestion des classes</strong>.</li>
+<li value="2">Dans la section <strong>Titulaire de la classe</strong>, sélectionnez l'enseignant souhaité dans le menu déroulant.</li>
+<li value="3">Cliquez sur <strong>Affecter comme titulaire</strong>.</li>
+</ol>
+<p>Deux cas particuliers peuvent se présenter :</p>
+<ul>
+<li><strong>La classe a déjà un titulaire</strong> (que vous souhaitez remplacer par un autre enseignant) : l'application vous demande simplement de confirmer le remplacement avant de l'appliquer.</li>
+<li><strong>L'enseignant choisi est déjà titulaire d'une autre classe</strong> : un même enseignant ne pouvant être titulaire que d'une seule classe à la fois, l'application refuse l'opération et vous invite à retirer d'abord son titulariat sur cette autre classe avant de recommencer.</li>
+</ul>
+<h3 id="84-créer-une-évaluation">8.4 Créer une évaluation</h3>
+<ol>
+<li value="1">Depuis le menu latéral (espace administrateur) ou depuis <strong>Évaluations</strong> (espace enseignant), cliquez sur <strong>Nouvelle épreuve</strong>.</li>
+<li value="2">Renseignez le libellé de l'épreuve et choisissez son type : <strong>Contrôle</strong> ou <strong>Examen</strong>.</li>
+<li value="3">Sélectionnez la classe concernée, puis, si nécessaire, le cours précis parmi ceux enseignés dans cette classe.</li>
+<li value="4">Renseignez la date, le coefficient et la note maximale.</li>
+<li value="5">Validez la création.</li>
+</ol>
+<p>L'épreuve est immédiatement disponible pour la saisie des notes.</p>
+<h3 id="85-saisir-les-notes">8.5 Saisir les notes</h3>
+<ol>
+<li value="1">Ouvrez la fiche de l'épreuve concernée.</li>
+<li value="2">Pour chaque élève de la classe, saisissez sa note et, si vous le souhaitez, une appréciation.</li>
+<li value="3">Cliquez sur <strong>Enregistrer</strong> (ou <strong>Mettre à jour</strong> si une note existait déjà) pour chaque élève.</li>
+</ol>
+<p>Le classement et les statistiques de l'épreuve (moyenne, meilleure note, note la plus faible) se mettent à jour automatiquement à chaque saisie.</p>
+<h3 id="86-enregistrer-un-paiement">8.6 Enregistrer un paiement</h3>
+<ol>
+<li value="1">Depuis le menu latéral, ouvrez <strong>Gestion des paiements</strong>.</li>
+<li value="2">Cliquez sur <strong>Nouveau paiement</strong>.</li>
+<li value="3">Sélectionnez la scolarité de l'élève concerné, la tranche réglée et le mode de paiement utilisé.</li>
+<li value="4">Renseignez le montant versé et, si vous le souhaitez, une référence et un numéro de reçu.</li>
+<li value="5">Validez l'enregistrement.</li>
+</ol>
+<p>Le statut de la scolarité (Impayé, Partiellement payé, Payé) se met à jour automatiquement.</p>
+<h3 id="87-consulter-un-bulletin">8.7 Consulter un bulletin</h3>
+<p><strong>Depuis l'espace administrateur :</strong></p>
+<ol>
+<li value="1">Ouvrez <strong>Gestion des évaluations</strong>, puis l'onglet <strong>Bulletins</strong>.</li>
+<li value="2">Sélectionnez l'élève souhaité dans la liste déroulante.</li>
+</ol>
+<p><strong>Depuis l'espace élève :</strong></p>
+<ol>
+<li value="1">Ouvrez directement le module <strong>Bulletins</strong> dans le menu latéral : votre propre bulletin s'affiche sans étape supplémentaire.</li>
+</ol>
+<p>Dans les deux cas, la moyenne générale et le détail par cours s'affichent instantanément, calculés à partir des notes déjà saisies.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="9-questions-fréquentes-faq">9. Questions fréquentes (FAQ)</h2>
+<p><strong>Un enseignant ou un élève a oublié son mot de passe : que faire ?</strong></p>
+<p>L'application ne dispose pas d'un système de réinitialisation automatique par e-mail. Un administrateur doit ouvrir la fiche de modification de la personne concernée et lui définir un nouveau mot de passe. Le champ mot de passe peut être laissé vide lors d'une modification si vous ne souhaitez pas le changer.</p>
+<p><strong>Peut-on inscrire un élève dans deux classes en même temps ?</strong></p>
+<p>Non. Inscrire un élève dans une nouvelle classe l'en retire automatiquement de son ancienne classe. Ce comportement est volontaire : il garantit qu'un élève n'appartient jamais qu'à une seule classe à la fois.</p>
+<p><strong>Un même enseignant peut-il être titulaire de deux classes ?</strong></p>
+<p>Non. Un enseignant peut enseigner dans plusieurs classes, mais n'être titulaire que d'une seule à la fois. Pour changer de titulaire, retirez d'abord l'ancien titulariat avant d'en affecter un nouveau.</p>
+<p><strong>Que se passe-t-il si je supprime une classe qui contient des élèves ?</strong></p>
+<p>La suppression d'une classe retire proprement toutes les données qui lui sont rattachées : élèves inscrits, titulariat, évaluations. Cette action est irréversible ; l'application vous demande toujours une confirmation avant de l'exécuter.</p>
+<p><strong>Un cours peut-il être enseigné par plusieurs enseignants différents ?</strong></p>
+<p>Oui, à condition que ce soit dans des classes différentes. Un même cours peut être assuré par un enseignant en CP et par un autre en CE1, par exemple.</p>
+<p><strong>Comment savoir si un paiement est complet ?</strong></p>
+<p>Le statut de la scolarité de l'élève (Impayé, Partiellement payé, Payé) est calculé et affiché automatiquement, sans qu'il soit nécessaire de faire le total manuellement.</p>
+<p><strong>Une note peut-elle dépasser le barème de l'épreuve ?</strong></p>
+<p>Non. L'application refuse systématiquement toute note supérieure à la note maximale définie pour l'épreuve, afin d'éviter les erreurs de saisie.</p>
+<p><strong>Un élève voit-il les notes ou les dossiers disciplinaires des autres élèves ?</strong></p>
+<p>Non. Chaque élève ne consulte que ses propres informations. De même, un enseignant ne voit que les classes dans lesquelles il est affecté.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="10-bonnes-pratiques">10. Bonnes pratiques</h2>
+<ul>
+<li><strong>Vérifiez l'orthographe des noms</strong> à la création d'un élève ou d'un enseignant : ces informations apparaissent ensuite sur les bulletins et les documents officiels.</li>
+<li><strong>Créez d'abord les cycles et les classes</strong>, avant de créer les cours et les enseignants, afin de pouvoir les rattacher directement lors de leur création.</li>
+<li><strong>Associez un cours à toutes ses classes dès sa création</strong> lorsque cela est possible : cela évite d'avoir à revenir modifier chaque cours individuellement par la suite.</li>
+<li><strong>Gardez une trace des identifiants distribués</strong> aux enseignants et aux élèves, en particulier lors de la mise en place initiale de l'application.</li>
+<li><strong>Traitez les rapports de discipline au fil de l'eau</strong> : un dossier laissé au statut « Ouvert » trop longtemps perd en pertinence pour le suivi de l'élève.</li>
+<li><strong>Vérifiez les notes saisies</strong> avant de les considérer comme définitives : bien que l'application empêche les erreurs de dépassement de barème, une erreur de frappe sur une note plausible (par exemple 12 au lieu de 21) reste possible et doit être relue.</li>
+<li><strong>Ne partagez jamais votre mot de passe</strong>, y compris entre collègues : chaque compte est personnel et permet de tracer les actions effectuées dans l'application.</li>
+</ul>
+<div style="page-break-after: always;"></div>
+<h2 id="11-conclusion">11. Conclusion</h2>
+<p>BrightPath Academy centralise, dans un espace unique, l'ensemble des tâches administratives et pédagogiques d'une école primaire : inscriptions, classes, cours, enseignants, évaluations, bulletins, emplois du temps, paiements et discipline. Les principes qui structurent l'application — un cours pouvant être enseigné dans plusieurs classes, un enseignant pouvant cumuler plusieurs affectations tout en n'étant titulaire que d'une seule classe, des calculs automatiques de moyennes et de statuts — visent à limiter les tâches répétitives et les erreurs de saisie, tout en gardant une utilisation simple au quotidien.</p>
+<p>Ce manuel couvre l'ensemble des fonctionnalités disponibles à ce jour. Pour toute question non traitée dans ce document, rapprochez-vous de l'administration de votre établissement.</p>
+<hr />
+<p><em>Fin du manuel utilisateur.</em></p>
+</body>
+</html>

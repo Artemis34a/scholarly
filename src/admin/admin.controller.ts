@@ -15,10 +15,13 @@ import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Administrateurs')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('admins')
 export class AdminController {
   constructor(private adminService: AdminService) {}

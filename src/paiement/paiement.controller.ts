@@ -21,10 +21,13 @@ import { UpdateScolariteDto } from './dto/update-scolarite.dto';
 import { CreatePaiementDto } from './dto/create-paiement.dto';
 import { UpdatePaiementDto } from './dto/update-paiement.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Paiements')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('paiements')
 export class PaiementController {
   constructor(private paiementService: PaiementService) {}
@@ -143,6 +146,7 @@ export class PaiementController {
 
   // ── Historique — route fixe ──────────────────────────────────────────
   @Get('eleves/:idEleve/historique')
+  @Roles('admin', 'eleve')
   @ApiOperation({ summary: "Historique complet des paiements d'un élève (toutes années)" })
   getHistoriqueEleve(@Param('idEleve', ParseIntPipe) idEleve: number) {
     return this.paiementService.getHistoriqueEleve(idEleve);
@@ -151,8 +155,8 @@ export class PaiementController {
   // ── Paiement — CRUD principal, routes paramétrées déclarées en dernier ──
   @Post()
   @ApiOperation({ summary: 'Enregistrer un paiement (vérifie le reste à payer)' })
-  createPaiement(@Body() dto: CreatePaiementDto, @Query('adminId') adminId?: number) {
-    return this.paiementService.createPaiement(dto, adminId ? +adminId : undefined);
+  createPaiement(@Body() dto: CreatePaiementDto) {
+    return this.paiementService.createPaiement(dto, dto.idAdmin);
   }
 
   @Get()

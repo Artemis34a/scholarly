@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsBoolean,
   IsNumber,
+  IsInt,
   IsDateString,
   IsEnum,
   Min,
@@ -26,11 +27,17 @@ export class CreateEpreuveDto {
   @IsEnum(TypeEpreuve)
   typeEpreuve: TypeEpreuve;
 
-  @ApiPropertyOptional({ example: 2, description: 'ID du cours (optionnel)' })
-  @IsNumber()
-  @Min(1)
+  @ApiProperty({ example: 1, description: "ID de la classe concernée par l'épreuve" })
+  @IsInt()
+  idClasse: number;
+
+  @ApiPropertyOptional({
+    example: 2,
+    description: "ID du couple cours/classe (ClasseCours) concerné, optionnel — doit correspondre à idClasse",
+  })
+  @IsInt()
   @IsOptional()
-  idCours?: number;
+  idClasseCours?: number;
 
   @ApiProperty({ example: '2024-05-15T08:00:00Z' })
   @IsDateString()

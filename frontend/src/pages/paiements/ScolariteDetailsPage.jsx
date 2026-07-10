@@ -171,7 +171,7 @@ function ScolariteDetailsPage() {
                         <p className="text-sm font-semibold text-slate-900">{formatMontant(paiement.montant)}</p>
                         <p className="text-xs text-slate-400">{formatDate(paiement.datePaiement)}</p>
                       </div>
-                      <p className="mt-1 text-xs text-slate-500">{paiement.tranche?.libelle} · {paiement.modePaiement?.libelle}</p>
+                      <p className="mt-1 text-xs text-slate-500">{paiement.tranche?.libelle ?? 'Versement libre'} · {paiement.modePaiement?.libelle}</p>
                     </Link>
                   ))}
                 </div>

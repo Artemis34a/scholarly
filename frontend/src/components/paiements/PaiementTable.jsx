@@ -30,7 +30,7 @@ function PaiementTable({ paiementsList, deletingId, onDelete }) {
               {paiement.scolarite?.eleve?.nom} {paiement.scolarite?.eleve?.prenom}
             </Link>
 
-            <div className="text-sm text-slate-600">{paiement.tranche?.libelle}</div>
+            <div className="text-sm text-slate-600">{paiement.tranche?.libelle ?? 'Versement libre'}</div>
 
             <div className="text-sm text-slate-600">{paiement.modePaiement?.libelle}</div>
 

@@ -52,9 +52,13 @@ export class CreateEnseignantDto {
   @IsOptional()
   lieuNaissance?: string;
 
-  @ApiProperty({ example: 1, description: 'Identifiant du cours enseigné' })
+  @ApiProperty({
+    example: 1,
+    description:
+      "Affectation d'enseignement initiale : ID du couple cours/classe (ClasseCours) que cet enseignant enseigne. D'autres affectations pourront être ajoutées ensuite depuis la fiche de l'enseignant.",
+  })
   @IsInt()
-  idCours: number;
+  idClasseCours: number;
 
   @ApiPropertyOptional({ example: true })
   @IsBoolean()

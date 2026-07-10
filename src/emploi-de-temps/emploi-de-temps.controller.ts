@@ -15,10 +15,13 @@ import { EmploiDeTempsService } from './emploi-de-temps.service';
 import { CreateEmploiDeTempsDto } from './dto/create-emploi-de-temps.dto';
 import { UpdateEmploiDeTempsDto } from './dto/update-emploi-de-temps.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Emploi du temps')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('emploi-de-temps')
 export class EmploiDeTempsController {
   constructor(private emploiService: EmploiDeTempsService) {}
@@ -64,12 +67,14 @@ export class EmploiDeTempsController {
   }
 
   @Get('enseignants/:idPers')
-  @ApiOperation({ summary: "Emploi du temps d'un enseignant (via son cours assigné)" })
+  @Roles('admin', 'enseignant')
+  @ApiOperation({ summary: "Emploi du temps d'un enseignant (via ses affectations)" })
   getGrilleEnseignant(@Param('idPers', ParseIntPipe) idPers: number) {
     return this.emploiService.getGrilleEnseignant(idPers);
   }
 
   @Get('eleves/:idEleve')
+  @Roles('admin', 'eleve')
   @ApiOperation({ summary: "Emploi du temps d'un élève (via sa classe)" })
   getGrilleEleve(@Param('idEleve', ParseIntPipe) idEleve: number) {
     return this.emploiService.getGrilleEleve(idEleve);

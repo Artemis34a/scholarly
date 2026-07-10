@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Card from '../../components/Card'
 import EleveStatusBadge from '../../components/eleves/EleveStatusBadge'
+import HistoriqueView from '../../components/paiements/HistoriqueView'
 import { elevesService } from '../../services/elevesService'
+import { paiementsService } from '../../services/paiementsService'
 import { BUTTON_ON_DARK } from '../../components/buttonStyles'
 import { formatDate, getEleveClasseLabel, getEleveCycleLabel, getSexeLabel } from './eleves.utils'
 
@@ -19,7 +21,9 @@ function EleveDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [eleve, setEleve] = useState(null)
+  const [historique, setHistorique] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [historiqueError, setHistoriqueError] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
 
@@ -45,6 +49,13 @@ function EleveDetailsPage() {
     }
 
     loadData()
+    paiementsService.getHistorique(id)
+      .then((data) => {
+        if (isMounted) setHistorique(data)
+      })
+      .catch((err) => {
+        if (isMounted) setHistoriqueError(err.message)
+      })
 
     return () => {
       isMounted = false
@@ -168,6 +179,45 @@ function EleveDetailsPage() {
             </div>
           </Card>
         </section>
+      )}
+
+      {eleve && (
+        <Card
+          title="Situation financiere"
+          subtitle="Montant total des frais, versements deja effectues et reste a payer, par annee academique."
+        >
+          <div className="mb-5 flex justify-end">
+            {historique?.parAnnee?.[0] ? (
+              <Link
+                to={`/dashboard/paiements/nouveau?idScolarite=${historique.parAnnee[0].idScolarite}`}
+                className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600"
+              >
+                Enregistrer un paiement
+              </Link>
+            ) : historique && !historiqueError ? (
+              <Link
+                to="/dashboard/paiements/scolarites/nouvelle"
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+              >
+                Creer une scolarite
+              </Link>
+            ) : null}
+          </div>
+
+          {historiqueError ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {historiqueError}
+            </div>
+          ) : !historique ? (
+            <div className="py-8 text-center text-slate-400">Chargement de la situation financiere...</div>
+          ) : historique.parAnnee.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              Aucune scolarite enregistree pour cet eleve : aucun frais n'a encore ete defini.
+            </p>
+          ) : (
+            <HistoriqueView historique={historique} eleveLabel="Annee academique" />
+          )}
+        </Card>
       )}
     </div>
   )

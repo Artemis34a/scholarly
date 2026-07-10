@@ -16,10 +16,13 @@ import { CreateClasseDto } from './dto/create-classe.dto';
 import { UpdateClasseDto } from './dto/update-classe.dto';
 import { AssignTitulaireDto } from './dto/assign-titulaire.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Classes')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('classes')
 export class ClasseController {
   constructor(private classeService: ClasseService) {}
@@ -31,6 +34,7 @@ export class ClasseController {
   }
 
   @Get()
+  @Roles('admin', 'enseignant')
   @ApiOperation({ summary: 'Lister les classes (paginé, recherche et filtre par cycle optionnels)' })
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'cycle', required: false, type: Number })
@@ -51,6 +55,7 @@ export class ClasseController {
   }
 
   @Get(':id')
+  @Roles('admin', 'enseignant')
   @ApiOperation({ summary: 'Obtenir une classe (cycle, salle principale, titulaire, cours)' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.classeService.findOne(id);
@@ -69,6 +74,7 @@ export class ClasseController {
   }
 
   @Get(':id/eleves')
+  @Roles('admin', 'enseignant')
   @ApiOperation({ summary: 'Lister les élèves inscrits dans la classe' })
   findEleves(@Param('id', ParseIntPipe) id: number) {
     return this.classeService.findEleves(id);

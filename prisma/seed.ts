@@ -154,6 +154,8 @@ async function main() {
   const grandeSection = classesList[2];
   const cp = classesList[4];
   const ce1 = classesList[5];
+  const ce2 = classesList[6];
+  const cm1 = classesList[7];
 
   const sallesList: any[] = [];
   for (const classe of classesList) {
@@ -166,34 +168,74 @@ async function main() {
   const salleCp = sallesList[4];
   const salleCe1 = sallesList[5];
 
-  const coursData = [
-    { libelle: 'Mathématiques', coefficient: 3, idClasse: cp.id, actif: true, description: 'Cours de base sur les nombres et les formes.', idAdmin: admin.id },
-    { libelle: 'Français', coefficient: 2, idClasse: cp.id, actif: true, description: 'Lecture, écriture et expression orale.', idAdmin: admin.id },
-    { libelle: 'Sciences', coefficient: 1.5, idClasse: ce1.id, actif: true, description: 'Découverte de la nature et de la physique simple.', idAdmin: admin.id },
+  // Un cours est désormais un catalogue de matière, enseignable dans plusieurs
+  // classes : Mathématiques est enseigné en CP, CE1 et CE2 ; Français en CP, CE1
+  // et CM1 ; Sciences seulement en CE1. La table de jonction ClasseCours porte
+  // cette association (voir CoursService).
+  const mathematiques = await prisma.cours.create({
+    data: { libelle: 'Mathématiques', coefficient: 3, actif: true, description: 'Cours de base sur les nombres et les formes.', idAdmin: admin.id },
+  });
+  const francais = await prisma.cours.create({
+    data: { libelle: 'Français', coefficient: 2, actif: true, description: 'Lecture, écriture et expression orale.', idAdmin: admin.id },
+  });
+  const sciences = await prisma.cours.create({
+    data: { libelle: 'Sciences', coefficient: 1.5, actif: true, description: 'Découverte de la nature et de la physique simple.', idAdmin: admin.id },
+  });
+
+  const classeCoursData: { idClasse: number; idCours: number }[] = [
+    { idClasse: cp.id, idCours: mathematiques.id },
+    { idClasse: ce1.id, idCours: mathematiques.id },
+    { idClasse: ce2.id, idCours: mathematiques.id },
+    { idClasse: cp.id, idCours: francais.id },
+    { idClasse: ce1.id, idCours: francais.id },
+    { idClasse: cm1.id, idCours: francais.id },
+    { idClasse: ce1.id, idCours: sciences.id },
   ];
 
-  const coursList: any[] = [];
-  for (const cours of coursData) {
-    const created = await prisma.cours.create({ data: cours });
-    coursList.push(created);
+  const classeCoursList: any[] = [];
+  for (const cc of classeCoursData) {
+    const created = await prisma.classeCours.create({ data: { ...cc, idAdmin: admin.id } });
+    classeCoursList.push(created);
   }
+  const mathsCp = classeCoursList[0];
+  const mathsCe1 = classeCoursList[1];
+  const mathsCe2 = classeCoursList[2];
+  const francaisCp = classeCoursList[3];
+  const francaisCe1 = classeCoursList[4];
+  // classeCoursList[5] (Français en CM1) est proposé mais volontairement laissé
+  // sans enseignant affecté dans ce jeu de démo.
 
-  console.log('Création des enseignants et titulaires...');
+  console.log('Création des enseignants, affectations et titulaires...');
+  // Sophie enseigne les mathématiques en CP, CE1 et CE2 (plusieurs classes pour
+  // un même enseignant), mais n'est titulaire que du CP : le titulariat (modèle
+  // Titulaire) reste indépendant des affectations d'enseignement.
   const enseignant1 = await prisma.enseignant.create({
     data: {
       idPers: personnes[2].id,
-      idCours: coursList[0].id,
       actif: true,
       idAdmin: admin.id,
+      affectations: {
+        create: [
+          { idClasseCours: mathsCp.id, idAdmin: admin.id },
+          { idClasseCours: mathsCe1.id, idAdmin: admin.id },
+          { idClasseCours: mathsCe2.id, idAdmin: admin.id },
+        ],
+      },
     },
   });
 
+  // Paul enseigne le français en CP et CE1.
   const enseignant2 = await prisma.enseignant.create({
     data: {
       idPers: personnes[3].id,
-      idCours: coursList[1].id,
       actif: true,
       idAdmin: admin.id,
+      affectations: {
+        create: [
+          { idClasseCours: francaisCp.id, idAdmin: admin.id },
+          { idClasseCours: francaisCe1.id, idAdmin: admin.id },
+        ],
+      },
     },
   });
 

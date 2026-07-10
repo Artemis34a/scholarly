@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { assertDateNaissanceValide } from '../shared/validators';
 import { CreateEleveDto } from './dto/create-eleve.dto';
 import { UpdateEleveDto } from './dto/update-eleve.dto';
 
@@ -40,6 +41,7 @@ export class EleveService {
   async create(dto: CreateEleveDto) {
     await this.assertAdminExiste(dto.idAdmin);
     await this.assertUsernameAvailable(dto.username);
+    assertDateNaissanceValide(dto.dateNaissance);
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     return this.prisma.eleve.create({
@@ -105,6 +107,7 @@ export class EleveService {
     if (dto.username && dto.username !== eleve.username) {
       await this.assertUsernameAvailable(dto.username);
     }
+    if (dto.dateNaissance !== undefined) assertDateNaissanceValide(dto.dateNaissance);
 
     return this.prisma.eleve.update({
       where: { id },

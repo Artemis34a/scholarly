@@ -118,7 +118,7 @@ function PaiementDetailsPage() {
               <InfoRow label="Eleve" value={`${paiement.scolarite?.eleve?.nom} ${paiement.scolarite?.eleve?.prenom}`} />
               <InfoRow label="Annee academique" value={paiement.scolarite?.anneeAcademique?.libelle} />
               <InfoRow label="Classe" value={paiement.scolarite?.classe?.libelle} />
-              <InfoRow label="Tranche" value={paiement.tranche?.libelle} />
+              <InfoRow label="Tranche" value={paiement.tranche?.libelle ?? 'Versement libre'} />
               <InfoRow label="Mode de paiement" value={paiement.modePaiement?.libelle} />
               <InfoRow label="Montant" value={formatMontant(paiement.montant)} />
               <InfoRow label="Date" value={formatDate(paiement.datePaiement)} />

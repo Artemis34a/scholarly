@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TypeEpreuve } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEpreuveDto } from './dto/create-epreuve.dto';
@@ -24,12 +24,18 @@ export interface FindAllEvaluationsParams {
   limit?: number;
 }
 
-// Relations déjà présentes dans schema.prisma, exposées ici via include (aucune
-// nouvelle relation créée) :
-//   Evaluation -> Epreuve -> Cours -> Classe, Cours <- Enseignant[]
-//   Evaluation -> Eleve
+// Une épreuve appartient toujours à une classe précise (Epreuve.idClasse) et,
+// optionnellement, à un cours enseigné dans cette classe (Epreuve.idClasseCours,
+// qui pointe vers la combinaison ClasseCours — jamais un idCours brut, pour ne pas
+// pouvoir associer un cours qui n'est pas réellement enseigné dans cette classe).
 const EPREUVE_INCLUDE = {
-  cours: { include: { classe: true, enseignants: { include: { personne: true } } } },
+  classe: { include: { cycle: true } },
+  classeCours: {
+    include: {
+      cours: true,
+      affectations: { include: { enseignant: { include: { personne: true } } } },
+    },
+  },
 };
 
 const EVALUATION_INCLUDE = {
@@ -41,12 +47,29 @@ const EVALUATION_INCLUDE = {
 export class EvaluationService {
   constructor(private prisma: PrismaService) {}
 
+  private async assertClasseExiste(idClasse: number) {
+    const classe = await this.prisma.classe.findUnique({ where: { id: idClasse } });
+    if (!classe) throw new NotFoundException(`Classe #${idClasse} introuvable`);
+  }
+
+  // Si un cours est précisé, il doit vraiment être enseigné dans la classe de
+  // l'épreuve : on vérifie que le ClasseCours choisi pointe bien vers cette classe,
+  // pour ne jamais créer d'épreuve avec une paire cours/classe incohérente.
+  private async assertClasseCoursCoherent(idClasseCours: number, idClasse: number) {
+    const classeCours = await this.prisma.classeCours.findUnique({ where: { id: idClasseCours } });
+    if (!classeCours) throw new NotFoundException(`Cours/classe #${idClasseCours} introuvable`);
+    if (classeCours.idClasse !== idClasse) {
+      throw new BadRequestException(
+        "Le cours choisi n'est pas enseigné dans la classe sélectionnée pour cette épreuve.",
+      );
+    }
+  }
+
   // ── Epreuve ──────────────────────────────────────────────────────
   async createEpreuve(dto: CreateEpreuveDto, idAdmin?: number) {
-    if (dto.idCours) {
-      await this.prisma.cours.findUniqueOrThrow({
-        where: { id: dto.idCours },
-      });
+    await this.assertClasseExiste(dto.idClasse);
+    if (dto.idClasseCours) {
+      await this.assertClasseCoursCoherent(dto.idClasseCours, dto.idClasse);
     }
     return this.prisma.epreuve.create({
       data: { ...dto, idAdmin },
@@ -62,8 +85,8 @@ export class EvaluationService {
     const where = {
       ...(params.search ? { libelle: { contains: params.search } } : {}),
       ...(params.typeEpreuve ? { typeEpreuve: params.typeEpreuve } : {}),
-      ...(params.idCours ? { idCours: params.idCours } : {}),
-      ...(params.idClasse ? { cours: { idClasse: params.idClasse } } : {}),
+      ...(params.idClasse ? { idClasse: params.idClasse } : {}),
+      ...(params.idCours ? { classeCours: { idCours: params.idCours } } : {}),
     };
 
     const shouldPaginate = params.page !== undefined || params.limit !== undefined;
@@ -115,10 +138,15 @@ export class EvaluationService {
   }
 
   async updateEpreuve(id: number, dto: UpdateEpreuveDto) {
-    await this.findOneEpreuve(id);
-    if (dto.idCours) {
-      await this.prisma.cours.findUniqueOrThrow({ where: { id: dto.idCours } });
+    const existing = await this.findOneEpreuve(id);
+    if (dto.idClasse) await this.assertClasseExiste(dto.idClasse);
+
+    const idClasseCours = dto.idClasseCours !== undefined ? dto.idClasseCours : existing.idClasseCours;
+    const idClasse = dto.idClasse ?? existing.idClasse;
+    if (idClasseCours) {
+      await this.assertClasseCoursCoherent(idClasseCours, idClasse);
     }
+
     return this.prisma.epreuve.update({ where: { id }, data: dto, include: EPREUVE_INCLUDE });
   }
 
@@ -151,8 +179,18 @@ export class EvaluationService {
   }
 
   // ── Evaluation (notes) ───────────────────────────────────────────
+  private assertNoteValide(note: number | undefined | null, noteMax: number) {
+    if (note === undefined || note === null) return;
+    if (note > noteMax) {
+      throw new BadRequestException(
+        `La note (${note}) ne peut pas dépasser la note maximale de l'épreuve (${noteMax}).`,
+      );
+    }
+  }
+
   async createEvaluation(dto: CreateEvaluationDto, idAdmin?: number) {
-    await this.findOneEpreuve(dto.idEpreuve);
+    const epreuve = await this.findOneEpreuve(dto.idEpreuve);
+    this.assertNoteValide(dto.note, epreuve.noteMax);
 
     await this.prisma.eleve.findUniqueOrThrow({
       where: { id: dto.idEleve },
@@ -174,7 +212,7 @@ export class EvaluationService {
     const where = {
       ...(params.idEleve ? { idEleve: params.idEleve } : {}),
       ...(params.idEpreuve ? { idEpreuve: params.idEpreuve } : {}),
-      ...(params.idClasse ? { epreuve: { cours: { idClasse: params.idClasse } } } : {}),
+      ...(params.idClasse ? { epreuve: { idClasse: params.idClasse } } : {}),
       ...(params.search
         ? {
             OR: [
@@ -219,7 +257,9 @@ export class EvaluationService {
   async updateEvaluation(id: number, dto: UpdateEvaluationDto) {
     const existing = await this.findOneEvaluation(id);
 
-    if (dto.idEpreuve) await this.findOneEpreuve(dto.idEpreuve);
+    const epreuve = dto.idEpreuve ? await this.findOneEpreuve(dto.idEpreuve) : existing.epreuve;
+    this.assertNoteValide(dto.note, epreuve.noteMax);
+
     if (dto.idEleve) {
       await this.prisma.eleve.findUniqueOrThrow({ where: { id: dto.idEleve } });
     }
@@ -270,7 +310,7 @@ export class EvaluationService {
     await this.prisma.cours.findUniqueOrThrow({ where: { id: idCours } });
 
     const evaluations = await this.prisma.evaluation.findMany({
-      where: { idEleve, note: { not: null }, epreuve: { idCours } },
+      where: { idEleve, note: { not: null }, epreuve: { classeCours: { idCours } } },
       include: { epreuve: true },
     });
 
@@ -295,7 +335,7 @@ export class EvaluationService {
 
     const evaluations = await this.prisma.evaluation.findMany({
       where: { idEleve, note: { not: null } },
-      include: { epreuve: { include: { cours: true } } },
+      include: { epreuve: { include: { classeCours: { include: { cours: true } } } } },
     });
 
     const parCoursMap = new Map<
@@ -304,7 +344,7 @@ export class EvaluationService {
     >();
 
     for (const evaluation of evaluations) {
-      const cours = evaluation.epreuve.cours;
+      const cours = evaluation.epreuve.classeCours?.cours;
       if (!cours) continue;
 
       const entry = parCoursMap.get(cours.id) ?? {

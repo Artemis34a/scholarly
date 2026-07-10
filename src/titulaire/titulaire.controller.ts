@@ -4,10 +4,13 @@ import { TitulaireService } from './titulaire.service';
 import { CreateTitulaireDto } from './dto/create-titulaire.dto';
 import { UpdateTitulaireDto } from './dto/update-titulaire.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Titulaires')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('titulaires')
 export class TitulaireController {
   constructor(private titulaireService: TitulaireService) {}

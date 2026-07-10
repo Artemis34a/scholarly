@@ -4,10 +4,13 @@ import { TrimestreService } from './trimestre.service';
 import { CreateTrimestreDto } from './dto/create-trimestre.dto';
 import { UpdateTrimestreDto } from './dto/update-trimestre.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Trimestres')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('trimestres')
 export class TrimestreController {
   constructor(private triService: TrimestreService) {}

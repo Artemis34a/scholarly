@@ -4,10 +4,13 @@ import { EleveService } from './eleve.service';
 import { CreateEleveDto } from './dto/create-eleve.dto';
 import { UpdateEleveDto } from './dto/update-eleve.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Élèves')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('eleves')
 export class EleveController {
   constructor(private eleveService: EleveService) {}
@@ -38,6 +41,7 @@ export class EleveController {
   findActifs() { return this.eleveService.findActifs(); }
 
   @Get(':matricule')
+  @Roles('admin', 'eleve')
   @ApiOperation({ summary: 'Obtenir un élève par matricule' })
   findOne(@Param('matricule', ParseIntPipe) matricule: number) {
     return this.eleveService.findOne(matricule);

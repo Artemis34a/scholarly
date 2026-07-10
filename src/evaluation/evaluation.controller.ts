@@ -23,10 +23,13 @@ import { UpdateEpreuveDto } from './dto/update-epreuve.dto';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
 import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Évaluations')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin', 'enseignant')
 @Controller('evaluations')
 export class EvaluationController {
   constructor(private evaluationService: EvaluationService) {}
@@ -113,6 +116,7 @@ export class EvaluationController {
   }
 
   @Get('notes')
+  @Roles('admin', 'enseignant', 'eleve')
   @ApiOperation({ summary: 'Lister les évaluations (paginé, recherche et filtres optionnels)' })
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'eleveId', required: false, type: Number })
@@ -139,6 +143,7 @@ export class EvaluationController {
   }
 
   @Get('notes/:id')
+  @Roles('admin', 'enseignant', 'eleve')
   @ApiOperation({ summary: 'Obtenir une évaluation par ID' })
   findOneEvaluation(@Param('id', ParseIntPipe) id: number) {
     return this.evaluationService.findOneEvaluation(id);
@@ -161,6 +166,7 @@ export class EvaluationController {
 
   // ── Moyennes ─────────────────────────────────────────────────────
   @Get('eleves/:idEleve/moyenne-cours/:idCours')
+  @Roles('admin', 'enseignant', 'eleve')
   @ApiOperation({ summary: "Moyenne pondérée d'un élève sur un cours" })
   getMoyenneEleveCours(
     @Param('idEleve', ParseIntPipe) idEleve: number,
@@ -170,6 +176,7 @@ export class EvaluationController {
   }
 
   @Get('eleves/:idEleve/bulletin')
+  @Roles('admin', 'enseignant', 'eleve')
   @ApiOperation({ summary: "Bulletin d'un élève : moyenne par cours et moyenne générale" })
   getBulletinEleve(@Param('idEleve', ParseIntPipe) idEleve: number) {
     return this.evaluationService.getBulletinEleve(idEleve);

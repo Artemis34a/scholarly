@@ -37,15 +37,15 @@ function RoleShell({ title, subtitle, basePath, modules }) {
                     to={to}
                     end={module.id === 'dashboard'}
                     className={({ isActive }) =>
-                      `group flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                      `group flex flex-col gap-0.5 rounded-2xl border px-4 py-3 text-sm transition ${
                         isActive
                           ? 'border-sky-300/40 bg-white text-slate-900 shadow-[0_16px_45px_-30px_rgba(255,255,255,0.78)]'
                           : 'border-white/8 bg-white/6 text-slate-200 hover:border-white/16 hover:bg-white/12 hover:text-white'
                       }`
                     }
                   >
-                    <span className="font-medium">{module.label}</span>
-                    <span className="text-xs uppercase tracking-[0.22em] text-slate-400 group-[.active]:text-slate-500">
+                    <span className="font-medium leading-snug">{module.label}</span>
+                    <span className="text-[0.65rem] uppercase tracking-[0.22em] text-slate-400 group-[.active]:text-slate-500">
                       {module.shortLabel}
                     </span>
                   </NavLink>

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Card from '../../components/Card'
 import PaiementForm from '../../components/paiements/PaiementForm'
+import { useAuth } from '../../context/AuthContext'
 import { paiementsService } from '../../services/paiementsService'
 import { buildPaiementPayload, paiementInitialValues } from './paiements.utils'
 
 function PaiementCreatePage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const prefillIdScolarite = searchParams.get('idScolarite')
   const [values, setValues] = useState(
@@ -78,7 +80,7 @@ function PaiementCreatePage() {
     setError('')
 
     try {
-      await paiementsService.create(buildPaiementPayload(values))
+      await paiementsService.create(buildPaiementPayload(values, user?.id))
       navigate('/dashboard/paiements')
     } catch (err) {
       setError(err.message)

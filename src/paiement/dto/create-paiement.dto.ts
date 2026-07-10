@@ -6,9 +6,14 @@ export class CreatePaiementDto {
   @IsInt()
   idScolarite: number;
 
-  @ApiProperty({ example: 1, description: 'ID de la tranche' })
+  @ApiPropertyOptional({
+    example: 1,
+    description:
+      "ID de la tranche du catalogue (optionnel) : laisser vide pour un versement libre, non rattaché à une échéance prédéfinie.",
+  })
   @IsInt()
-  idTranche: number;
+  @IsOptional()
+  idTranche?: number;
 
   @ApiProperty({ example: 1, description: 'ID du mode de paiement' })
   @IsInt()
@@ -38,4 +43,9 @@ export class CreatePaiementDto {
   @IsString()
   @IsOptional()
   recuNumero?: string;
+
+  @ApiPropertyOptional({ example: 1, description: "ID de l'administrateur ayant enregistré le paiement" })
+  @IsInt()
+  @IsOptional()
+  idAdmin?: number;
 }

@@ -22,10 +22,13 @@ import { UpdateDisciplineDto } from './dto/update-discipline.dto';
 import { CreateRapportDto } from './dto/create-rapport.dto';
 import { UpdateRapportDto } from './dto/update-rapport.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Discipline')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('discipline')
 export class DisciplineController {
   constructor(private disciplineService: DisciplineService) {}
@@ -132,6 +135,7 @@ export class DisciplineController {
 
   // ── Historique — également une route fixe, avant ':id' ──────────────────
   @Get('eleves/:idEleve/historique')
+  @Roles('admin', 'eleve')
   @ApiOperation({ summary: "Historique disciplinaire complet d'un élève" })
   getHistoriqueEleve(@Param('idEleve', ParseIntPipe) idEleve: number) {
     return this.disciplineService.getHistoriqueEleve(idEleve);

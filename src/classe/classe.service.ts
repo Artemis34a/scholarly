@@ -25,8 +25,10 @@ const CLASSE_INCLUDE = {
       _count: { select: { frequentes: true } },
     },
   },
-  cours: {
-    select: { id: true, libelle: true, coefficient: true, actif: true },
+  classesCours: {
+    include: {
+      cours: { select: { id: true, libelle: true, coefficient: true, actif: true } },
+    },
   },
 };
 

@@ -78,13 +78,12 @@ function PaiementForm({
           placeholder="Choisir une scolarite"
         />
         <SelectField
-          label="Tranche"
+          label="Tranche (optionnelle)"
           name="idTranche"
           value={values.idTranche}
           onChange={onChange}
-          required
           options={tranches.map((t) => ({ value: `${t.id}`, label: t.libelle }))}
-          placeholder="Choisir une tranche"
+          placeholder="Versement libre (aucune tranche)"
         />
         <SelectField
           label="Mode de paiement"

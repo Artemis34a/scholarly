@@ -12,9 +12,13 @@ export interface FindAllEmploiParams {
   limit?: number;
 }
 
+// Qui enseigne un créneau donné n'est plus directement lisible depuis Cours (un
+// cours peut être enseigné par des enseignants différents selon la classe) : on
+// se limite ici à afficher classe/cours/salle, et on retrouve l'enseignant via
+// getGrilleEnseignant ci-dessous, en passant par ses Affectation(s).
 const EMPLOI_INCLUDE = {
   classe: { include: { cycle: true } },
-  cours: { include: { enseignants: { include: { personne: true } } } },
+  cours: true,
   salle: true,
 };
 
@@ -178,14 +182,28 @@ export class EmploiDeTempsService {
     });
   }
 
-  // Vue "emploi du temps enseignant" : créneaux des cours que cet enseignant assure
-  // (Enseignant.idPers -> idCours, relation déjà existante, pas de nouvelle relation).
+  // Vue "emploi du temps enseignant" : créneaux des cours que cet enseignant assure,
+  // dans les classes précises où il les enseigne (Enseignant -> Affectation ->
+  // ClasseCours -> cours/classe). Un enseignant pouvant désormais avoir plusieurs
+  // affectations, on ne retient que les créneaux correspondant exactement à l'une
+  // de ses paires (cours, classe) affectées — pas seulement au même cours enseigné
+  // ailleurs par quelqu'un d'autre.
   async getGrilleEnseignant(idPers: number) {
-    const enseignant = await this.prisma.enseignant.findUnique({ where: { idPers } });
+    const enseignant = await this.prisma.enseignant.findUnique({
+      where: { idPers },
+      include: { affectations: { include: { classeCours: true } } },
+    });
     if (!enseignant) throw new NotFoundException(`Aucun enseignant pour la personne #${idPers}`);
 
+    const paires = enseignant.affectations.map((a) => ({
+      idCours: a.classeCours.idCours,
+      idClasse: a.classeCours.idClasse,
+    }));
+
+    if (paires.length === 0) return [];
+
     return this.prisma.emploiDuTemps.findMany({
-      where: { idCours: enseignant.idCours },
+      where: { OR: paires.map(({ idCours, idClasse }) => ({ idCours, idClasse })) },
       include: EMPLOI_INCLUDE,
       orderBy: [{ jour: 'asc' }, { heureDebut: 'asc' }],
     });

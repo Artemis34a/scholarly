@@ -231,12 +231,20 @@ export class PaiementService {
   }
 
   // ── Paiement (transactions) ───────────────────────────────────────
+  // Une tranche est purement informative : un versement peut être libre (aucune
+  // tranche), pour permettre à un établissement d'encaisser un nombre illimité
+  // de règlements, de montants arbitraires, sans devoir prédéfinir un catalogue
+  // d'échéances au préalable.
   async createPaiement(dto: CreatePaiementDto, idAdmin?: number) {
+    const { idAdmin: _ignored, ...rest } = dto;
+
     const scolarite = await this.prisma.scolarite.findUnique({ where: { id: dto.idScolarite } });
     if (!scolarite) throw new NotFoundException(`Scolarité #${dto.idScolarite} introuvable`);
 
-    const tranche = await this.prisma.tranche.findUnique({ where: { id: dto.idTranche } });
-    if (!tranche) throw new NotFoundException(`Tranche #${dto.idTranche} introuvable`);
+    if (dto.idTranche) {
+      const tranche = await this.prisma.tranche.findUnique({ where: { id: dto.idTranche } });
+      if (!tranche) throw new NotFoundException(`Tranche #${dto.idTranche} introuvable`);
+    }
 
     const mode = await this.prisma.modePaiement.findUnique({ where: { id: dto.idModePaiement } });
     if (!mode) throw new NotFoundException(`Mode de paiement #${dto.idModePaiement} introuvable`);
@@ -250,7 +258,7 @@ export class PaiementService {
 
     return this.prisma.paiement.create({
       data: {
-        ...dto,
+        ...rest,
         datePaiement: dto.datePaiement ? new Date(dto.datePaiement) : undefined,
         idAdmin,
       },

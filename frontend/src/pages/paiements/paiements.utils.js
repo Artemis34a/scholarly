@@ -159,16 +159,17 @@ export function createPaiementFormValues(paiement) {
   }
 }
 
-export function buildPaiementPayload(values) {
+export function buildPaiementPayload(values, adminId) {
   return {
     idScolarite: Number(values.idScolarite),
-    idTranche: Number(values.idTranche),
+    idTranche: values.idTranche ? Number(values.idTranche) : undefined,
     idModePaiement: Number(values.idModePaiement),
     montant: Number(values.montant),
     datePaiement: values.datePaiement ? new Date(values.datePaiement).toISOString() : undefined,
     reference: values.reference.trim() || undefined,
     commentaire: values.commentaire.trim() || undefined,
     recuNumero: values.recuNumero.trim() || undefined,
+    idAdmin: adminId ?? undefined,
   }
 }
 
