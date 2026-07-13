@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Card from '../../components/Card'
 import EmploiForm from '../../components/emploi-du-temps/EmploiForm'
@@ -45,17 +45,16 @@ function EmploiCreatePage() {
   // "salle" : pas besoin d'un service Salle dedie.
   const selectedClasse = classes.find((classe) => `${classe.id}` === values.idClasse)
   const salles = selectedClasse?.salles ?? []
-  const coursFiltres = useMemo(
-    () => (values.idClasse ? coursList.filter((cours) => `${cours.idClasse}` === values.idClasse) : coursList),
-    [coursList, values.idClasse],
-  )
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
     setValues((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
-      ...(name === 'idClasse' ? { idCours: '', idSalle: '' } : {}),
+      // Changer la classe invalide le cours et l'enseignant choisis (ils sont
+      // filtres sur la classe precedente) ; changer le cours invalide l'enseignant.
+      ...(name === 'idClasse' ? { idCours: '', idEnseignant: '', idSalle: '' } : {}),
+      ...(name === 'idCours' ? { idEnseignant: '' } : {}),
     }))
   }
 
@@ -81,10 +80,10 @@ function EmploiCreatePage() {
       ) : (
         <EmploiForm
           title="Creer un creneau"
-          subtitle="Les conflits de classe et de salle sont detectes automatiquement."
+          subtitle="Choisissez une classe, un cours qui lui est affecte, puis un enseignant qui l'assure. Les conflits de classe, d'enseignant et de salle sont detectes automatiquement."
           values={values}
           classes={classes}
-          cours={coursFiltres}
+          cours={coursList}
           salles={salles}
           submitting={submitting}
           error={error}

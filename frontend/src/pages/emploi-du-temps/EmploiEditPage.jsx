@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Card from '../../components/Card'
 import EmploiForm from '../../components/emploi-du-temps/EmploiForm'
@@ -49,17 +49,14 @@ function EmploiEditPage() {
 
   const selectedClasse = classes.find((classe) => values && `${classe.id}` === values.idClasse)
   const salles = selectedClasse?.salles ?? []
-  const coursFiltres = useMemo(
-    () => (values?.idClasse ? coursList.filter((cours) => `${cours.idClasse}` === values.idClasse) : coursList),
-    [coursList, values],
-  )
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
     setValues((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
-      ...(name === 'idClasse' ? { idCours: '', idSalle: '' } : {}),
+      ...(name === 'idClasse' ? { idCours: '', idEnseignant: '', idSalle: '' } : {}),
+      ...(name === 'idCours' ? { idEnseignant: '' } : {}),
     }))
   }
 
@@ -85,10 +82,10 @@ function EmploiEditPage() {
       ) : (
         <EmploiForm
           title="Modifier le creneau"
-          subtitle="Les conflits de classe et de salle sont revalides automatiquement."
+          subtitle="Toutes les regles metier (classe, cours affecte, enseignant affecte, conflits) sont revalidees automatiquement."
           values={values}
           classes={classes}
-          cours={coursFiltres}
+          cours={coursList}
           salles={salles}
           submitting={submitting}
           error={error}

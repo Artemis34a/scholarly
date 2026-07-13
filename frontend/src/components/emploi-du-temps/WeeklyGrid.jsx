@@ -9,6 +9,11 @@ function SlotCard({ slot, onEdit, onDelete }) {
       </p>
       <p className="mt-1 text-sm font-semibold text-slate-900">{slot.cours?.libelle}</p>
       <p className="mt-1 text-xs text-slate-500">{slot.classe?.libelle}</p>
+      {slot.enseignant?.personne && (
+        <p className="mt-1 text-xs font-medium text-sky-700">
+          {slot.enseignant.personne.nom} {slot.enseignant.personne.prenom}
+        </p>
+      )}
       {slot.salle && <p className="text-xs text-slate-400">{slot.salle.libelle}</p>}
       {(onEdit || onDelete) && (
         <div className="mt-2 flex gap-2">
