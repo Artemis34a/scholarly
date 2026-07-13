@@ -6,6 +6,11 @@ import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
 import { getMesAffectations } from './teacher.utils'
 
+// evaluationsService.epreuves.findAll() est deja restreint par le backend aux
+// epreuves de l'enseignant connecte : le regroupement par affectation ci-dessous
+// sert uniquement a organiser l'affichage (une carte par matiere/classe, y compris
+// celles sans encore aucune epreuve), pas a filtrer la visibilite des donnees.
+
 function TeacherStatsPage() {
   const { user } = useAuth()
   const [coursList, setCoursList] = useState([])

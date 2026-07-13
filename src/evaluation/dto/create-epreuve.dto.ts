@@ -33,11 +33,21 @@ export class CreateEpreuveDto {
 
   @ApiPropertyOptional({
     example: 2,
-    description: "ID du couple cours/classe (ClasseCours) concerné, optionnel — doit correspondre à idClasse",
+    description:
+      "ID du couple cours/classe (ClasseCours) concerné — doit correspondre à idClasse. Obligatoire pour un enseignant (voir EvaluationService.createEpreuve) ; optionnel pour un administrateur.",
   })
   @IsInt()
   @IsOptional()
   idClasseCours?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description:
+      "ID de l'enseignant propriétaire de l'épreuve. Ignoré si l'appelant est lui-même un enseignant (déduit automatiquement de son compte, jamais accepté depuis le corps de la requête pour cette identité) ; utilisable par un administrateur pour assigner l'épreuve à un enseignant précis.",
+  })
+  @IsInt()
+  @IsOptional()
+  idEnseignant?: number;
 
   @ApiProperty({ example: '2024-05-15T08:00:00Z' })
   @IsDateString()
@@ -63,4 +73,9 @@ export class CreateEpreuveDto {
   @IsBoolean()
   @IsOptional()
   actif?: boolean;
+
+  @ApiPropertyOptional({ example: 1, description: "ID de l'administrateur ayant créé l'épreuve" })
+  @IsInt()
+  @IsOptional()
+  idAdmin?: number;
 }

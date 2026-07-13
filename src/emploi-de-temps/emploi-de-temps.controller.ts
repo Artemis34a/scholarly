@@ -38,6 +38,7 @@ export class EmploiDeTempsController {
   })
   @ApiQuery({ name: 'classe', required: false, type: Number })
   @ApiQuery({ name: 'cours', required: false, type: Number })
+  @ApiQuery({ name: 'enseignant', required: false, type: Number })
   @ApiQuery({ name: 'salle', required: false, type: Number })
   @ApiQuery({ name: 'jour', required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -45,6 +46,7 @@ export class EmploiDeTempsController {
   findAll(
     @Query('classe') classe?: string,
     @Query('cours') cours?: string,
+    @Query('enseignant') enseignant?: string,
     @Query('salle') salle?: string,
     @Query('jour') jour?: string,
     @Query('page') page?: string,
@@ -53,6 +55,7 @@ export class EmploiDeTempsController {
     return this.emploiService.findAll({
       idClasse: classe ? parseInt(classe, 10) : undefined,
       idCours: cours ? parseInt(cours, 10) : undefined,
+      idEnseignant: enseignant ? parseInt(enseignant, 10) : undefined,
       idSalle: salle ? parseInt(salle, 10) : undefined,
       jour,
       page: page ? parseInt(page, 10) : undefined,

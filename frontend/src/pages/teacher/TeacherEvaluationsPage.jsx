@@ -1,32 +1,26 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Card from '../../components/Card'
-import { useAuth } from '../../context/AuthContext'
 import { evaluationsService } from '../../services/evaluationsService'
-import { coursService } from '../../services/coursService'
 import { BUTTON_LIGHT, BUTTON_ON_DARK } from '../../components/buttonStyles'
 import { formatDate } from '../evaluations/evaluations.utils'
-import { getMesAffectations } from './teacher.utils'
 
+// Le backend restreint deja /evaluations/epreuves aux epreuves de l'enseignant
+// connecte (voir EvaluationService.findAllEpreuves) : aucun filtrage cote client
+// n'est necessaire ni souhaitable ici — un filtrage local base sur un champ
+// optionnel (idClasseCours) est precisement ce qui rendait une epreuve "invisible"
+// pour son createur si ce champ n'etait pas renseigne.
 function TeacherEvaluationsPage() {
-  const { user } = useAuth()
-  const [epreuvesList, setEpreuvesList] = useState([])
-  const [coursList, setCoursList] = useState([])
+  const [mesEpreuves, setMesEpreuves] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
 
-    Promise.all([
-      evaluationsService.epreuves.findAll(),
-      coursService.findAll(),
-    ])
-      .then(([epreuvesData, coursData]) => {
-        if (isMounted) {
-          setEpreuvesList(epreuvesData)
-          setCoursList(coursData)
-        }
+    evaluationsService.epreuves.findAll()
+      .then((epreuvesData) => {
+        if (isMounted) setMesEpreuves(epreuvesData)
       })
       .catch((err) => {
         if (isMounted) setError(err.message)
@@ -39,16 +33,6 @@ function TeacherEvaluationsPage() {
       isMounted = false
     }
   }, [])
-
-  const mesAffectations = useMemo(() => getMesAffectations(coursList, user.id), [coursList, user.id])
-  const mesClasseCoursIds = useMemo(
-    () => new Set(mesAffectations.map((affectation) => affectation.idClasseCours)),
-    [mesAffectations],
-  )
-  const mesEpreuves = useMemo(
-    () => epreuvesList.filter((epreuve) => epreuve.idClasseCours && mesClasseCoursIds.has(epreuve.idClasseCours)),
-    [epreuvesList, mesClasseCoursIds],
-  )
 
   return (
     <div className="space-y-6 md:space-y-7">

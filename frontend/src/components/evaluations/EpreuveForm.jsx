@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { typeEpreuveOptions } from '../../pages/evaluations/evaluations.utils'
 
 function InputField({ label, name, value, onChange, required = false, type = 'text', placeholder = '', step }) {
@@ -56,12 +57,19 @@ function TextAreaField({ label, name, value, onChange, placeholder = '' }) {
   )
 }
 
+// coursObligatoire : vrai depuis l'espace enseignant. Un enseignant doit toujours
+// préciser le cours de son épreuve — c'est ce qui permet au serveur de vérifier
+// qu'il enseigne bien cette matière, et c'est la donnée qui garantit que l'épreuve
+// lui reste visible ensuite (voir EvaluationService.createEpreuve). Laisser ce
+// champ optionnel côté enseignant est précisément ce qui causait le bug où une
+// épreuve devenait invisible pour son propre créateur.
 function EpreuveForm({
   title,
   subtitle,
   values,
   classes,
   cours,
+  coursObligatoire = false,
   submitting,
   error,
   submitLabel,
@@ -69,6 +77,8 @@ function EpreuveForm({
   onSubmit,
   onCancel,
 }) {
+  const [localError, setLocalError] = useState('')
+
   // Un cours peut être enseigné dans plusieurs classes : on ne propose donc, dans
   // le second menu, que les cours réellement enseignés dans la classe choisie
   // (via classesCours), pour ne jamais laisser choisir une paire incohérente.
@@ -79,17 +89,29 @@ function EpreuveForm({
         .map((classeCours) => ({ value: `${classeCours.id}`, label: item.libelle })),
     )
 
+  function handleSubmit(event) {
+    event.preventDefault()
+    setLocalError('')
+
+    if (coursObligatoire && !values.idClasseCours) {
+      setLocalError('Vous devez préciser le cours concerné par cette épreuve.')
+      return
+    }
+
+    onSubmit(event)
+  }
+
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-600">Gestion des evaluations</p>
         <h2 className="mt-3 text-3xl font-semibold text-slate-900">{title}</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">{subtitle}</p>
       </div>
 
-      {error && (
+      {(localError || error) && (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {error}
+          {localError || error}
         </div>
       )}
 
@@ -120,12 +142,17 @@ function EpreuveForm({
           placeholder="Choisir une classe"
         />
         <SelectField
-          label="Cours (optionnel)"
+          label={coursObligatoire ? 'Cours' : 'Cours (optionnel)'}
           name="idClasseCours"
           value={values.idClasseCours}
           onChange={onChange}
+          required={coursObligatoire}
           options={classeCoursOptions}
-          placeholder={values.idClasse ? 'Aucun cours specifique' : "Choisissez d'abord une classe"}
+          placeholder={
+            values.idClasse
+              ? (coursObligatoire ? 'Choisir le cours concerne' : 'Aucun cours specifique')
+              : "Choisissez d'abord une classe"
+          }
         />
         <InputField
           label="Date et heure"

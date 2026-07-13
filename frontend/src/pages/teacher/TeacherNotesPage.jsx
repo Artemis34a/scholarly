@@ -1,31 +1,23 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Card from '../../components/Card'
-import { useAuth } from '../../context/AuthContext'
 import { evaluationsService } from '../../services/evaluationsService'
-import { coursService } from '../../services/coursService'
 import { BUTTON_LIGHT } from '../../components/buttonStyles'
-import { getMesAffectations } from './teacher.utils'
 
+// Le backend restreint deja /evaluations/notes aux notes des epreuves de
+// l'enseignant connecte (voir EvaluationService.findAllEvaluations) : aucun
+// filtrage cote client n'est necessaire.
 function TeacherNotesPage() {
-  const { user } = useAuth()
-  const [evaluationsList, setEvaluationsList] = useState([])
-  const [coursList, setCoursList] = useState([])
+  const [mesNotes, setMesNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
 
-    Promise.all([
-      evaluationsService.notes.findAll({ page: 1, limit: 200 }),
-      coursService.findAll(),
-    ])
-      .then(([notesResult, coursData]) => {
-        if (isMounted) {
-          setEvaluationsList(notesResult.data)
-          setCoursList(coursData)
-        }
+    evaluationsService.notes.findAll({ page: 1, limit: 200 })
+      .then((notesResult) => {
+        if (isMounted) setMesNotes(notesResult.data)
       })
       .catch((err) => {
         if (isMounted) setError(err.message)
@@ -38,15 +30,6 @@ function TeacherNotesPage() {
       isMounted = false
     }
   }, [])
-
-  const mesClasseCoursIds = useMemo(
-    () => new Set(getMesAffectations(coursList, user.id).map((a) => a.idClasseCours)),
-    [coursList, user.id],
-  )
-  const mesNotes = useMemo(
-    () => evaluationsList.filter((evaluation) => evaluation.epreuve?.idClasseCours && mesClasseCoursIds.has(evaluation.epreuve.idClasseCours)),
-    [evaluationsList, mesClasseCoursIds],
-  )
 
   return (
     <div className="space-y-6 md:space-y-7">

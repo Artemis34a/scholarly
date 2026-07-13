@@ -6,21 +6,72 @@ import { UpdateEmploiDeTempsDto } from './dto/update-emploi-de-temps.dto';
 export interface FindAllEmploiParams {
   idClasse?: number;
   idCours?: number;
+  idEnseignant?: number;
   idSalle?: number;
   jour?: string;
   page?: number;
   limit?: number;
 }
 
-// Qui enseigne un créneau donné n'est plus directement lisible depuis Cours (un
-// cours peut être enseigné par des enseignants différents selon la classe) : on
-// se limite ici à afficher classe/cours/salle, et on retrouve l'enseignant via
-// getGrilleEnseignant ci-dessous, en passant par ses Affectation(s).
+// Un créneau pointe vers une Affectation (enseignant + cours + classe déjà
+// validés ensemble) : ce include suffit à retrouver classe, cours, enseignant
+// et salle en une seule requête.
 const EMPLOI_INCLUDE = {
-  classe: { include: { cycle: true } },
-  cours: true,
+  affectation: {
+    include: {
+      enseignant: { include: { personne: true } },
+      classeCours: {
+        include: {
+          classe: { include: { cycle: true } },
+          cours: true,
+        },
+      },
+    },
+  },
   salle: true,
+} as const;
+
+type RawEmploi = {
+  id: number;
+  jour: string;
+  heureDebut: string;
+  heureFin: string;
+  idSalle: number | null;
+  actif: boolean;
+  idAdmin: number | null;
+  created_at: Date;
+  updated_at: Date;
+  affectation: {
+    id: number;
+    idEnseignant: number;
+    enseignant: unknown;
+    classeCours: {
+      idClasse: number;
+      idCours: number;
+      classe: unknown;
+      cours: unknown;
+    };
+  };
+  salle: unknown;
 };
+
+// On aplatit la réponse (classe/cours/enseignant remontés au premier niveau) pour
+// que le frontend n'ait pas à connaître le détail de la modélisation interne —
+// il continue de lire emploi.classe / emploi.cours comme avant, avec en plus
+// emploi.enseignant.
+function mapEmploi(raw: RawEmploi) {
+  const { affectation, ...rest } = raw;
+  return {
+    ...rest,
+    idClasse: affectation.classeCours.idClasse,
+    idCours: affectation.classeCours.idCours,
+    idEnseignant: affectation.idEnseignant,
+    idAffectation: affectation.id,
+    classe: affectation.classeCours.classe,
+    cours: affectation.classeCours.cours,
+    enseignant: affectation.enseignant,
+  };
+}
 
 @Injectable()
 export class EmploiDeTempsService {
@@ -30,21 +81,44 @@ export class EmploiDeTempsService {
     return startA < endB && endA > startB;
   }
 
-  private async assertValid(dto: { idClasse: number; idCours: number; idSalle?: number; heureDebut: string; heureFin: string }) {
-    if (dto.heureDebut >= dto.heureFin) {
-      throw new BadRequestException("L'heure de fin doit être après l'heure de début.");
+  private assertHorairesValides(heureDebut: string, heureFin: string) {
+    if (heureDebut >= heureFin) {
+      throw new BadRequestException(
+        "Les horaires saisis sont invalides : l'heure de fin doit être strictement après l'heure de début.",
+      );
+    }
+  }
+
+  // Résout et valide en une fois les trois règles de cohérence métier :
+  // - la classe et le cours existent ;
+  // - ce cours est bien affecté à cette classe (ClasseCours) ;
+  // - cet enseignant enseigne bien ce cours dans cette classe (Affectation).
+  // Retourne l'Affectation correspondante, seule donnée réellement persistée.
+  private async resolveAffectation(idClasse: number, idCours: number, idEnseignant: number) {
+    const classe = await this.prisma.classe.findUnique({ where: { id: idClasse } });
+    if (!classe) throw new NotFoundException(`Classe #${idClasse} introuvable`);
+
+    const cours = await this.prisma.cours.findUnique({ where: { id: idCours } });
+    if (!cours) throw new NotFoundException(`Cours #${idCours} introuvable`);
+
+    const classeCours = await this.prisma.classeCours.findUnique({
+      where: { idClasse_idCours: { idClasse, idCours } },
+    });
+    if (!classeCours) {
+      throw new BadRequestException("Cette matière n'est pas affectée à cette classe.");
     }
 
-    const classe = await this.prisma.classe.findUnique({ where: { id: dto.idClasse } });
-    if (!classe) throw new NotFoundException(`Classe #${dto.idClasse} introuvable`);
+    const enseignant = await this.prisma.enseignant.findUnique({ where: { id: idEnseignant } });
+    if (!enseignant) throw new NotFoundException(`Enseignant #${idEnseignant} introuvable`);
 
-    const cours = await this.prisma.cours.findUnique({ where: { id: dto.idCours } });
-    if (!cours) throw new NotFoundException(`Cours #${dto.idCours} introuvable`);
-
-    if (dto.idSalle) {
-      const salle = await this.prisma.salle.findUnique({ where: { id: dto.idSalle } });
-      if (!salle) throw new NotFoundException(`Salle #${dto.idSalle} introuvable`);
+    const affectation = await this.prisma.affectation.findUnique({
+      where: { idEnseignant_idClasseCours: { idEnseignant, idClasseCours: classeCours.id } },
+    });
+    if (!affectation) {
+      throw new BadRequestException("Cet enseignant n'enseigne pas cette matière.");
     }
+
+    return affectation;
   }
 
   private async assertNoConflict(params: {
@@ -52,6 +126,7 @@ export class EmploiDeTempsService {
     heureDebut: string;
     heureFin: string;
     idClasse: number;
+    idEnseignant: number;
     idSalle?: number;
     excludeId?: number;
   }) {
@@ -60,43 +135,77 @@ export class EmploiDeTempsService {
         jour: params.jour,
         ...(params.excludeId ? { id: { not: params.excludeId } } : {}),
         OR: [
-          { idClasse: params.idClasse },
+          { affectation: { classeCours: { idClasse: params.idClasse } } },
+          { affectation: { idEnseignant: params.idEnseignant } },
           ...(params.idSalle ? [{ idSalle: params.idSalle }] : []),
         ],
       },
+      include: { affectation: { include: { classeCours: true } } },
     });
 
     for (const existing of candidates) {
       if (!this.timeOverlap(params.heureDebut, params.heureFin, existing.heureDebut, existing.heureFin)) {
         continue;
       }
-      if (existing.idClasse === params.idClasse) {
+
+      if (existing.affectation.classeCours.idClasse === params.idClasse) {
         throw new ConflictException(
-          `La classe a déjà un créneau de ${existing.heureDebut} à ${existing.heureFin} ce jour-là.`,
+          `Cette classe possède déjà un cours pendant cette plage horaire (${existing.heureDebut} - ${existing.heureFin}).`,
+        );
+      }
+      if (existing.affectation.idEnseignant === params.idEnseignant) {
+        throw new ConflictException(
+          `Cet enseignant est déjà occupé sur un autre cours pendant cette plage horaire (${existing.heureDebut} - ${existing.heureFin}).`,
         );
       }
       if (params.idSalle && existing.idSalle === params.idSalle) {
         throw new ConflictException(
-          `La salle est déjà occupée de ${existing.heureDebut} à ${existing.heureFin} ce jour-là.`,
+          `La salle est déjà occupée pendant cette plage horaire (${existing.heureDebut} - ${existing.heureFin}).`,
         );
       }
     }
   }
 
-  async create(dto: CreateEmploiDeTempsDto) {
-    await this.assertValid(dto);
-    await this.assertNoConflict(dto);
+  private async assertSalleExiste(idSalle?: number) {
+    if (!idSalle) return;
+    const salle = await this.prisma.salle.findUnique({ where: { id: idSalle } });
+    if (!salle) throw new NotFoundException(`Salle #${idSalle} introuvable`);
+  }
 
-    return this.prisma.emploiDuTemps.create({
-      data: dto,
+  async create(dto: CreateEmploiDeTempsDto) {
+    this.assertHorairesValides(dto.heureDebut, dto.heureFin);
+    const affectation = await this.resolveAffectation(dto.idClasse, dto.idCours, dto.idEnseignant);
+    await this.assertSalleExiste(dto.idSalle);
+    await this.assertNoConflict({
+      jour: dto.jour,
+      heureDebut: dto.heureDebut,
+      heureFin: dto.heureFin,
+      idClasse: dto.idClasse,
+      idEnseignant: dto.idEnseignant,
+      idSalle: dto.idSalle,
+    });
+
+    const created = await this.prisma.emploiDuTemps.create({
+      data: {
+        jour: dto.jour,
+        heureDebut: dto.heureDebut,
+        heureFin: dto.heureFin,
+        idAffectation: affectation.id,
+        idSalle: dto.idSalle,
+        actif: dto.actif,
+        idAdmin: dto.idAdmin,
+      },
       include: EMPLOI_INCLUDE,
     });
+
+    return mapEmploi(created);
   }
 
   async findAll(params: FindAllEmploiParams = {}) {
     const where = {
-      ...(params.idClasse ? { idClasse: params.idClasse } : {}),
-      ...(params.idCours ? { idCours: params.idCours } : {}),
+      ...(params.idClasse ? { affectation: { classeCours: { idClasse: params.idClasse } } } : {}),
+      ...(params.idCours ? { affectation: { classeCours: { idCours: params.idCours } } } : {}),
+      ...(params.idEnseignant ? { affectation: { idEnseignant: params.idEnseignant } } : {}),
       ...(params.idSalle ? { idSalle: params.idSalle } : {}),
       ...(params.jour ? { jour: params.jour } : {}),
     };
@@ -104,11 +213,12 @@ export class EmploiDeTempsService {
     const shouldPaginate = params.page !== undefined || params.limit !== undefined;
 
     if (!shouldPaginate) {
-      return this.prisma.emploiDuTemps.findMany({
+      const data = await this.prisma.emploiDuTemps.findMany({
         where,
         include: EMPLOI_INCLUDE,
         orderBy: [{ jour: 'asc' }, { heureDebut: 'asc' }],
       });
+      return data.map(mapEmploi);
     }
 
     const page = params.page && params.page > 0 ? params.page : 1;
@@ -126,7 +236,7 @@ export class EmploiDeTempsService {
     ]);
 
     return {
-      data,
+      data: data.map(mapEmploi),
       total,
       page,
       limit,
@@ -140,29 +250,39 @@ export class EmploiDeTempsService {
       include: EMPLOI_INCLUDE,
     });
     if (!emploi) throw new NotFoundException(`Créneau #${id} introuvable`);
-    return emploi;
+    return mapEmploi(emploi);
   }
 
   async update(id: number, dto: UpdateEmploiDeTempsDto) {
     const existing = await this.findOne(id);
 
-    const merged = {
-      idClasse: dto.idClasse ?? existing.idClasse,
-      idCours: dto.idCours ?? existing.idCours,
-      idSalle: dto.idSalle !== undefined ? dto.idSalle : existing.idSalle ?? undefined,
-      jour: dto.jour ?? existing.jour,
-      heureDebut: dto.heureDebut ?? existing.heureDebut,
-      heureFin: dto.heureFin ?? existing.heureFin,
-    };
+    const idClasse = dto.idClasse ?? existing.idClasse;
+    const idCours = dto.idCours ?? existing.idCours;
+    const idEnseignant = dto.idEnseignant ?? existing.idEnseignant;
+    const jour = dto.jour ?? existing.jour;
+    const heureDebut = dto.heureDebut ?? existing.heureDebut;
+    const heureFin = dto.heureFin ?? existing.heureFin;
+    const idSalle = dto.idSalle !== undefined ? dto.idSalle : (existing.idSalle ?? undefined);
 
-    await this.assertValid(merged);
-    await this.assertNoConflict({ ...merged, excludeId: id });
+    this.assertHorairesValides(heureDebut, heureFin);
+    const affectation = await this.resolveAffectation(idClasse, idCours, idEnseignant);
+    await this.assertSalleExiste(idSalle);
+    await this.assertNoConflict({ jour, heureDebut, heureFin, idClasse, idEnseignant, idSalle, excludeId: id });
 
-    return this.prisma.emploiDuTemps.update({
+    const updated = await this.prisma.emploiDuTemps.update({
       where: { id },
-      data: dto,
+      data: {
+        jour,
+        heureDebut,
+        heureFin,
+        idAffectation: affectation.id,
+        idSalle: idSalle ?? null,
+        ...(dto.actif !== undefined ? { actif: dto.actif } : {}),
+      },
       include: EMPLOI_INCLUDE,
     });
+
+    return mapEmploi(updated);
   }
 
   async remove(id: number) {
@@ -175,38 +295,27 @@ export class EmploiDeTempsService {
     const classe = await this.prisma.classe.findUnique({ where: { id: idClasse } });
     if (!classe) throw new NotFoundException(`Classe #${idClasse} introuvable`);
 
-    return this.prisma.emploiDuTemps.findMany({
-      where: { idClasse },
+    const data = await this.prisma.emploiDuTemps.findMany({
+      where: { affectation: { classeCours: { idClasse } } },
       include: EMPLOI_INCLUDE,
       orderBy: [{ jour: 'asc' }, { heureDebut: 'asc' }],
     });
+    return data.map(mapEmploi);
   }
 
-  // Vue "emploi du temps enseignant" : créneaux des cours que cet enseignant assure,
-  // dans les classes précises où il les enseigne (Enseignant -> Affectation ->
-  // ClasseCours -> cours/classe). Un enseignant pouvant désormais avoir plusieurs
-  // affectations, on ne retient que les créneaux correspondant exactement à l'une
-  // de ses paires (cours, classe) affectées — pas seulement au même cours enseigné
-  // ailleurs par quelqu'un d'autre.
+  // Vue "emploi du temps enseignant" : tous les créneaux où cet enseignant est
+  // explicitement programmé (relation directe désormais, plus de reconstruction
+  // via des paires cours/classe).
   async getGrilleEnseignant(idPers: number) {
-    const enseignant = await this.prisma.enseignant.findUnique({
-      where: { idPers },
-      include: { affectations: { include: { classeCours: true } } },
-    });
+    const enseignant = await this.prisma.enseignant.findUnique({ where: { idPers } });
     if (!enseignant) throw new NotFoundException(`Aucun enseignant pour la personne #${idPers}`);
 
-    const paires = enseignant.affectations.map((a) => ({
-      idCours: a.classeCours.idCours,
-      idClasse: a.classeCours.idClasse,
-    }));
-
-    if (paires.length === 0) return [];
-
-    return this.prisma.emploiDuTemps.findMany({
-      where: { OR: paires.map(({ idCours, idClasse }) => ({ idCours, idClasse })) },
+    const data = await this.prisma.emploiDuTemps.findMany({
+      where: { affectation: { idEnseignant: enseignant.id } },
       include: EMPLOI_INCLUDE,
       orderBy: [{ jour: 'asc' }, { heureDebut: 'asc' }],
     });
+    return data.map(mapEmploi);
   }
 
   // Vue "emploi du temps élève" : via sa salle principale (Frequente -> Salle -> Classe),
@@ -223,10 +332,11 @@ export class EmploiDeTempsService {
       return [];
     }
 
-    return this.prisma.emploiDuTemps.findMany({
-      where: { idClasse: frequente.salle.idClasse },
+    const data = await this.prisma.emploiDuTemps.findMany({
+      where: { affectation: { classeCours: { idClasse: frequente.salle.idClasse } } },
       include: EMPLOI_INCLUDE,
       orderBy: [{ jour: 'asc' }, { heureDebut: 'asc' }],
     });
+    return data.map(mapEmploi);
   }
 }

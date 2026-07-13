@@ -75,10 +75,11 @@ function TeacherEpreuveCreatePage() {
       ) : (
         <EpreuveForm
           title="Creer une nouvelle epreuve"
-          subtitle="Uniquement pour les cours que vous enseignez."
+          subtitle="Uniquement pour les cours que vous enseignez. Le cours est obligatoire : il permet de verifier que vous enseignez bien cette matiere et garantit que l'epreuve reste visible dans votre liste."
           values={values}
           cours={mesCours}
           classes={mesClasses}
+          coursObligatoire
           submitting={submitting}
           error={error}
           submitLabel="Creer l'epreuve"

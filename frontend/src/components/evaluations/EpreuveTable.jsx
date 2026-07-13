@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import ActifBadge from '../ActifBadge'
 import { BUTTON_LIGHT } from '../buttonStyles'
-import { formatDate, getEpreuveClasseLabel, getEpreuveCoursLabel, getTypeEpreuveLabel } from '../../pages/evaluations/evaluations.utils'
+import { formatDate, getEpreuveClasseLabel, getEpreuveCoursLabel, getEpreuveEnseignantLabel, getTypeEpreuveLabel } from '../../pages/evaluations/evaluations.utils'
 
 function EpreuveTable({ epreuvesList, deletingId, onDelete }) {
   if (epreuvesList.length === 0) {
@@ -15,10 +15,11 @@ function EpreuveTable({ epreuvesList, deletingId, onDelete }) {
 
   return (
     <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/92">
-      <div className="hidden grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr_0.6fr_1fr] gap-3 bg-slate-900 px-5 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 lg:grid">
+      <div className="hidden grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr_0.8fr_0.6fr_1fr] gap-3 bg-slate-900 px-5 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 lg:grid">
         <span>Epreuve</span>
         <span>Type</span>
         <span>Classe / Cours</span>
+        <span>Enseignant</span>
         <span>Date</span>
         <span>Statut</span>
         <span>Actions</span>
@@ -26,7 +27,7 @@ function EpreuveTable({ epreuvesList, deletingId, onDelete }) {
 
       <div className="divide-y divide-slate-100">
         {epreuvesList.map((epreuve) => (
-          <article key={epreuve.id} className="grid gap-4 px-5 py-5 lg:grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr_0.6fr_1fr] lg:items-center">
+          <article key={epreuve.id} className="grid gap-4 px-5 py-5 lg:grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr_0.8fr_0.6fr_1fr] lg:items-center">
             <div>
               <p className="text-base font-semibold text-slate-900">{epreuve.libelle}</p>
               <p className="mt-1 text-xs text-slate-400">ID {epreuve.id} · Coeff. {epreuve.coefficient}</p>
@@ -38,6 +39,8 @@ function EpreuveTable({ epreuvesList, deletingId, onDelete }) {
               <p>{getEpreuveClasseLabel(epreuve)}</p>
               <p className="text-xs text-slate-400">{getEpreuveCoursLabel(epreuve)}</p>
             </div>
+
+            <div className="text-sm text-slate-600">{getEpreuveEnseignantLabel(epreuve)}</div>
 
             <div className="text-sm text-slate-600">{formatDate(epreuve.dateEpreuve)}</div>
 

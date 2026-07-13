@@ -60,7 +60,7 @@ export function createEpreuveFormValues(epreuve) {
   }
 }
 
-export function buildEpreuvePayload(values) {
+export function buildEpreuvePayload(values, adminId) {
   return {
     libelle: values.libelle.trim(),
     description: values.description.trim() || undefined,
@@ -72,6 +72,7 @@ export function buildEpreuvePayload(values) {
     coefficient: Number(values.coefficient),
     noteMax: Number(values.noteMax),
     actif: Boolean(values.actif),
+    idAdmin: adminId ?? undefined,
   }
 }
 
@@ -91,6 +92,14 @@ export function getEpreuveClasseLabel(epreuve) {
 
 export function getEpreuveCoursLabel(epreuve) {
   return epreuve?.classeCours?.cours?.libelle ?? 'Aucun cours'
+}
+
+// Enseignant proprietaire de l'epreuve (voir Epreuve.idEnseignant) : c'est la
+// reponse a "quel enseignant a cree cette epreuve", visible cote administrateur.
+export function getEpreuveEnseignantLabel(epreuve) {
+  const personne = epreuve?.enseignant?.personne
+  if (!personne) return 'Administration'
+  return `${personne.nom} ${personne.prenom}`
 }
 
 export function applyEpreuveFilters(epreuvesList, filters) {

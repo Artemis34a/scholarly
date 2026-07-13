@@ -178,7 +178,6 @@ model Classe {
   epreuves Epreuve[]
   scolarites Scolarite[]
   livres   Livre[]
-  emploisDuTemps EmploiDuTemps[]
 
   @@map("Classe")
 }
@@ -319,6 +318,7 @@ model Enseignant{
   personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
   admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
   affectations Affectation[]
+  epreuves Epreuve[]
 }
 
 // Un cours est un catalogue de matière (ex. "Mathématiques"), enseignable dans
@@ -339,7 +339,6 @@ model Cours {
 
   classesCours ClasseCours[]
   livres    Livre[]
-  emploisDuTemps EmploiDuTemps[]
 }
 
 // Table de jonction : quelles classes proposent quel cours. C'est la source de
@@ -381,6 +380,11 @@ model Affectation {
   classeCours ClasseCours @relation(fields: [idClasseCours], references: [id], onDelete: Cascade)
   admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
 
+  // Un créneau d'emploi du temps est toujours rattaché à une affectation précise
+  // (enseignant + cours + classe déjà validés ensemble) : retirer l'affectation
+  // retire automatiquement les créneaux qui n'ont alors plus de sens.
+  emploisDuTemps EmploiDuTemps[]
+
   @@unique([idEnseignant, idClasseCours])
   @@map("Affectation")
 }
@@ -389,26 +393,30 @@ model Affectation {
 //----------------------EMPLOI DU TEMPS---------------------------
 //--------------------------------------------------------
 
+// Un créneau ne référence plus la classe et le cours séparément : il pointe vers
+// une Affectation (enseignant + cours + classe déjà validés ensemble à la création
+// de l'affectation). Cela rend structurellement impossible de programmer un cours
+// non affecté à la classe, ou un enseignant qui n'enseigne pas ce cours — ces deux
+// règles métier n'ont donc plus besoin d'être revalidées à chaque écriture, elles
+// sont garanties par la contrainte de clé étrangère elle-même.
 model EmploiDuTemps {
   id Int @id @default(autoincrement())
   jour String // LUNDI, MARDI, MERCREDI, JEUDI, VENDREDI, SAMEDI
   heureDebut String // "08:00"
   heureFin String // "09:00"
-  idClasse Int
-  idCours Int
+  idAffectation Int
   idSalle Int?
   actif Boolean @default(true)
   idAdmin Int?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  classe Classe @relation(fields: [idClasse], references: [id], onDelete: Cascade)
-  cours Cours @relation(fields: [idCours], references: [id], onDelete: Cascade)
+  affectation Affectation @relation(fields: [idAffectation], references: [id], onDelete: Cascade)
   salle Salle? @relation(fields: [idSalle], references: [id], onDelete: SetNull)
   admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
 
   @@map("EmploiDuTemps")
-  @@unique([idClasse, jour, heureDebut])
+  @@unique([idAffectation, jour, heureDebut])
 }
 
 //--------------------------------------------------------
@@ -426,11 +434,17 @@ model Epreuve {
   description String?
   typeEpreuve TypeEpreuve
   idClasse Int
-  // "Cours dans cette classe" concerné (optionnel : une épreuve peut rester
-  // générale, sans matière précise). Passe par ClasseCours plutôt que par un
-  // second idCours brut, pour garantir que le cours choisi est bien enseigné
-  // dans la classe de l'épreuve (pas de paire cours/classe incohérente possible).
+  // "Cours dans cette classe" concerné (optionnel pour une épreuve créée par un
+  // administrateur, qui peut rester générale ; obligatoire côté service pour une
+  // épreuve créée par un enseignant — voir EvaluationService.createEpreuve).
+  // Passe par ClasseCours plutôt que par un idCours brut, pour garantir que le
+  // cours choisi est bien enseigné dans la classe de l'épreuve.
   idClasseCours Int?
+  // Enseignant propriétaire de l'épreuve : c'est la source de vérité pour "qui a
+  // créé cette épreuve" et pour tout le filtrage de l'espace enseignant (jamais
+  // déduit indirectement d'idClasseCours, qui est optionnel et ne peut donc pas
+  // servir de signal d'appartenance fiable).
+  idEnseignant Int?
   dateEpreuve DateTime
   duree Int? // en minutes
   coefficient Float @default(1.0)
@@ -443,6 +457,7 @@ model Epreuve {
   admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
   classe Classe @relation(fields: [idClasse], references: [id], onDelete: Cascade)
   classeCours ClasseCours? @relation(fields: [idClasseCours], references: [id], onDelete: SetNull)
+  enseignant Enseignant? @relation(fields: [idEnseignant], references: [id], onDelete: SetNull)
   evaluations Evaluation[]
 
   @@map("Epreuve")

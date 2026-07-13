@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Card from '../../components/Card'
 import EpreuveForm from '../../components/evaluations/EpreuveForm'
+import { useAuth } from '../../context/AuthContext'
 import { evaluationsService } from '../../services/evaluationsService'
 import { coursService } from '../../services/coursService'
 import { classesService } from '../../services/classesService'
@@ -9,6 +10,7 @@ import { buildEpreuvePayload, epreuveInitialValues } from './evaluations.utils'
 
 function EpreuveCreatePage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [values, setValues] = useState(epreuveInitialValues)
   const [cours, setCours] = useState([])
   const [classes, setClasses] = useState([])
@@ -56,7 +58,7 @@ function EpreuveCreatePage() {
     setError('')
 
     try {
-      const created = await evaluationsService.epreuves.create(buildEpreuvePayload(values))
+      const created = await evaluationsService.epreuves.create(buildEpreuvePayload(values, user?.id))
       navigate(`/dashboard/evaluations/${created.id}`)
     } catch (err) {
       setError(err.message)
