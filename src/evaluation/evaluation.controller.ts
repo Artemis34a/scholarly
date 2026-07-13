@@ -16,60 +16,25 @@ import {
   ApiOperation,
   ApiQuery,
 } from '@nestjs/swagger';
+import { TypeEpreuve } from '@prisma/client';
 import { EvaluationService } from './evaluation.service';
-import { CreateNatureEpreuveDto } from './dto/create-nature-epreuve.dto';
 import { CreateEpreuveDto } from './dto/create-epreuve.dto';
+import { UpdateEpreuveDto } from './dto/update-epreuve.dto';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
+import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Évaluations')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin', 'enseignant')
 @Controller('evaluations')
 export class EvaluationController {
   constructor(private evaluationService: EvaluationService) {}
 
-  // Nature Epreuve endpoints
-  @Post('nature-epreuves')
-  @ApiOperation({ summary: "Créer une nature d'épreuve" })
-  createNatureEpreuve(
-    @Body() dto: CreateNatureEpreuveDto,
-    @Query('adminId') adminId?: number,
-  ) {
-    return this.evaluationService.createNatureEpreuve(
-      dto,
-      adminId ? +adminId : undefined,
-    );
-  }
-
-  @Get('nature-epreuves')
-  @ApiOperation({ summary: "Lister toutes les natures d'épreuves" })
-  findAllNatureEpreuves() {
-    return this.evaluationService.findAllNatureEpreuves();
-  }
-
-  @Get('nature-epreuves/:id')
-  @ApiOperation({ summary: "Obtenir une nature d'épreuve par ID" })
-  findOneNatureEpreuve(@Param('id', ParseIntPipe) id: number) {
-    return this.evaluationService.findOneNatureEpreuve(id);
-  }
-
-  @Put('nature-epreuves/:id')
-  @ApiOperation({ summary: "Modifier une nature d'épreuve" })
-  updateNatureEpreuve(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: CreateNatureEpreuveDto,
-  ) {
-    return this.evaluationService.updateNatureEpreuve(id, dto);
-  }
-
-  @Delete('nature-epreuves/:id')
-  @ApiOperation({ summary: "Supprimer une nature d'épreuve" })
-  deleteNatureEpreuve(@Param('id', ParseIntPipe) id: number) {
-    return this.evaluationService.deleteNatureEpreuve(id);
-  }
-
-  // Epreuve endpoints
+  // ── Epreuve ──────────────────────────────────────────────────────
   @Post('epreuves')
   @ApiOperation({ summary: 'Créer une épreuve' })
   createEpreuve(
@@ -83,22 +48,50 @@ export class EvaluationController {
   }
 
   @Get('epreuves')
-  @ApiOperation({ summary: 'Lister toutes les épreuves' })
-  findAllEpreuves() {
-    return this.evaluationService.findAllEpreuves();
+  @ApiOperation({
+    summary: 'Lister les épreuves (tableau complet par défaut, paginé si page/limit fournis)',
+  })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'cours', required: false, type: Number })
+  @ApiQuery({ name: 'classe', required: false, type: Number })
+  @ApiQuery({ name: 'type', required: false, enum: TypeEpreuve })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  findAllEpreuves(
+    @Query('search') search?: string,
+    @Query('cours') cours?: string,
+    @Query('classe') classe?: string,
+    @Query('type') type?: TypeEpreuve,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.evaluationService.findAllEpreuves({
+      search,
+      idCours: cours ? parseInt(cours, 10) : undefined,
+      idClasse: classe ? parseInt(classe, 10) : undefined,
+      typeEpreuve: type || undefined,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 
   @Get('epreuves/:id')
-  @ApiOperation({ summary: 'Obtenir une épreuve par ID' })
+  @ApiOperation({ summary: 'Obtenir une épreuve par ID (avec évaluations)' })
   findOneEpreuve(@Param('id', ParseIntPipe) id: number) {
     return this.evaluationService.findOneEpreuve(id);
+  }
+
+  @Get('epreuves/:id/stats')
+  @ApiOperation({ summary: 'Statistiques de classe pour une épreuve (moyenne, min, max)' })
+  getStatsEpreuve(@Param('id', ParseIntPipe) id: number) {
+    return this.evaluationService.getStatsEpreuve(id);
   }
 
   @Put('epreuves/:id')
   @ApiOperation({ summary: 'Modifier une épreuve' })
   updateEpreuve(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: CreateEpreuveDto,
+    @Body() dto: UpdateEpreuveDto,
   ) {
     return this.evaluationService.updateEpreuve(id, dto);
   }
@@ -109,9 +102,9 @@ export class EvaluationController {
     return this.evaluationService.deleteEpreuve(id);
   }
 
-  // Evaluation endpoints
+  // ── Evaluation (notes) ───────────────────────────────────────────
   @Post('notes')
-  @ApiOperation({ summary: 'Créer une évaluation/note' })
+  @ApiOperation({ summary: 'Créer une évaluation/note (recalcule automatiquement le classement)' })
   createEvaluation(
     @Body() dto: CreateEvaluationDto,
     @Query('adminId') adminId?: number,
@@ -123,37 +116,69 @@ export class EvaluationController {
   }
 
   @Get('notes')
-  @ApiOperation({ summary: 'Lister toutes les évaluations' })
+  @Roles('admin', 'enseignant', 'eleve')
+  @ApiOperation({ summary: 'Lister les évaluations (paginé, recherche et filtres optionnels)' })
+  @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'eleveId', required: false, type: Number })
   @ApiQuery({ name: 'epreuveId', required: false, type: Number })
+  @ApiQuery({ name: 'classe', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   findAllEvaluations(
-    @Query('eleveId') eleveId?: number,
-    @Query('epreuveId') epreuveId?: number,
+    @Query('search') search?: string,
+    @Query('eleveId') eleveId?: string,
+    @Query('epreuveId') epreuveId?: string,
+    @Query('classe') classe?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    if (eleveId) return this.evaluationService.findEvaluationsByEleve(+eleveId);
-    if (epreuveId)
-      return this.evaluationService.findEvaluationsByEpreuve(+epreuveId);
-    return this.evaluationService.findAllEvaluations();
+    return this.evaluationService.findAllEvaluations({
+      search,
+      idEleve: eleveId ? parseInt(eleveId, 10) : undefined,
+      idEpreuve: epreuveId ? parseInt(epreuveId, 10) : undefined,
+      idClasse: classe ? parseInt(classe, 10) : undefined,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 
   @Get('notes/:id')
+  @Roles('admin', 'enseignant', 'eleve')
   @ApiOperation({ summary: 'Obtenir une évaluation par ID' })
   findOneEvaluation(@Param('id', ParseIntPipe) id: number) {
     return this.evaluationService.findOneEvaluation(id);
   }
 
   @Put('notes/:id')
-  @ApiOperation({ summary: 'Modifier une évaluation' })
+  @ApiOperation({ summary: 'Modifier une évaluation (recalcule automatiquement le classement)' })
   updateEvaluation(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: CreateEvaluationDto,
+    @Body() dto: UpdateEvaluationDto,
   ) {
     return this.evaluationService.updateEvaluation(id, dto);
   }
 
   @Delete('notes/:id')
-  @ApiOperation({ summary: 'Supprimer une évaluation' })
+  @ApiOperation({ summary: 'Supprimer une évaluation (recalcule automatiquement le classement)' })
   deleteEvaluation(@Param('id', ParseIntPipe) id: number) {
     return this.evaluationService.deleteEvaluation(id);
+  }
+
+  // ── Moyennes ─────────────────────────────────────────────────────
+  @Get('eleves/:idEleve/moyenne-cours/:idCours')
+  @Roles('admin', 'enseignant', 'eleve')
+  @ApiOperation({ summary: "Moyenne pondérée d'un élève sur un cours" })
+  getMoyenneEleveCours(
+    @Param('idEleve', ParseIntPipe) idEleve: number,
+    @Param('idCours', ParseIntPipe) idCours: number,
+  ) {
+    return this.evaluationService.getMoyenneEleveCours(idEleve, idCours);
+  }
+
+  @Get('eleves/:idEleve/bulletin')
+  @Roles('admin', 'enseignant', 'eleve')
+  @ApiOperation({ summary: "Bulletin d'un élève : moyenne par cours et moyenne générale" })
+  getBulletinEleve(@Param('idEleve', ParseIntPipe) idEleve: number) {
+    return this.evaluationService.getBulletinEleve(idEleve);
   }
 }

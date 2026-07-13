@@ -1,17 +1,17 @@
-import { IsString, IsNotEmpty, IsOptional, IsDateString, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsDateString, IsInt, Min, Max, IsBoolean, Length } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 export class CreateEleveDto {
-  @ApiProperty({ example: 'Biya' })
+  @ApiProperty({ example: 'Njoya' })
   @IsString() @IsNotEmpty() nom: string;
 
   @ApiProperty({ example: 'Paul Junior' })
   @IsString() @IsNotEmpty() prenom: string;
 
-  @ApiPropertyOptional({ example: '2012-03-15' })
-  @IsDateString() @IsOptional() dateNaissance?: string;
+  @ApiProperty({ example: '2012-03-15' })
+  @IsDateString() dateNaissance: string;
 
-  @ApiPropertyOptional({ example: 'Yaoundé' })
-  @IsString() @IsOptional() lieuNaissance?: string;
+  @ApiProperty({ example: 'Yaounde' })
+  @IsString() @IsNotEmpty() lieuNaissance: string;
 
   @ApiProperty({ example: 1, description: '1=M 2=F' })
   @IsInt() @Min(1) @Max(2) sexe: number;
@@ -22,12 +22,15 @@ export class CreateEleveDto {
   @ApiPropertyOptional({ example: 'https://storage.example.com/photo.jpg' })
   @IsString() @IsOptional() photoURL?: string;
 
-  @ApiProperty({ example: 1 })
-  @IsInt() @Min(0) @Max(1) actif: number;
+  @ApiProperty({ example: 'paul.njoya' })
+  @IsString() @IsNotEmpty() @Length(3, 100) username: string;
 
-  @ApiProperty({ example: 1 })
-  @IsInt() idVilleNaissance: number;
+  @ApiProperty({ example: 'eleve123' })
+  @IsString() @IsNotEmpty() @Length(4, 100) password: string;
 
-  @ApiProperty({ example: 1 })
-  @IsInt() idAdmin: number;
+  @ApiPropertyOptional({ example: true })
+  @IsBoolean() @IsOptional() actif?: boolean;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsInt() @IsOptional() idAdmin?: number;
 }

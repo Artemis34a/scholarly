@@ -20,10 +20,13 @@ import { PersonneService } from './personne.service';
 import { CreatePersonneDto } from './dto/create-personne.dto';
 import { UpdatePersonneDto } from './dto/update-personne.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Personnes')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('personnes')
 export class PersonneController {
   constructor(private personneService: PersonneService) {}
@@ -43,6 +46,7 @@ export class PersonneController {
   }
 
   @Get(':id')
+  @Roles('admin', 'enseignant')
   @ApiOperation({ summary: 'Obtenir une personne par ID' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.personneService.findOne(id);

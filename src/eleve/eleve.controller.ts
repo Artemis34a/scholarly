@@ -4,10 +4,13 @@ import { EleveService } from './eleve.service';
 import { CreateEleveDto } from './dto/create-eleve.dto';
 import { UpdateEleveDto } from './dto/update-eleve.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Élèves')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('eleves')
 export class EleveController {
   constructor(private eleveService: EleveService) {}
@@ -17,11 +20,20 @@ export class EleveController {
   create(@Body() dto: CreateEleveDto) { return this.eleveService.create(dto); }
 
   @Get()
-  @ApiOperation({ summary: 'Lister les élèves' })
+  @ApiOperation({ summary: 'Lister les élèves (paginé, recherche optionnelle)' })
   @ApiQuery({ name: 'search', required: false })
-  findAll(@Query('search') search?: string) {
-    if (search) return this.eleveService.search(search);
-    return this.eleveService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  findAll(
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.eleveService.findAll({
+      search,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 
   @Get('actifs')
@@ -29,6 +41,7 @@ export class EleveController {
   findActifs() { return this.eleveService.findActifs(); }
 
   @Get(':matricule')
+  @Roles('admin', 'eleve')
   @ApiOperation({ summary: 'Obtenir un élève par matricule' })
   findOne(@Param('matricule', ParseIntPipe) matricule: number) {
     return this.eleveService.findOne(matricule);

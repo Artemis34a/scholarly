@@ -1,11 +1,11 @@
 const BASE_URL = 'http://localhost:3000'
 
 // ── Login admin ──────────────────────────────────────
-export async function loginAdmin(email, password) {
+export async function loginAdmin(username, password) {
   const res = await fetch(`${BASE_URL}/auth/login/admin`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   })
   if (!res.ok) throw new Error('Identifiants incorrects')
   const data = await res.json()
@@ -13,12 +13,12 @@ export async function loginAdmin(email, password) {
   return data
 }
 
-// ── Login personne ───────────────────────────────────
-export async function loginPersonne(email, password) {
+// ── Login personne (enseignant, parent, directeur) ───
+export async function loginPersonne(username, password) {
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   })
   if (!res.ok) throw new Error('Identifiants incorrects')
   const data = await res.json()
@@ -26,36 +26,27 @@ export async function loginPersonne(email, password) {
   return data
 }
 
-// ── Rafraîchir le token ──────────────────────────────────
-export async function refreshAccessToken() {
-  const refresh_token = localStorage.getItem('scholarly_refresh')
-  if (!refresh_token) throw new Error('Pas de refresh token')
-
-  const res = await fetch(`${BASE_URL}/auth/refresh`, {
+// ── Login élève ───────────────────────────────────────
+export async function loginEleve(username, password) {
+  const res = await fetch(`${BASE_URL}/auth/login/eleve`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token }),
+    body: JSON.stringify({ username, password }),
   })
-  if (!res.ok) {
-    logout()
-    throw new Error('Session expirée')
-  }
+  if (!res.ok) throw new Error('Identifiants incorrects')
   const data = await res.json()
-  localStorage.setItem('scholarly_token', data.access)
-  localStorage.setItem('scholarly_refresh', data.refresh)
-  return data.access
+  _saveSession(data)
+  return data
 }
 
 // ── Utilitaires ──────────────────────────────────────
 function _saveSession(data) {
-  localStorage.setItem('scholarly_token',   data.access)
-  localStorage.setItem('scholarly_refresh',  data.refresh)
-  localStorage.setItem('scholarly_user',     JSON.stringify(data.user))
+  localStorage.setItem('scholarly_token', data.access_token)
+  localStorage.setItem('scholarly_user', JSON.stringify(data.user))
 }
 
 export function logout() {
   localStorage.removeItem('scholarly_token')
-  localStorage.removeItem('scholarly_refresh')
   localStorage.removeItem('scholarly_user')
 }
 

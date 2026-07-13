@@ -9,21 +9,21 @@ export class TitulaireService {
 
   create(dto: CreateTitulaireDto) { return this.prisma.titulaire.create({ data: dto }); }
   findAll() { return this.prisma.titulaire.findMany(); }
-  findActifs() { return this.prisma.titulaire.findMany({ where: { actif: 1 } }); }
+  findActifs() { return this.prisma.titulaire.findMany({ where: { actif: true } }); }
 
   async findOne(id: number) {
-    const t = await this.prisma.titulaire.findUnique({ where: { idTitulaire: id } });
+    const t = await this.prisma.titulaire.findUnique({ where: { id } });
     if (!t) throw new NotFoundException(`Titulaire #${id} introuvable`);
     return t;
   }
 
   async update(id: number, dto: UpdateTitulaireDto) {
     await this.findOne(id);
-    return this.prisma.titulaire.update({ where: { idTitulaire: id }, data: dto });
+    return this.prisma.titulaire.update({ where: { id }, data: dto });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.titulaire.delete({ where: { idTitulaire: id } });
+    return this.prisma.titulaire.delete({ where: { id } });
   }
 }

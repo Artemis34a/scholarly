@@ -1,18 +1,21 @@
-import { IsString, IsNotEmpty, IsNumber, IsInt, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsBoolean, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateCoursDto {
   @ApiProperty({ example: 'Mathématiques' })
   @IsString() @IsNotEmpty() libelle: string;
-  @ApiProperty({ example: 20 })
-  @IsNumber() note: number;
+  @ApiPropertyOptional({ example: 20 })
+  @IsNumber() @IsOptional() note?: number;
   @ApiProperty({ example: 2 })
   @IsNumber() coefficient: number;
-  @ApiProperty({ example: 'Cours de mathématiques niveau CM1' })
-  @IsString() @IsNotEmpty() description: string;
-  @ApiProperty({ example: 1 })
-  @IsInt() idLivre: number;
-  @ApiProperty({ example: 1, description: '1=actif 0=inactif' })
-  @IsInt() @Min(0) @Max(1) actif: number;
-  @ApiProperty({ example: 1 })
-  @IsInt() idAdmin: number;
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Classes dans lesquelles ce cours est enseigné dès sa création (optionnel).',
+  })
+  @IsArray() @IsInt({ each: true }) @IsOptional() idClasses?: number[];
+  @ApiPropertyOptional({ example: 'Cours de mathematiques niveau CM1' })
+  @IsString() @IsOptional() description?: string;
+  @ApiPropertyOptional({ example: true })
+  @IsBoolean() @IsOptional() actif?: boolean;
+  @ApiPropertyOptional({ example: 1 })
+  @IsInt() @IsOptional() idAdmin?: number;
 }

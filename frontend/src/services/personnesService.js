@@ -6,6 +6,3 @@ export const personnesService = {
   update:   (id, data)=> api.put(`/personnes/${id}`, data),
   remove:   (id)      => api.delete(`/personnes/${id}`),
 }
-export async function fetchPersonnes() {
-  return personnesService.findAll()
-}

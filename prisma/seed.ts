@@ -1,7 +1,12 @@
 import 'dotenv/config';
+import * as bcrypt from 'bcrypt';
 import { PrismaClient, TypePersonne } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+function hashPassword(password: string) {
+  return bcrypt.hash(password, 10);
+}
 
 function randomDate(start: Date, end: Date) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
@@ -21,7 +26,6 @@ async function main() {
   await prisma.cycle.deleteMany();
   await prisma.parent.deleteMany();
   await prisma.eleve.deleteMany();
-  await prisma.villeNaissance.deleteMany();
   await prisma.resident.deleteMany();
   await prisma.quartier.deleteMany();
   await prisma.personne.deleteMany();
@@ -30,43 +34,33 @@ async function main() {
   console.log('Création de l\'administrateur principal...');
   const admin = await prisma.admin.create({
     data: {
-      nom: 'Super Admin',
+      nom: 'Administrateur Principal',
       username: 'admin',
-      password: 'admin123',
-      mobile: '0601020304',
+      password: await hashPassword('admin'),
+      mobile: '0699010203',
       actif: true,
     },
   });
 
-  console.log('Création des quartiers et des villes de naissance...');
+  console.log('Création des quartiers...');
   const quartiers = await prisma.quartier.createMany({
     data: [
-      { libelle: 'Centre-ville', description: 'Quartier central et animé.' },
-      { libelle: 'Bellevue', description: 'Quartier résidentiel calme.' },
-      { libelle: 'Rivière', description: 'Proche de la rivière et des écoles.' },
-    ],
-  });
-
-  const villes = await prisma.villeNaissance.createMany({
-    data: [
-      { libelle: 'Paris' },
-      { libelle: 'Lyon' },
-      { libelle: 'Toulouse' },
-      { libelle: 'Marseille' },
+      { libelle: 'Bastos', description: 'Quartier central et animé.' },
+      { libelle: 'Bonamoussadi', description: 'Quartier résidentiel calme.' },
+      { libelle: 'Nkolbisson', description: 'Proche des écoles et des marchés.' },
     ],
   });
 
   const quartierList = await prisma.quartier.findMany();
-  const villeList = await prisma.villeNaissance.findMany();
 
   console.log('Création des personnes...');
   const personnesData = [
-    { nom: 'Dubois', prenom: 'Claire', typePersonne: TypePersonne.PARENT, username: 'claire.dubois', password: 'passParent1', mobile: '0650012300', phone: '0142233445' },
-    { nom: 'Moussa', prenom: 'Karim', typePersonne: TypePersonne.DIRECTEUR, username: 'karim.moussa', password: 'passDirecteur', mobile: '0650067890' },
-    { nom: 'Nguyen', prenom: 'Sophie', typePersonne: TypePersonne.ENSEIGNANT, username: 'sophie.nguyen', password: 'passProf1', mobile: '0650098765' },
-    { nom: 'Koffi', prenom: 'Yann', typePersonne: TypePersonne.ENSEIGNANT, username: 'yann.koffi', password: 'passProf2', mobile: '0650076543' },
-    { nom: 'Martin', prenom: 'Lucas', typePersonne: TypePersonne.PARENT, username: 'lucas.martin', password: 'passParent2', mobile: '0650087654' },
-    { nom: 'Ngoma', prenom: 'Amina', typePersonne: TypePersonne.PARENT, username: 'amina.ngoma', password: 'passParent3', mobile: '0650034567' },
+    { nom: 'Ndzié', prenom: 'Marie', typePersonne: TypePersonne.PARENT, username: 'marie.ndzie', password: 'passParent1', mobile: '0699012300', phone: '0233233445' },
+    { nom: 'Mballa', prenom: 'Jean', typePersonne: TypePersonne.DIRECTEUR, username: 'jean.mballa', password: 'passDirecteur', mobile: '0699067890' },
+    { nom: 'Tchoumi', prenom: 'Sophie', typePersonne: TypePersonne.ENSEIGNANT, username: 'sophie.tchoumi', password: 'enseignant123', mobile: '0699098765' },
+    { nom: 'Fonkou', prenom: 'Paul', typePersonne: TypePersonne.ENSEIGNANT, username: 'paul.fonkou', password: 'enseignant123', mobile: '0699076543' },
+    { nom: 'Ndzi', prenom: 'Pierre', typePersonne: TypePersonne.PARENT, username: 'pierre.ndzi', password: 'passParent2', mobile: '0699087654' },
+    { nom: 'Kouam', prenom: 'Aminatou', typePersonne: TypePersonne.PARENT, username: 'aminatou.kouam', password: 'passParent3', mobile: '0699034567' },
   ];
 
   const personnes: any[] = [];
@@ -74,8 +68,9 @@ async function main() {
     const created = await prisma.personne.create({
       data: {
         ...personne,
+        password: await hashPassword(personne.password),
         dateNaissance: randomDate(new Date(1980, 0, 1), new Date(2000, 11, 31)),
-        lieuNaissance: 'Lyon',
+        lieuNaissance: 'Yaoundé',
         idAdmin: admin.id,
       },
     });
@@ -84,17 +79,18 @@ async function main() {
 
   console.log('Création des élèves...');
   const elevesData = [
-    { nom: 'Bernard', prenom: 'Élise', dateNaissance: new Date(2014, 4, 17), lieuNaissance: 'Paris', sexe: 2, langue: 'Français', photoURL: null },
-    { nom: 'Kouame', prenom: 'Noé', dateNaissance: new Date(2013, 9, 2), lieuNaissance: 'Toulouse', sexe: 1, langue: 'Français', photoURL: null },
-    { nom: 'Petit', prenom: 'Lina', dateNaissance: new Date(2015, 1, 28), lieuNaissance: 'Marseille', sexe: 2, langue: 'Français', photoURL: null },
+    { nom: 'Njoya', prenom: 'Aïcha', dateNaissance: new Date(2014, 4, 17), lieuNaissance: 'Yaoundé', sexe: 2, langue: 'Français', photoURL: null, username: 'aicha.njoya', password: 'eleve123' },
+    { nom: 'Ndzié Ngono', prenom: 'Emmanuel', dateNaissance: new Date(2013, 9, 2), lieuNaissance: 'Douala', sexe: 1, langue: 'Français', photoURL: null, username: 'emmanuel.ndzie', password: 'eleve123' },
+    { nom: 'Tchoumi', prenom: 'Grace', dateNaissance: new Date(2015, 1, 28), lieuNaissance: 'Bafoussam', sexe: 2, langue: 'Français', photoURL: null, username: 'grace.tchoumi', password: 'eleve123' },
   ];
 
   const eleves: any[] = [];
-  for (const [index, eleve] of elevesData.entries()) {
+  for (const eleve of elevesData) {
+    const { password, ...eleveFields } = eleve;
     const created = await prisma.eleve.create({
       data: {
-        ...eleve,
-        idVilleNaissance: villeList[index % villeList.length].id,
+        ...eleveFields,
+        password: await hashPassword(password),
         idAdmin: admin.id,
       },
     });
@@ -118,65 +114,134 @@ async function main() {
     ],
   });
 
-  console.log('Création des cycles, classes, salles et cours...');
-  const cycle = await prisma.cycle.create({
+  console.log('Création des cycles...');
+  // L'établissement ne comporte que ces deux cycles fixes (voir CycleService,
+  // qui interdit désormais toute création/suppression en dehors de ceux-ci).
+  const cycleMaternel = await prisma.cycle.create({
     data: {
-      libelle: 'Cycle 1',
-      description: 'Cycle fondamental pour les classes primaires.',
+      libelle: 'Cycle maternel',
+      description: 'Petite, moyenne et grande section.',
       idAdmin: admin.id,
     },
   });
 
-  const classes = await prisma.classe.createMany({
-    data: [
-      { libelle: 'CP', idCycle: cycle.id, idAdmin: admin.id },
-      { libelle: 'CE1', idCycle: cycle.id, idAdmin: admin.id },
-    ],
+  const cyclePrimaire = await prisma.cycle.create({
+    data: {
+      libelle: 'Cycle primaire',
+      description: 'De la SIL au CM2.',
+      idAdmin: admin.id,
+    },
   });
 
-  const classesList = await prisma.classe.findMany();
-
-  const sallesData = [
-    { libelle: 'Salle A', position: 'Rez-de-chaussée', surface: '45m2', idClasse: classesList[0].id, actif: true, idAdmin: admin.id },
-    { libelle: 'Salle B', position: '1er étage', surface: '50m2', idClasse: classesList[1].id, actif: true, idAdmin: admin.id },
-  ];
-  const salles = await prisma.salle.createMany({ data: sallesData });
-  const sallesList = await prisma.salle.findMany();
-
-  const coursData = [
-    { libelle: 'Mathématiques', coefficient: 3, idClasse: classesList[0].id, actif: true, description: 'Cours de base sur les nombres et les formes.', idAdmin: admin.id },
-    { libelle: 'Français', coefficient: 2, idClasse: classesList[0].id, actif: true, description: 'Lecture, écriture et expression orale.', idAdmin: admin.id },
-    { libelle: 'Sciences', coefficient: 1.5, idClasse: classesList[1].id, actif: true, description: 'Découverte de la nature et de la physique simple.', idAdmin: admin.id },
+  console.log('Création des classes, salles et cours...');
+  const classesData = [
+    { libelle: 'Petite Section', idCycle: cycleMaternel.id },
+    { libelle: 'Moyenne Section', idCycle: cycleMaternel.id },
+    { libelle: 'Grande Section', idCycle: cycleMaternel.id },
+    { libelle: 'SIL', idCycle: cyclePrimaire.id },
+    { libelle: 'CP', idCycle: cyclePrimaire.id },
+    { libelle: 'CE1', idCycle: cyclePrimaire.id },
+    { libelle: 'CE2', idCycle: cyclePrimaire.id },
+    { libelle: 'CM1', idCycle: cyclePrimaire.id },
+    { libelle: 'CM2', idCycle: cyclePrimaire.id },
   ];
 
-  const coursList: any[] = [];
-  for (const cours of coursData) {
-    const created = await prisma.cours.create({ data: cours });
-    coursList.push(created);
+  const classesList: any[] = [];
+  for (const classe of classesData) {
+    const created = await prisma.classe.create({ data: { ...classe, idAdmin: admin.id } });
+    classesList.push(created);
   }
+  const grandeSection = classesList[2];
+  const cp = classesList[4];
+  const ce1 = classesList[5];
+  const ce2 = classesList[6];
+  const cm1 = classesList[7];
 
-  console.log('Création des enseignants et titulaires...');
+  const sallesList: any[] = [];
+  for (const classe of classesList) {
+    const created = await prisma.salle.create({
+      data: { libelle: `Salle ${classe.libelle}`, idClasse: classe.id, actif: true, idAdmin: admin.id },
+    });
+    sallesList.push(created);
+  }
+  const salleGrandeSection = sallesList[2];
+  const salleCp = sallesList[4];
+  const salleCe1 = sallesList[5];
+
+  // Un cours est désormais un catalogue de matière, enseignable dans plusieurs
+  // classes : Mathématiques est enseigné en CP, CE1 et CE2 ; Français en CP, CE1
+  // et CM1 ; Sciences seulement en CE1. La table de jonction ClasseCours porte
+  // cette association (voir CoursService).
+  const mathematiques = await prisma.cours.create({
+    data: { libelle: 'Mathématiques', coefficient: 3, actif: true, description: 'Cours de base sur les nombres et les formes.', idAdmin: admin.id },
+  });
+  const francais = await prisma.cours.create({
+    data: { libelle: 'Français', coefficient: 2, actif: true, description: 'Lecture, écriture et expression orale.', idAdmin: admin.id },
+  });
+  const sciences = await prisma.cours.create({
+    data: { libelle: 'Sciences', coefficient: 1.5, actif: true, description: 'Découverte de la nature et de la physique simple.', idAdmin: admin.id },
+  });
+
+  const classeCoursData: { idClasse: number; idCours: number }[] = [
+    { idClasse: cp.id, idCours: mathematiques.id },
+    { idClasse: ce1.id, idCours: mathematiques.id },
+    { idClasse: ce2.id, idCours: mathematiques.id },
+    { idClasse: cp.id, idCours: francais.id },
+    { idClasse: ce1.id, idCours: francais.id },
+    { idClasse: cm1.id, idCours: francais.id },
+    { idClasse: ce1.id, idCours: sciences.id },
+  ];
+
+  const classeCoursList: any[] = [];
+  for (const cc of classeCoursData) {
+    const created = await prisma.classeCours.create({ data: { ...cc, idAdmin: admin.id } });
+    classeCoursList.push(created);
+  }
+  const mathsCp = classeCoursList[0];
+  const mathsCe1 = classeCoursList[1];
+  const mathsCe2 = classeCoursList[2];
+  const francaisCp = classeCoursList[3];
+  const francaisCe1 = classeCoursList[4];
+  // classeCoursList[5] (Français en CM1) est proposé mais volontairement laissé
+  // sans enseignant affecté dans ce jeu de démo.
+
+  console.log('Création des enseignants, affectations et titulaires...');
+  // Sophie enseigne les mathématiques en CP, CE1 et CE2 (plusieurs classes pour
+  // un même enseignant), mais n'est titulaire que du CP : le titulariat (modèle
+  // Titulaire) reste indépendant des affectations d'enseignement.
   const enseignant1 = await prisma.enseignant.create({
     data: {
       idPers: personnes[2].id,
-      idCours: coursList[0].id,
       actif: true,
       idAdmin: admin.id,
+      affectations: {
+        create: [
+          { idClasseCours: mathsCp.id, idAdmin: admin.id },
+          { idClasseCours: mathsCe1.id, idAdmin: admin.id },
+          { idClasseCours: mathsCe2.id, idAdmin: admin.id },
+        ],
+      },
     },
   });
 
+  // Paul enseigne le français en CP et CE1.
   const enseignant2 = await prisma.enseignant.create({
     data: {
       idPers: personnes[3].id,
-      idCours: coursList[1].id,
       actif: true,
       idAdmin: admin.id,
+      affectations: {
+        create: [
+          { idClasseCours: francaisCp.id, idAdmin: admin.id },
+          { idClasseCours: francaisCe1.id, idAdmin: admin.id },
+        ],
+      },
     },
   });
 
   await prisma.titulaire.create({
     data: {
-      idSalle: sallesList[0].id,
+      idSalle: salleCp.id,
       idPers: personnes[2].id,
       actif: true,
       idAdmin: admin.id,
@@ -209,11 +274,12 @@ async function main() {
   });
 
   console.log('Création des fréquentations élèves-salles...');
+  // Un élève de chaque cycle, pour exercer la dérivation du cycle depuis la classe.
   await prisma.frequente.createMany({
     data: [
-      { idSalle: sallesList[0].id, idEleve: eleves[0].id, commentaire: 'Présent tous les jours.', idAdmin: admin.id },
-      { idSalle: sallesList[1].id, idEleve: eleves[1].id, commentaire: 'Participe bien aux activités.', idAdmin: admin.id },
-      { idSalle: sallesList[0].id, idEleve: eleves[2].id, commentaire: 'Élève calme et attentif.', idAdmin: admin.id },
+      { idSalle: salleCp.id, idEleve: eleves[0].id, commentaire: 'Présent tous les jours.', idAdmin: admin.id },
+      { idSalle: salleCe1.id, idEleve: eleves[1].id, commentaire: 'Participe bien aux activités.', idAdmin: admin.id },
+      { idSalle: salleGrandeSection.id, idEleve: eleves[2].id, commentaire: 'Élève calme et attentif.', idAdmin: admin.id },
     ],
   });
 

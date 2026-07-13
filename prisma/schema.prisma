@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 //--------------------------------------------------------
@@ -69,7 +70,8 @@ model Admin {
   sessions   Session[]
   enseignants Enseignant[]
   cours   Cours[]
-  natureEpreuves NatureEpreuve[]
+  classesCours ClasseCours[]
+  affectations Affectation[]
   epreuves  Epreuve[]
   evaluations Evaluation[]
   disciplines Discipline[]
@@ -81,6 +83,7 @@ model Admin {
   messages  Message[]
   livres    Livre[]
   specialites Specialite[]
+  emploisDuTemps EmploiDuTemps[]
 
 
   @@map("Admin")
@@ -115,18 +118,6 @@ model Resident {
 //----------------------STUDENTS---------------------------
 //--------------------------------------------------------
 
-model VilleNaissance {
-  id Int       @id @default(autoincrement())
-  libelle          String
-  actif            Boolean     @default(true)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-
-  eleves Eleve[]
-
-  @@map("VilleNaissance")
-}
-
 model Eleve {
   id Int       @id @default(autoincrement())
   nom          String
@@ -136,9 +127,9 @@ model Eleve {
   sexe        Int
   langue       String
   photoURL     String?
+  username     String?     @unique
+  password     String?
   actif      Boolean     @default(true)
-  idVilleNaissance Int?
-  villeNaissance   VilleNaissance? @relation(fields: [idVilleNaissance], references: [id], onDelete: SetNull)
   idAdmin    Int?
   admin      Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
   created_at DateTime  @default(now())
@@ -183,9 +174,11 @@ model Classe {
   cycle    Cycle      @relation(fields: [idCycle], references: [id], onDelete: Cascade)
 
   salles   Salle[]
-  cours   Cours[]
+  classesCours ClasseCours[]
+  epreuves Epreuve[]
   scolarites Scolarite[]
   livres   Livre[]
+  emploisDuTemps EmploiDuTemps[]
 
   @@map("Classe")
 }
@@ -212,7 +205,12 @@ model Salle {
   position    String?
   surface    String?
   idClasse Int?
-  classe   Classe?  @relation(fields: [idClasse], references: [id], onDelete: SetNull)
+  // Une salle "principale" appartient toujours à une classe précise dans ce projet
+  // (voir ClasseService.getOrCreatePrimarySalle) : si la classe est supprimée, sa
+  // salle et tout ce qui en dépend (inscriptions, titulaire) doivent l'être aussi,
+  // pour ne jamais laisser d'inscription "fantôme" pointant vers une salle sans
+  // classe.
+  classe   Classe?  @relation(fields: [idClasse], references: [id], onDelete: Cascade)
   actif     Boolean     @default(true)
   idAdmin Int?
   admin   Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
@@ -221,6 +219,7 @@ model Salle {
 
   frequentes Frequente[]
   titulaire Titulaire?
+  emploisDuTemps EmploiDuTemps[]
 
   @@map("Salle")
 }
@@ -305,10 +304,13 @@ model Session {
 //----------------------COURSES---------------------------
 //--------------------------------------------------------
 
+// Un enseignant est une identité professionnelle unique (un compte = une personne),
+// indépendante des cours/classes qu'il enseigne. Ce qu'il enseigne et où est capturé
+// par des lignes d'Affectation distinctes (voir plus bas) : un enseignant peut donc
+// avoir 0, 1 ou plusieurs affectations, sans dupliquer ses informations personnelles.
 model Enseignant{
   id Int       @id @default(autoincrement())
   idPers Int @unique
-  idCours Int
   actif    Boolean     @default(true)
   idAdmin Int?
   created_at DateTime  @default(now())
@@ -316,15 +318,17 @@ model Enseignant{
 
   personne Personne  @relation(fields: [idPers], references: [id], onDelete: Cascade)
   admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
-  cours  Cours     @relation(fields: [idCours], references: [id], onDelete: Cascade)
+  affectations Affectation[]
 }
 
+// Un cours est un catalogue de matière (ex. "Mathématiques"), enseignable dans
+// plusieurs classes à la fois. La relation many-to-many avec Classe passe par
+// ClasseCours, pour ne jamais dupliquer la fiche du cours par classe.
 model Cours {
   id Int       @id @default(autoincrement())
   libelle        String
   note      Float?
   coefficient Float
-  idClasse Int
   actif    Boolean     @default(true)
   description    String?
   idAdmin Int?
@@ -332,39 +336,101 @@ model Cours {
   updated_at DateTime  @updatedAt
 
   admin    Admin?    @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
-  classe   Classe    @relation(fields: [idClasse], references: [id], onDelete: Cascade)
 
-  enseignants Enseignant[]
-  epreuves  Epreuve[]
+  classesCours ClasseCours[]
   livres    Livre[]
+  emploisDuTemps EmploiDuTemps[]
+}
+
+// Table de jonction : quelles classes proposent quel cours. C'est la source de
+// vérité de la relation many-to-many Cours <-> Classe, et le point d'ancrage des
+// affectations d'enseignants (on affecte toujours un enseignant à un "cours dans
+// une classe" précis, jamais à un cours seul).
+model ClasseCours {
+  id Int @id @default(autoincrement())
+  idClasse Int
+  idCours Int
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  classe Classe @relation(fields: [idClasse], references: [id], onDelete: Cascade)
+  cours Cours @relation(fields: [idCours], references: [id], onDelete: Cascade)
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  affectations Affectation[]
+  epreuves Epreuve[]
+
+  @@unique([idClasse, idCours])
+  @@map("ClasseCours")
+}
+
+// Affectation d'enseignement : "cet enseignant enseigne ce cours dans cette classe".
+// Totalement indépendant du titulariat (modèle Titulaire, inchangé) : un enseignant
+// peut avoir plusieurs affectations, mais n'est titulaire que d'une classe au plus.
+model Affectation {
+  id Int @id @default(autoincrement())
+  idEnseignant Int
+  idClasseCours Int
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  enseignant Enseignant @relation(fields: [idEnseignant], references: [id], onDelete: Cascade)
+  classeCours ClasseCours @relation(fields: [idClasseCours], references: [id], onDelete: Cascade)
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  @@unique([idEnseignant, idClasseCours])
+  @@map("Affectation")
+}
+
+//--------------------------------------------------------
+//----------------------EMPLOI DU TEMPS---------------------------
+//--------------------------------------------------------
+
+model EmploiDuTemps {
+  id Int @id @default(autoincrement())
+  jour String // LUNDI, MARDI, MERCREDI, JEUDI, VENDREDI, SAMEDI
+  heureDebut String // "08:00"
+  heureFin String // "09:00"
+  idClasse Int
+  idCours Int
+  idSalle Int?
+  actif Boolean @default(true)
+  idAdmin Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  classe Classe @relation(fields: [idClasse], references: [id], onDelete: Cascade)
+  cours Cours @relation(fields: [idCours], references: [id], onDelete: Cascade)
+  salle Salle? @relation(fields: [idSalle], references: [id], onDelete: SetNull)
+  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
+
+  @@map("EmploiDuTemps")
+  @@unique([idClasse, jour, heureDebut])
 }
 
 //--------------------------------------------------------
 //----------------------EVALUATIONS---------------------------
 //--------------------------------------------------------
 
-model NatureEpreuve {
-  id Int @id @default(autoincrement())
-  libelle String
-  description String?
-  coefficient Float @default(1.0)
-  actif Boolean @default(true)
-  idAdmin Int?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
-  epreuves Epreuve[]
-
-  @@map("NatureEpreuve")
+enum TypeEpreuve {
+  CONTROLE
+  EXAMEN
 }
 
 model Epreuve {
   id Int @id @default(autoincrement())
   libelle String
   description String?
-  idNatureEpreuve Int
-  idCours Int?
+  typeEpreuve TypeEpreuve
+  idClasse Int
+  // "Cours dans cette classe" concerné (optionnel : une épreuve peut rester
+  // générale, sans matière précise). Passe par ClasseCours plutôt que par un
+  // second idCours brut, pour garantir que le cours choisi est bien enseigné
+  // dans la classe de l'épreuve (pas de paire cours/classe incohérente possible).
+  idClasseCours Int?
   dateEpreuve DateTime
   duree Int? // en minutes
   coefficient Float @default(1.0)
@@ -375,8 +441,8 @@ model Epreuve {
   updated_at DateTime @updatedAt
 
   admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
-  natureEpreuve NatureEpreuve @relation(fields: [idNatureEpreuve], references: [id], onDelete: Cascade)
-  cours Cours? @relation(fields: [idCours], references: [id], onDelete: SetNull)
+  classe Classe @relation(fields: [idClasse], references: [id], onDelete: Cascade)
+  classeCours ClasseCours? @relation(fields: [idClasseCours], references: [id], onDelete: SetNull)
   evaluations Evaluation[]
 
   @@map("Epreuve")
@@ -485,7 +551,7 @@ model Tranche {
 model Paiement {
   id Int @id @default(autoincrement())
   idScolarite Int
-  idTranche Int
+  idTranche Int? // optionnelle : un versement libre n'est rattaché à aucune tranche prédéfinie
   idModePaiement Int
   montant Float
   datePaiement DateTime @default(now())
@@ -498,7 +564,9 @@ model Paiement {
 
   admin Admin? @relation(fields: [idAdmin], references: [id], onDelete: SetNull)
   scolarite Scolarite @relation(fields: [idScolarite], references: [id], onDelete: Cascade)
-  tranche Tranche @relation(fields: [idTranche], references: [id], onDelete: Cascade)
+  // SetNull (et non Cascade) : supprimer une tranche du catalogue ne doit jamais
+  // effacer l'historique des versements qui la référençaient.
+  tranche Tranche? @relation(fields: [idTranche], references: [id], onDelete: SetNull)
   modePaiement ModePaiement @relation(fields: [idModePaiement], references: [id], onDelete: Cascade)
 
   @@map("Paiement")

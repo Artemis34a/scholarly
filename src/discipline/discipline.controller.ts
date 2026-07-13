@@ -18,17 +18,23 @@ import {
 } from '@nestjs/swagger';
 import { DisciplineService } from './discipline.service';
 import { CreateDisciplineDto } from './dto/create-discipline.dto';
+import { UpdateDisciplineDto } from './dto/update-discipline.dto';
 import { CreateRapportDto } from './dto/create-rapport.dto';
+import { UpdateRapportDto } from './dto/update-rapport.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Discipline')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('discipline')
 export class DisciplineController {
   constructor(private disciplineService: DisciplineService) {}
 
-  // Discipline endpoints
+  // ── Discipline (routes fixes, doivent precéder ':id' pour ne pas être
+  // capturées par le paramètre dynamique — même profondeur de chemin) ─────
   @Post()
   @ApiOperation({ summary: 'Créer une discipline' })
   createDiscipline(
@@ -42,33 +48,32 @@ export class DisciplineController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lister toutes les disciplines' })
-  findAllDisciplines() {
-    return this.disciplineService.findAllDisciplines();
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Obtenir une discipline par ID' })
-  findOneDiscipline(@Param('id', ParseIntPipe) id: number) {
-    return this.disciplineService.findOneDiscipline(id);
-  }
-
-  @Put(':id')
-  @ApiOperation({ summary: 'Modifier une discipline' })
-  updateDiscipline(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: CreateDisciplineDto,
+  @ApiOperation({
+    summary: 'Lister les disciplines (tableau complet par défaut, paginé si page/limit fournis)',
+  })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'estFaute', required: false, type: Boolean })
+  @ApiQuery({ name: 'gravite', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  findAllDisciplines(
+    @Query('search') search?: string,
+    @Query('estFaute') estFaute?: string,
+    @Query('gravite') gravite?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.disciplineService.updateDiscipline(id, dto);
+    return this.disciplineService.findAllDisciplines({
+      search,
+      estFaute: estFaute !== undefined ? estFaute === 'true' : undefined,
+      gravite: gravite ? parseInt(gravite, 10) : undefined,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Supprimer une discipline' })
-  deleteDiscipline(@Param('id', ParseIntPipe) id: number) {
-    return this.disciplineService.deleteDiscipline(id);
-  }
-
-  // Rapport endpoints
+  // ── Rapport (incidents) — routes fixes sous /discipline, déclarées avant
+  // /discipline/:id pour éviter que ':id' ne capture 'rapports' ────────────
   @Post('rapports')
   @ApiOperation({ summary: 'Créer un rapport disciplinaire' })
   createRapport(
@@ -82,20 +87,29 @@ export class DisciplineController {
   }
 
   @Get('rapports')
-  @ApiOperation({ summary: 'Lister tous les rapports' })
+  @ApiOperation({ summary: 'Lister les rapports (paginé, recherche et filtres optionnels)' })
+  @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'eleveId', required: false, type: Number })
   @ApiQuery({ name: 'disciplineId', required: false, type: Number })
   @ApiQuery({ name: 'statut', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   findAllRapports(
-    @Query('eleveId') eleveId?: number,
-    @Query('disciplineId') disciplineId?: number,
+    @Query('search') search?: string,
+    @Query('eleveId') eleveId?: string,
+    @Query('disciplineId') disciplineId?: string,
     @Query('statut') statut?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    if (eleveId) return this.disciplineService.findRapportsByEleve(+eleveId);
-    if (disciplineId)
-      return this.disciplineService.findRapportsByDiscipline(+disciplineId);
-    if (statut) return this.disciplineService.findRapportsByStatut(statut);
-    return this.disciplineService.findAllRapports();
+    return this.disciplineService.findAllRapports({
+      search,
+      idEleve: eleveId ? parseInt(eleveId, 10) : undefined,
+      idDiscipline: disciplineId ? parseInt(disciplineId, 10) : undefined,
+      statut,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 
   @Get('rapports/:id')
@@ -108,7 +122,7 @@ export class DisciplineController {
   @ApiOperation({ summary: 'Modifier un rapport' })
   updateRapport(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: CreateRapportDto,
+    @Body() dto: UpdateRapportDto,
   ) {
     return this.disciplineService.updateRapport(id, dto);
   }
@@ -117,5 +131,35 @@ export class DisciplineController {
   @ApiOperation({ summary: 'Supprimer un rapport' })
   deleteRapport(@Param('id', ParseIntPipe) id: number) {
     return this.disciplineService.deleteRapport(id);
+  }
+
+  // ── Historique — également une route fixe, avant ':id' ──────────────────
+  @Get('eleves/:idEleve/historique')
+  @Roles('admin', 'eleve')
+  @ApiOperation({ summary: "Historique disciplinaire complet d'un élève" })
+  getHistoriqueEleve(@Param('idEleve', ParseIntPipe) idEleve: number) {
+    return this.disciplineService.getHistoriqueEleve(idEleve);
+  }
+
+  // ── Discipline : routes paramétrées, déclarées en dernier ────────────────
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtenir une discipline par ID (avec ses rapports)' })
+  findOneDiscipline(@Param('id', ParseIntPipe) id: number) {
+    return this.disciplineService.findOneDiscipline(id);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Modifier une discipline' })
+  updateDiscipline(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateDisciplineDto,
+  ) {
+    return this.disciplineService.updateDiscipline(id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Supprimer une discipline' })
+  deleteDiscipline(@Param('id', ParseIntPipe) id: number) {
+    return this.disciplineService.deleteDiscipline(id);
   }
 }

@@ -4,10 +4,13 @@ import {
   IsOptional,
   IsBoolean,
   IsNumber,
+  IsInt,
   IsDateString,
+  IsEnum,
   Min,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TypeEpreuve } from '@prisma/client';
 
 export class CreateEpreuveDto {
   @ApiProperty({ example: 'Devoir de Mathématiques' })
@@ -20,16 +23,21 @@ export class CreateEpreuveDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ example: 1, description: "ID de la nature de l'épreuve" })
-  @IsNumber()
-  @Min(1)
-  idNatureEpreuve: number;
+  @ApiProperty({ example: TypeEpreuve.CONTROLE, enum: TypeEpreuve, description: "Type de l'épreuve" })
+  @IsEnum(TypeEpreuve)
+  typeEpreuve: TypeEpreuve;
 
-  @ApiPropertyOptional({ example: 2, description: 'ID du cours (optionnel)' })
-  @IsNumber()
-  @Min(1)
+  @ApiProperty({ example: 1, description: "ID de la classe concernée par l'épreuve" })
+  @IsInt()
+  idClasse: number;
+
+  @ApiPropertyOptional({
+    example: 2,
+    description: "ID du couple cours/classe (ClasseCours) concerné, optionnel — doit correspondre à idClasse",
+  })
+  @IsInt()
   @IsOptional()
-  idCours?: number;
+  idClasseCours?: number;
 
   @ApiProperty({ example: '2024-05-15T08:00:00Z' })
   @IsDateString()

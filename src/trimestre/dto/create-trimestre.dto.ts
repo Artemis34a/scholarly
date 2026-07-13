@@ -1,5 +1,5 @@
-import { IsString, IsNotEmpty, IsInt } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 export class CreateTrimestreDto {
   @ApiProperty({ example: 'Trimestre 1' })
   @IsString() @IsNotEmpty() libelle: string;
@@ -7,6 +7,6 @@ export class CreateTrimestreDto {
   @IsString() @IsNotEmpty() periode: string;
   @ApiProperty({ example: 1 })
   @IsInt() idAca: number;
-  @ApiProperty({ example: 1 })
-  @IsInt() idAdmin: number;
+  @ApiPropertyOptional({ example: 1 })
+  @IsInt() @IsOptional() idAdmin?: number;
 }

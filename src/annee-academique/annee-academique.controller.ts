@@ -4,10 +4,13 @@ import { AnneeAcademiqueService } from './annee-academique.service';
 import { CreateAnneeAcademiqueDto } from './dto/create-annee-academique.dto';
 import { UpdateAnneeAcademiqueDto } from './dto/update-annee-academique.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Années académiques')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('annees-academiques')
 export class AnneeAcademiqueController {
   constructor(private anneeService: AnneeAcademiqueService) {}

@@ -4,10 +4,13 @@ import { FrequenteService } from './frequente.service';
 import { CreateFrequenteDto } from './dto/create-frequente.dto';
 import { UpdateFrequenteDto } from './dto/update-frequente.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Fréquentation')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('frequente')
 export class FrequenteController {
   constructor(private frequenteService: FrequenteService) {}

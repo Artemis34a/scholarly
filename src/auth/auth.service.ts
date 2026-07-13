@@ -3,6 +3,19 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 
+function typePersonneToRole(typePersonne: string): string {
+  switch (typePersonne) {
+    case 'DIRECTEUR':
+      return 'directeur';
+    case 'ENSEIGNANT':
+      return 'enseignant';
+    case 'PARENT':
+      return 'parent';
+    default:
+      return typePersonne.toLowerCase();
+  }
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -17,11 +30,24 @@ export class AuthService {
     const valid = await bcrypt.compare(password, admin.password);
     if (!valid) throw new UnauthorizedException('Identifiants incorrects');
 
-    const payload = { sub: admin.id, username: admin.username, role: 'admin' };
-    return {
-      access_token: this.jwtService.sign(payload),
-      admin: { id: admin.id, username: admin.username, nom: admin.nom },
-    };
+    return this.issueSession(admin.id, admin.username, admin.nom, 'admin');
+  }
+
+  async loginEleve(username: string, password: string) {
+    const eleve = await this.prisma.eleve.findUnique({ where: { username } });
+    if (!eleve || !eleve.password) {
+      throw new UnauthorizedException('Identifiants incorrects');
+    }
+
+    const valid = await bcrypt.compare(password, eleve.password);
+    if (!valid) throw new UnauthorizedException('Identifiants incorrects');
+
+    return this.issueSession(
+      eleve.id,
+      eleve.username as string,
+      `${eleve.prenom} ${eleve.nom}`,
+      'eleve',
+    );
   }
 
   async loginPersonne(username: string, password: string) {
@@ -33,18 +59,25 @@ export class AuthService {
     const valid = await bcrypt.compare(password, personne.password);
     if (!valid) throw new UnauthorizedException('Identifiants incorrects');
 
-    const payload = {
-      sub: personne.id,
-      username: personne.username,
-      role: 'personne',
-    };
+    const role = typePersonneToRole(personne.typePersonne);
+    return this.issueSession(
+      personne.id,
+      personne.username,
+      `${personne.prenom} ${personne.nom}`,
+      role,
+    );
+  }
+
+  private issueSession(
+    id: number,
+    username: string,
+    nom: string,
+    role: string,
+  ) {
+    const payload = { sub: id, username, role };
     return {
       access_token: this.jwtService.sign(payload),
-      personne: {
-        id: personne.id,
-        username: personne.username,
-        nom: personne.nom,
-      },
+      user: { id, username, nom, role },
     };
   }
 }
